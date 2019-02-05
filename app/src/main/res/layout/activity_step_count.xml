@@ -9,10 +9,16 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/buttonGoToSteps"
+        android:id="@+id/buttonUpdateSteps"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
-        android:text="@string/goToStep" />
+        android:text="@string/update" />
+
+    <TextView
+        android:id="@+id/textSteps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/stepUpdate" />
 
 </LinearLayout>
