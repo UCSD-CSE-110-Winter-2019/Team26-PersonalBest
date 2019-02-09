@@ -1,7 +1,5 @@
 package edu.ucsd.cse110.team26.personalbest;
 
-import android.util.Log;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +15,7 @@ public class FitnessServiceFactory {
     }
 
     public static FitnessService create(String key, StepCountActivity stepCountActivity) {
-        Log.i(TAG, String.format("creating FitnessService with key %s", key));
+        //Log.i(TAG, String.format("creating FitnessService with key %s", key));
         return blueprints.get(key).create(stepCountActivity);
     }
 

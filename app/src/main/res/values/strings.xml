@@ -1,7 +1,12 @@
 <resources>
     <string name="app_name">Personal Best</string>
     <string name="goToStep">Go to Step counter</string>
-    <string name="update">Start</string>
+    <string name="update">Update Step</string>
     <string name="stepUpdate">Step will be shown here</string>
     <string name="logIn">Log in</string>
+    <string name="logIn">Google Log In</string>
+    <string name= "height"> Height: </string>
+    <string name= "goal"> Goal: </string>
+    <string name= "save"> Save </string>
+    <string name= "go_back"> Go Back </string>
 </resources>
