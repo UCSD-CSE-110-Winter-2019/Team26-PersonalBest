@@ -43,7 +43,7 @@ public class StepCountActivity extends AppCompatActivity {
 
                 resp = params[0] + " steps";
 
-
+                publishProgress(currentStep);
                 while (isStartOn)
                 {
                     Thread.sleep(1000);
@@ -75,31 +75,35 @@ public class StepCountActivity extends AppCompatActivity {
         fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
         fitnessService.updateStepCount();
 
-        Button btnUpdateSteps = findViewById(R.id.buttonUpdateSteps);
+        textSteps.setText(currentStep);
 
 
+        final Button btnUpdateSteps = findViewById(R.id.buttonUpdateSteps);
+        btnUpdateSteps.setTag(1);
+        btnUpdateSteps.setText("Start");
 
         btnUpdateSteps.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                isStartOn = true;
 
                 UpdateStep updateStep = new UpdateStep();
-
-                updateStep.execute(currentStep);
-
-
+                int status =(Integer) v.getTag();
+                if(status == 1) {
+                    isStartOn = true;
+                    updateStep.execute(currentStep);
+                    btnUpdateSteps.setText("Stop");
+                    v.setTag(0); //pause
+                } else {
+                    btnUpdateSteps.setText("Start");
+                    isStartOn = false;
+                    updateStep.cancel(true);
+                    v.setTag(1); //pause
+                }
             }
         });
 
-        Button stopButton = findViewById(R.id.buttonStop);
-        stopButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isStartOn = false;
-            }
-        });
+
 
         fitnessService.setup();
 
