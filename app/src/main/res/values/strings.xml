@@ -3,4 +3,5 @@
     <string name="goToStep">Go to Step counter</string>
     <string name="update">Update Step</string>
     <string name="stepUpdate">Step will be shown here</string>
+    <string name="logIn">Google Log In</string>
 </resources>
