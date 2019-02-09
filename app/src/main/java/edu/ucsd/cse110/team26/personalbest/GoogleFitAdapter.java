@@ -88,10 +88,13 @@ public class GoogleFitAdapter implements FitnessService {
                                 Log.d(TAG, dataSet.toString());
                                 long total = dataSet.isEmpty() ? 0 : dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
 
-                                activity.setStepCount(total);
+                                //activity.setStepCount(total);
 
                                 String totalString = String.valueOf(total);
-                                activity.showEncouragement(totalString);
+                                //activity.showEncouragement(totalString);
+                                activity.setCurrentStep(totalString);
+
+
 
                                 Log.d(TAG, "Total steps: " + total);
                             }
