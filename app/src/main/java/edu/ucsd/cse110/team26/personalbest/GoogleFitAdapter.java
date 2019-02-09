@@ -93,9 +93,6 @@ public class GoogleFitAdapter implements FitnessService {
                                 String totalString = String.valueOf(total);
                                 //activity.showEncouragement(totalString);
                                 activity.setCurrentStep(totalString);
-
-
-
                                 Log.d(TAG, "Total steps: " + total);
                             }
                         })
