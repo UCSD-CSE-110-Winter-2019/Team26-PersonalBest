@@ -12,6 +12,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import edu.ucsd.cse110.team26.personalbest.FitnessService;
 import edu.ucsd.cse110.team26.personalbest.FitnessServiceFactory;
@@ -146,6 +149,30 @@ public class StepCountActivity extends AppCompatActivity {
             Toast toast = Toast.makeText(context, text, duration);
             toast.show();
         }
+    }
+
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            Toast.makeText(this, "settings is Clicked", Toast.LENGTH_LONG).show();
+
+            Intent intent = new Intent(StepCountActivity.this, SettingsActivity.class);
+
+            StepCountActivity.this.startActivity(intent);
+
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }

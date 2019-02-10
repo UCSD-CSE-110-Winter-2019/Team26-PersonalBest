@@ -25,8 +25,8 @@ public class SettingsActivity extends AppCompatActivity {
 
         EditText goalEdit = findViewById(R.id.goalEdit);
         EditText heightEdit = findViewById(R.id.heightEdit);
-        goalEdit.setText( sharedPreferences.getInt("goal", 5000));
-        heightEdit.setText( sharedPreferences.getInt("height", 0));
+        goalEdit.setText( ""+(sharedPreferences.getInt("goal", 5000)));
+        heightEdit.setText( ""+(sharedPreferences.getInt("height", 0)));
 
         Button btnGoBack = findViewById(R.id.btnSettingsSave);
         Button btnSave = findViewById(R.id.btnSettingsGoBack);
@@ -58,6 +58,6 @@ public class SettingsActivity extends AppCompatActivity {
         editor.putInt("height", Integer.parseInt(heightEdit.getText().toString()));
     }
 
-    private SettingsActivity() {
+    public SettingsActivity() {
     }
 }
