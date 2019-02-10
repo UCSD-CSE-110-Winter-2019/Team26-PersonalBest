@@ -7,6 +7,13 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+
+import edu.ucsd.cse110.team26.personalbest.FitnessService;
+import edu.ucsd.cse110.team26.personalbest.FitnessServiceFactory;
 
 public class StepCountActivity extends AppCompatActivity {
 
@@ -90,6 +97,55 @@ public class StepCountActivity extends AppCompatActivity {
         } else {
             Log.e(TAG, "ERROR, google fit result code: " + resultCode);
         }
+    }
+
+    /*public void setStepCount(long stepCount) {
+        textSteps.setText(String.valueOf(stepCount));
+    }*/
+
+    public void setCurrentStep(String stepsTaken)
+    {
+        currentStep = stepsTaken;
+    }
+    public void showEncouragement(String stepsTaken)
+    {
+        Context context = getApplicationContext();
+
+        int numStep = Integer.parseInt(stepsTaken);
+        if(numStep >= 1000)
+        {
+            int percentInt = numStep/500;
+            //String percentString = String.valueOf(percentInt);
+            CharSequence text = "Good job! You're already at " + percentInt + "% of the daily recommended number of steps";
+
+            int duration = Toast.LENGTH_LONG;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
+    }
+
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            Toast.makeText(this, "settings is Clicked", Toast.LENGTH_LONG).show();
+
+            Intent intent = new Intent(StepCountActivity.this, SettingsActivity.class);
+
+            StepCountActivity.this.startActivity(intent);
+
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }
