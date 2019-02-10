@@ -10,6 +10,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.Locale;
@@ -26,6 +28,7 @@ public class StepCountActivity extends AppCompatActivity {
     private FitnessService fitnessService;
     private long currentSteps = 0;
     private long goalSteps = 0;
+    TimeStamper timeStamper;
 
     private class UpdateStep extends AsyncTask<Integer, Integer, Integer> {
         private int resp;
@@ -55,8 +58,29 @@ public class StepCountActivity extends AppCompatActivity {
 
         String fitnessServiceKey = getIntent().getStringExtra(FITNESS_SERVICE_KEY);
         fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
-        fitnessService.setup();
 
+        timeStamper = new TimeStampNow();
+
+        // Check if the user started a walk and has not stopped it
+        SharedPreferences walkInfo = getSharedPreferences("walk", MODE_PRIVATE );
+        long startTimeStamp = walkInfo.getLong("startTimeStamp", -1);
+        if(startTimeStamp != -1 && !timeStamper.isToday(startTimeStamp)) {
+            fitnessService.walk(startTimeStamp, timeStamper.endOfDay(startTimeStamp)); // terminate walk at end of day
+            SharedPreferences.Editor e = walkInfo.edit();
+            e.putLong("startTimeStamp", -1);
+            e.apply();
+        }
+
+        Button btnWalk = findViewById(R.id.buttonUpdateSteps);
+        btnWalk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+
+        fitnessService.setup();
     }
 
     @Override
@@ -76,7 +100,6 @@ public class StepCountActivity extends AppCompatActivity {
         super.onStop();
         if(updateStep != null) updateStep.cancel(true);
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

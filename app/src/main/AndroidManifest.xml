@@ -18,18 +18,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity android:name=".StepCountActivity"/>
-
         <activity android:name=".SettingsActivity"
             android:parentActivityName=".StepCountActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".StepCountActivity" />
         </activity>
-
-
-
     </application>
 
 </manifest>
