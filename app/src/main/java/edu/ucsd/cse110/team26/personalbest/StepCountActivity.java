@@ -2,6 +2,7 @@ package edu.ucsd.cse110.team26.personalbest;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +11,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
+
+import java.util.Locale;
 
 public class StepCountActivity extends AppCompatActivity {
 
@@ -21,6 +24,8 @@ public class StepCountActivity extends AppCompatActivity {
 
     private TextView textSteps;
     private FitnessService fitnessService;
+    private long currentSteps = 0;
+    private long goalSteps = 0;
 
     private class UpdateStep extends AsyncTask<Integer, Integer, Integer> {
         private int resp;
@@ -60,6 +65,10 @@ public class StepCountActivity extends AppCompatActivity {
         if(updateStep != null && !updateStep.isCancelled()) updateStep.cancel(true);
         updateStep = new UpdateStep();
         updateStep.execute(-1);
+
+        SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE );
+        goalSteps = sharedPreferences.getInt("goal", 5000);
+        setStepCount(currentSteps);
     }
 
     @Override
@@ -84,7 +93,8 @@ public class StepCountActivity extends AppCompatActivity {
     }
 
     public void setStepCount(long stepCount) {
-        textSteps.setText(String.valueOf(stepCount));
+        currentSteps = stepCount;
+        textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today!", currentSteps, goalSteps));
     }
 
     @Override
