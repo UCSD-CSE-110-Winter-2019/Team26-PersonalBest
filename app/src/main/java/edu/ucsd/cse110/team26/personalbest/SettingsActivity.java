@@ -7,8 +7,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import static edu.ucsd.cse110.team26.personalbest.StepCountActivity.FITNESS_SERVICE_KEY;
-
 public class SettingsActivity extends AppCompatActivity {
 
     @Override
