@@ -28,8 +28,8 @@ public class SettingsActivity extends AppCompatActivity {
         goalEdit.setText( ""+(sharedPreferences.getInt("goal", 5000)));
         heightEdit.setText( ""+(sharedPreferences.getInt("height", 0)));
 
-        Button btnGoBack = findViewById(R.id.btnSettingsSave);
-        Button btnSave = findViewById(R.id.btnSettingsGoBack);
+        Button btnSave = findViewById(R.id.btnSettingsSave);
+        Button btnGoBack = findViewById(R.id.btnSettingsGoBack);
 
         btnGoBack.setOnClickListener( new View.OnClickListener() {
             @Override
