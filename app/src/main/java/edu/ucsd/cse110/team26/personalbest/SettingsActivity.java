@@ -7,14 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import static edu.ucsd.cse110.team26.personalbest.StepCountActivity.FITNESS_SERVICE_KEY;
-
 public class SettingsActivity extends AppCompatActivity {
-    private static final SettingsActivity ourInstance = new SettingsActivity();
-
-    public static SettingsActivity getInstance() {
-        return ourInstance;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,8 +18,8 @@ public class SettingsActivity extends AppCompatActivity {
 
         EditText goalEdit = findViewById(R.id.goalEdit);
         EditText heightEdit = findViewById(R.id.heightEdit);
-        goalEdit.setText( ""+(sharedPreferences.getInt("goal", 5000)));
-        heightEdit.setText( ""+(sharedPreferences.getInt("height", 0)));
+        goalEdit.setText(String.valueOf(sharedPreferences.getInt("goal", 5000)));
+        heightEdit.setText(String.valueOf(sharedPreferences.getInt("height", 0)));
 
         Button btnSave = findViewById(R.id.btnSettingsSave);
         Button btnGoBack = findViewById(R.id.btnSettingsGoBack);
@@ -52,12 +45,11 @@ public class SettingsActivity extends AppCompatActivity {
         EditText heightEdit = findViewById(R.id.heightEdit);
 
         SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+        SharedPreferences.Editor editor = sharedPreferences.edit()
+                .putInt("goal", Integer.parseInt(goalEdit.getText().toString()))
+                .putInt("height", Integer.parseInt(heightEdit.getText().toString()));
 
-        editor.putInt("goal", Integer.parseInt(goalEdit.getText().toString()));
-        editor.putInt("height", Integer.parseInt(heightEdit.getText().toString()));
+        editor.apply();
     }
 
-    public SettingsActivity() {
-    }
 }
