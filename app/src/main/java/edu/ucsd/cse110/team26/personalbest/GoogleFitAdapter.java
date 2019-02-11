@@ -1,12 +1,13 @@
 package edu.ucsd.cse110.team26.personalbest;
 
-
-
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.common.Scopes;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.DataSet;
@@ -15,20 +16,18 @@ import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import edu.ucsd.cse110.team26.personalbest.StepCountActivity;
-
 public class GoogleFitAdapter implements FitnessService {
     private final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = System.identityHashCode(this) & 0xFFFF;
     private final String TAG = "GoogleFitAdapter";
 
     private StepCountActivity activity;
 
-    public GoogleFitAdapter(StepCountActivity activity) {
+    GoogleFitAdapter(StepCountActivity activity) {
         this.activity = activity;
     }
 
-
     public void setup() {
+
         FitnessOptions fitnessOptions = FitnessOptions.builder()
                 .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
                 .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
@@ -36,37 +35,37 @@ public class GoogleFitAdapter implements FitnessService {
 
         if (!GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(activity), fitnessOptions)) {
             GoogleSignIn.requestPermissions(
-                    activity, // your activity
-                    GOOGLE_FIT_PERMISSIONS_REQUEST_CODE,
+                    activity,
+                    getRequestCode(),
                     GoogleSignIn.getLastSignedInAccount(activity),
                     fitnessOptions);
-        } else {
-            updateStepCount();
+        } else {	
+            updateStepCount();	
             startRecording();
         }
     }
 
-    private void startRecording() {
-        GoogleSignInAccount lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);
-        if (lastSignedInAccount == null) {
-            return;
-        }
+    private void startRecording() {	
+        GoogleSignInAccount lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);	
+        if (lastSignedInAccount == null) {	
+            return;	
+        }	
 
-        Fitness.getRecordingClient(activity, GoogleSignIn.getLastSignedInAccount(activity))
-                .subscribe(DataType.TYPE_STEP_COUNT_CUMULATIVE)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.i(TAG, "Successfully subscribed!");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.i(TAG, "There was a problem subscribing.");
-                    }
-                });
-    }
+         Fitness.getRecordingClient(activity, GoogleSignIn.getLastSignedInAccount(activity))	
+                .subscribe(DataType.TYPE_STEP_COUNT_CUMULATIVE)	
+                .addOnSuccessListener(new OnSuccessListener<Void>() {	
+                    @Override	
+                    public void onSuccess(Void aVoid) {	
+                        Log.i(TAG, "Successfully subscribed!");	
+                    }	
+                })	
+                .addOnFailureListener(new OnFailureListener() {	
+                    @Override	
+                    public void onFailure(@NonNull Exception e) {	
+                        Log.i(TAG, "There was a problem subscribing.");	
+                    }	
+                });	
+    }	
 
 
     /**
@@ -74,40 +73,31 @@ public class GoogleFitAdapter implements FitnessService {
      * current timezone.
      */
     public void updateStepCount() {
+
         GoogleSignInAccount lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);
-        if (lastSignedInAccount == null) {
-            return;
+
+        if (lastSignedInAccount != null) {
+            Fitness.getHistoryClient(activity, lastSignedInAccount)
+                    .readDailyTotal(DataType.TYPE_STEP_COUNT_DELTA)
+                    .addOnSuccessListener(new OnSuccessListener<DataSet>() {
+                        @Override
+                        public void onSuccess(DataSet dataSet) {
+                            int totalSteps = dataSet.isEmpty()
+                                    ? -1
+                                    : dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
+
+                            activity.setStepCount(totalSteps);
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d(TAG, "There was a problem getting the step count.", e);
+                        }
+                    });
         }
 
-        Fitness.getHistoryClient(activity, lastSignedInAccount)
-                .readDailyTotal(DataType.TYPE_STEP_COUNT_DELTA)
-                .addOnSuccessListener(
-                        new OnSuccessListener<DataSet>() {
-                            @Override
-                            public void onSuccess(DataSet dataSet) {
-                                Log.d(TAG, dataSet.toString());
-                                long total = dataSet.isEmpty() ? 0 : dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
-
-                                //activity.setStepCount(total);
-
-                                String totalString = String.valueOf(total);
-                                //activity.showEncouragement(totalString);
-                                activity.setCurrentStep(totalString);
-
-
-
-                                Log.d(TAG, "Total steps: " + total);
-                            }
-                        })
-                .addOnFailureListener(
-                        new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.d(TAG, "There was a problem getting the step count.", e);
-                            }
-                        });
     }
-
 
     @Override
     public int getRequestCode() {
