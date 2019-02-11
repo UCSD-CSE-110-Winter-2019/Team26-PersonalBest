@@ -30,7 +30,7 @@ public class StepCountActivity extends AppCompatActivity {
             try {
                 resp = params[0];
                 while(true) {
-                    fitnessService.getStepCount();
+                    fitnessService.updateStepCount();
                     Thread.sleep(10000);
                 }
             } catch (Exception e) {

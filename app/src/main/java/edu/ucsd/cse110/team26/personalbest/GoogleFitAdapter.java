@@ -39,15 +39,40 @@ public class GoogleFitAdapter implements FitnessService {
                     getRequestCode(),
                     GoogleSignIn.getLastSignedInAccount(activity),
                     fitnessOptions);
+        } else {	
+            updateStepCount();	
+            startRecording();
         }
     }
+
+    private void startRecording() {	
+        GoogleSignInAccount lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);	
+        if (lastSignedInAccount == null) {	
+            return;	
+        }	
+
+         Fitness.getRecordingClient(activity, GoogleSignIn.getLastSignedInAccount(activity))	
+                .subscribe(DataType.TYPE_STEP_COUNT_CUMULATIVE)	
+                .addOnSuccessListener(new OnSuccessListener<Void>() {	
+                    @Override	
+                    public void onSuccess(Void aVoid) {	
+                        Log.i(TAG, "Successfully subscribed!");	
+                    }	
+                })	
+                .addOnFailureListener(new OnFailureListener() {	
+                    @Override	
+                    public void onFailure(@NonNull Exception e) {	
+                        Log.i(TAG, "There was a problem subscribing.");	
+                    }	
+                });	
+    }	
 
 
     /**
      * Reads the current daily step total, computed from midnight of the current day on the device's
      * current timezone.
      */
-    public void getStepCount() {
+    public void updateStepCount() {
 
         GoogleSignInAccount lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);
 
