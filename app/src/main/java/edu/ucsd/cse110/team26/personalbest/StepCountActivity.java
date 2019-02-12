@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Calendar;
 import java.util.Locale;
 
 public class StepCountActivity extends AppCompatActivity {
@@ -30,6 +31,7 @@ public class StepCountActivity extends AppCompatActivity {
     private long currentSteps = 0;
     private long goalSteps = 0;
     private boolean goalCompleted;
+    private Calendar firingCal;
 
     TimeStamper timeStamper;
 
@@ -56,7 +58,6 @@ public class StepCountActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_step_count);
-
         textSteps = findViewById(R.id.textSteps);
 
         String fitnessServiceKey = getIntent().getStringExtra(FITNESS_SERVICE_KEY);
