@@ -3,8 +3,6 @@ package edu.ucsd.cse110.team26.personalbest;
 import java.util.HashMap;
 import java.util.Map;
 
-import edu.ucsd.cse110.team26.personalbest.StepCountActivity;
-
 class FitnessServiceFactory {
     private static final String TAG = "[FitnessServiceFactory]";
 
