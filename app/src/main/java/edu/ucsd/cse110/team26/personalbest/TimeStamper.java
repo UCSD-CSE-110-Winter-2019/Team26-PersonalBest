@@ -4,7 +4,6 @@ import java.util.Calendar;
 
 public interface TimeStamper {
     long now();
-    Calendar getCalendar();
     long weekStart();
     long weekEnd();
     boolean isToday(long timeStamp);
