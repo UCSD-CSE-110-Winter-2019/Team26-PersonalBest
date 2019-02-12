@@ -36,7 +36,8 @@
             android:layout_margin="10dp"
             android:textSize="30sp"
             android:background="@drawable/edit_text_style"
-            android:importantForAutofill="no" />
+            android:importantForAutofill="no"
+            android:inputType="number"/>
     </TableRow>
 
     <TableRow

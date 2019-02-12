@@ -12,7 +12,7 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.settings);
+        setContentView(R.layout.activity_settings);
 
         SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE );
 
@@ -46,7 +46,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit()
-                .putInt("goal", Integer.parseInt(goalEdit.getText().toString()))
+                .putInt("goal", Integer.parseInt(goalEdit.getText().toString()) )
                 .putInt("height", Integer.parseInt(heightEdit.getText().toString()));
 
         editor.apply();
