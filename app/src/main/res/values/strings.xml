@@ -4,4 +4,6 @@
     <string name="update">Start</string>
     <string name="stepUpdate">Step will be shown here</string>
     <string name="logIn">Log in</string>
+    <string name="confirm">Confirm</string>
+
 </resources>

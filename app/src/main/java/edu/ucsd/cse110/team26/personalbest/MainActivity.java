@@ -5,14 +5,10 @@ import android.os.Bundle;
 
 
 import android.content.Intent;
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-
-import edu.ucsd.cse110.team26.personalbest.FitnessService;
-import edu.ucsd.cse110.team26.personalbest.FitnessServiceFactory;
-import edu.ucsd.cse110.team26.personalbest.GoogleFitAdapter;
+import android.widget.NumberPicker;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
     private String fitnessServiceKey = "GOOGLE_FIT";
@@ -36,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
                 return new GoogleFitAdapter(stepCountActivity);
             }
         });
+
+
+
     }
 
     public void launchStepCountActivity() {

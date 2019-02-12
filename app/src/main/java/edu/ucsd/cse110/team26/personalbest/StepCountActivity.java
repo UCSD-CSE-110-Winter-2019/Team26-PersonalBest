@@ -27,7 +27,7 @@ public class StepCountActivity extends AppCompatActivity {
     private boolean isStartOn = false;
     private String currentStep;
 
-    //private boolean goooo;
+
 
     private class UpdateStep extends AsyncTask<String, String, String>
     {
@@ -77,7 +77,6 @@ public class StepCountActivity extends AppCompatActivity {
 
         textSteps.setText(currentStep);
 
-
         final Button btnUpdateSteps = findViewById(R.id.buttonUpdateSteps);
         btnUpdateSteps.setTag(1);
         btnUpdateSteps.setText("Start");
@@ -85,8 +84,6 @@ public class StepCountActivity extends AppCompatActivity {
         btnUpdateSteps.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
                 UpdateStep updateStep = new UpdateStep();
                 int status =(Integer) v.getTag();
                 if(status == 1) {
@@ -102,11 +99,7 @@ public class StepCountActivity extends AppCompatActivity {
                 }
             }
         });
-
-
-
         fitnessService.setup();
-
     }
 
 
@@ -116,7 +109,6 @@ public class StepCountActivity extends AppCompatActivity {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == fitnessService.getRequestCode()) {
                 fitnessService.updateStepCount();
-
             }
         } else {
             Log.e(TAG, "ERROR, google fit result code: " + resultCode);
@@ -126,7 +118,13 @@ public class StepCountActivity extends AppCompatActivity {
     /*public void setStepCount(long stepCount) {
         textSteps.setText(String.valueOf(stepCount));
     }*/
-
+    public String getCurrentStep()
+    {
+        //fitnessService.updateStepCount();
+        if(currentStep == null)
+            return "0";
+        return currentStep;
+    }
     public void setCurrentStep(String stepsTaken)
     {
         currentStep = stepsTaken;
