@@ -12,6 +12,9 @@ public class TimeStampNow implements TimeStamper {
     }
 
     @Override
+    public Calendar getCalendar() { return Calendar.getInstance(); }
+
+    @Override
     public long weekStart() {
         Calendar cal = Calendar.getInstance(TimeZone.getDefault());
         cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
