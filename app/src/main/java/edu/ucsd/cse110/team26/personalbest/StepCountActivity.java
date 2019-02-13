@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -23,6 +24,12 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+
 import java.util.Locale;
 
 public class StepCountActivity extends AppCompatActivity {
@@ -76,38 +83,40 @@ public class StepCountActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_step_count);
-/*
+
         BarChart chart = (BarChart) findViewById(R.id.chart);
-        //BarData data = new BarData(getXAxisValues(), getDataSet());
+//BarData data = new BarData(getXAxisValues(), getDataSet());
         ArrayList<BarEntry> BarEntry = new ArrayList<>();
-        BarEntry.add(new BarEntry(2f, 0));
-        BarEntry.add(new BarEntry(4f, 1));
-        BarEntry.add(new BarEntry(6f, 2));
-        BarEntry.add(new BarEntry(8f, 3));
-        BarEntry.add(new BarEntry(7f, 4));
-        BarEntry.add(new BarEntry(3f, 5));
-        BarEntry.add(new BarEntry(4f, 6));
+        BarEntry.add(new BarEntry(0f, new float[] {1, 2}));
+        BarEntry.add(new BarEntry(1f, new float[] {3, 4}));
+        BarEntry.add(new BarEntry(2f, new float[] {1, 4}));
+        BarEntry.add(new BarEntry(3f, new float[] {5, 2}));
+        BarEntry.add(new BarEntry(4f, new float[] {6, 2}));
+        BarEntry.add(new BarEntry(5f, new float[] {1, 3}));
+        BarEntry.add(new BarEntry(6f, new float[] {1, 4}));
 
-        BarDataSet dataSet = new BarDataSet(BarEntry, "Projects");
-
+        BarDataSet dataSet = new BarDataSet(BarEntry, "Step Count");
+        dataSet.setStackLabels(new String[] {"Intentional Walks", "Unintentional Walks"});
         ArrayList<String> labels = new ArrayList<>();
 
-        labels.add("Monday");
-        labels.add("Tuesday");
-        labels.add("Wednesday");
-        labels.add("Thursday");
-        labels.add("Friday");
-        labels.add("Saturday");
-        labels.add("Sunday");
+        labels.add("Mon");
+        labels.add("Tues");
+        labels.add("Wed");
+        labels.add("Thurs");
+        labels.add("Fri");
+        labels.add("Sat");
+        labels.add("Sun");
 
         BarData data = new BarData(dataSet);
 
-        dataSet.setColors(ColorTemplate.COLORFUL_COLORS);
+
+        chart.getXAxis().setLabelCount(dataSet.getEntryCount());
+
+        chart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
+        dataSet.setColors(new int[] {ContextCompat.getColor(chart.getContext(), R.color.colorAccent),
+                ContextCompat.getColor(chart.getContext(), R.color.colorPrimary),});
         chart.setData(data);
 
-        chart.setDescription("Days");
-
-*/
         textSteps = findViewById(R.id.textSteps);
 
         final String fitnessServiceKey = getIntent().getStringExtra(FITNESS_SERVICE_KEY);
