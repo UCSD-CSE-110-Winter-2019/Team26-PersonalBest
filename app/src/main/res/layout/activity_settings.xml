@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:stretchColumns="1">
+    <TableRow>
+        <TextView
+            android:text="@string/height"
+            android:padding="3dip"
+            android:layout_margin="10sp"
+            android:textSize="30sp"/>
+        <EditText
+            android:text=""
+            android:gravity="end"
+            android:padding="3dip"
+            android:id = "@+id/heightEdit"
+            android:layout_margin="10dp"
+            android:textSize="30sp"
+            android:background="@drawable/edit_text_style"
+            android:importantForAutofill="no" />
+    </TableRow>
+
+    <TableRow>
+
+        <TextView
+            android:layout_margin="10sp"
+            android:padding="3dip"
+            android:text="@string/goal"
+            android:textSize="30sp"/>
+
+        <EditText
+            android:gravity="end"
+            android:padding="3dip"
+            android:text=""
+            android:id = "@+id/goalEdit"
+            android:layout_margin="10dp"
+            android:textSize="30sp"
+            android:background="@drawable/edit_text_style"
+            android:importantForAutofill="no"
+            android:inputType="number"/>
+    </TableRow>
+
+    <TableRow
+        android:layout_marginTop="300dp">
+
+        <Button
+            android:id="@+id/btnSettingsSave"
+            android:layout_width="201dp"
+            android:text="@string/save"
+            android:textSize="30sp" />
+
+        <Button
+            android:id="@+id/btnSettingsGoBack"
+            android:text="@string/go_back"
+            android:textSize="30sp"/>
+    </TableRow>
+</TableLayout>
