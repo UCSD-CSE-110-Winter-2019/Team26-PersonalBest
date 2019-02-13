@@ -5,5 +5,9 @@
     <string name="stepUpdate">Step will be shown here</string>
     <string name="logIn">Log in</string>
     <string name="confirm">Confirm</string>
+    <string name="feet">feet</string>
+    <string name="inch">inch</string>
+    <string name="enter_height_prompt">Please select your height</string>
+    <string name="go_to_mainUI">Done</string>
 
 </resources>

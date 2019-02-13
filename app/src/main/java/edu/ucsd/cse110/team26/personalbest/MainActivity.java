@@ -1,5 +1,6 @@
 package edu.ucsd.cse110.team26.personalbest;
 
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -10,19 +11,33 @@ import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
+import java.util.prefs.PreferenceChangeEvent;
+
 public class MainActivity extends AppCompatActivity {
     private String fitnessServiceKey = "GOOGLE_FIT";
-
+    public String user_height;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        SharedPreferences sharedPreferences = getSharedPreferences("user_height", MODE_PRIVATE);
+        user_height = sharedPreferences.getString("height", "");
+
+
+
+
         Button btnGoToSteps = findViewById(R.id.buttonGoToSteps);
         btnGoToSteps.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                launchStepCountActivity();
+                if(user_height == "")
+                {
+                    launchGetHeightActivity();
+                }
+                else
+                    launchStepCountActivity();
             }
         });
 
@@ -32,9 +47,6 @@ public class MainActivity extends AppCompatActivity {
                 return new GoogleFitAdapter(stepCountActivity);
             }
         });
-
-
-
     }
 
     public void launchStepCountActivity() {
@@ -42,8 +54,15 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(StepCountActivity.FITNESS_SERVICE_KEY, fitnessServiceKey);
         startActivity(intent);
     }
+    public void launchGetHeightActivity()
+    {
+        Intent intent = new Intent(this, GetHeight.class);
+        startActivity(intent);
+    }
 
     public void setFitnessServiceKey(String fitnessServiceKey) {
         this.fitnessServiceKey = fitnessServiceKey;
     }
+
+
 }
