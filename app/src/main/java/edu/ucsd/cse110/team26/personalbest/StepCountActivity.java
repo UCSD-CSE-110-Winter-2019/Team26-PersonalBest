@@ -15,6 +15,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.utils.ColorTemplate;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -70,6 +76,38 @@ public class StepCountActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_step_count);
+
+        BarChart chart = (BarChart) findViewById(R.id.chart);
+        //BarData data = new BarData(getXAxisValues(), getDataSet());
+        ArrayList<BarEntry> BarEntry = new ArrayList<>();
+        BarEntry.add(new BarEntry(2f, 0));
+        BarEntry.add(new BarEntry(4f, 1));
+        BarEntry.add(new BarEntry(6f, 2));
+        BarEntry.add(new BarEntry(8f, 3));
+        BarEntry.add(new BarEntry(7f, 4));
+        BarEntry.add(new BarEntry(3f, 5));
+        BarEntry.add(new BarEntry(4f, 6));
+
+        BarDataSet dataSet = new BarDataSet(BarEntry, "Projects");
+
+        ArrayList<String> labels = new ArrayList<>();
+
+        labels.add("Monday");
+        labels.add("Tuesday");
+        labels.add("Wednesday");
+        labels.add("Thursday");
+        labels.add("Friday");
+        labels.add("Saturday");
+        labels.add("Sunday");
+
+        BarData data = new BarData(dataSet);
+
+        dataSet.setColors(ColorTemplate.COLORFUL_COLORS);
+        chart.setData(data);
+
+        chart.setDescription("Days");
+
+
         textSteps = findViewById(R.id.textSteps);
 
         final String fitnessServiceKey = getIntent().getStringExtra(FITNESS_SERVICE_KEY);
