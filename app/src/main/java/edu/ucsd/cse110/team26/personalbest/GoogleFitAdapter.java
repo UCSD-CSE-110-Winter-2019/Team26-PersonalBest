@@ -49,14 +49,14 @@ public class GoogleFitAdapter implements FitnessService {
                     GoogleSignIn.getLastSignedInAccount(activity),
                     fitnessOptions);
         } else {
-            lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);
+            startRecording();
+            updateStepCount();
         }
 
-        updateStepCount();
-        startRecording();
     }
 
     private void startRecording() {
+        lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);
         if (lastSignedInAccount != null) {
             Fitness.getRecordingClient(activity, lastSignedInAccount)
                     .subscribe(DataType.TYPE_STEP_COUNT_CUMULATIVE)
@@ -72,10 +72,8 @@ public class GoogleFitAdapter implements FitnessService {
                             Log.i(TAG, "There was a problem subscribing.");
                         }
                     });
-        } else {
-            setup();
         }
-    }	
+    }
 
 
     /**
@@ -83,7 +81,7 @@ public class GoogleFitAdapter implements FitnessService {
      * current timezone.
      */
     public void updateStepCount() {
-
+        lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);
         if (lastSignedInAccount != null) {
             Fitness.getHistoryClient(activity, lastSignedInAccount)
                     .readDailyTotal(DataType.TYPE_STEP_COUNT_DELTA)
@@ -105,7 +103,7 @@ public class GoogleFitAdapter implements FitnessService {
                         }
                     });
         } else {
-            setup();
+            Log.e(TAG, "Error reading step count: no login found");
         }
     }
 
@@ -140,9 +138,6 @@ public class GoogleFitAdapter implements FitnessService {
                                     e.getLocalizedMessage());
                         }
                     });
-        }
-        else {
-            setup();
         }
     }
 
@@ -193,10 +188,6 @@ public class GoogleFitAdapter implements FitnessService {
                         }
                     });
         }
-        else {
-            setup();
-        }
-
     }
 
     @Override
