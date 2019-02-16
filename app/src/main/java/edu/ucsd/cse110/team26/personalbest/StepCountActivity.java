@@ -227,22 +227,21 @@ public class StepCountActivity extends AppCompatActivity {
         if(user_height == 0) {
             launchGetHeightActivity();
         }
-
-        //check if dialog box has been shown and if it's a new week:
-        if(hasSuggestHappend == false && timeStamper.isToday(timeStamper.weekStart())){
-            int averageStepsWeek = 0;
-            for(int stepsPerDay:stepCounts){
-                averageStepsWeek +=stepsPerDay;
+        if(suggestGoal()){
+            //check if dialog box has been shown and if it's a new week:
+            if(hasSuggestHappend == false && timeStamper.isToday(timeStamper.weekStart())){
+                int suggestedGoal = (int)goalSteps+500;
+                createAlertDialog(suggestedGoal);
+                hasSuggestHappend = true;
             }
-            createAlertDialog(averageStepsWeek/7);
-            hasSuggestHappend = true;
+            else if(hasSuggestHappend == true && !timeStamper.isToday(timeStamper.weekStart())){
+                hasSuggestHappend = false;
+            }
+            else{
+                //do nothing; keep suggestHappened as true since it's still sunday.
+            }
         }
-        else if(hasSuggestHappend == true && !timeStamper.isToday(timeStamper.weekStart())){
-            hasSuggestHappend = false;
-        }
-        else{
-            //do nothing; keep suggestHappened as true since it's still sunday.
-        }
+
 
         setStepCount(currentSteps);
 
@@ -345,25 +344,33 @@ public class StepCountActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void createAlertDialog(int averageForWeek) {
+    public boolean suggestGoal(){
+        List<Integer> prevWeek = new ArrayList<>();
+        int weekDif = 7*24*60*60*1000;
+        fitnessService.getStepsCount(timeStamper.weekStart()- weekDif, timeStamper.weekEnd()-weekDif, prevWeek);
+        for(int stepsThatDay: prevWeek){
+            if(stepsThatDay >= goalSteps){
+                return true;
+            }
+
+        }
+        return false;
+    }
+
+    public void createAlertDialog(final int suggestedGoal) {
         AlertDialog alertDialog = new AlertDialog.Builder(StepCountActivity.this).create();
         alertDialog.setTitle("Suggesting Goals");
-        int suggestedGoal;
-        if(averageForWeek <= 1000){
-            suggestedGoal = 1000;
-        }
-        else if(averageForWeek >= 15000){
-            suggestedGoal = 15000;
-        }
-        else{
-            //set goal to upper 500. i.e. if 1001 steps on average, suggested goal would be 1500.
-            suggestedGoal = (int) (Math.ceil(averageForWeek/ 500.0) * 500.0);
-        }
+
+
+
         alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoal);
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        //update stuff
+                        SharedPreferences user = getSharedPreferences("user", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = user.edit();
+                        editor.putInt("your_int_key", suggestedGoal);
+                        editor.apply();
                         dialog.dismiss();
                     }
                 });
