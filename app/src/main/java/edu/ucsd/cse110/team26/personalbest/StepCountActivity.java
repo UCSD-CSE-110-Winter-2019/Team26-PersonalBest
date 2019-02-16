@@ -263,6 +263,7 @@ public class StepCountActivity extends AppCompatActivity {
             } else {
                 btnStartWalk.setVisibility(View.GONE);
                 btnEndWalk.setVisibility(View.VISIBLE);
+                currentWalk = new Walk(currentSteps - initialSteps, startTimeStamp);
             }
         }
     }
@@ -327,7 +328,6 @@ public class StepCountActivity extends AppCompatActivity {
                     lastWalk.stepsToFeet(user_height),
                     lastWalk.averageMph(user_height)));
         }
-        Log.i(TAG, "updateWalkData" + startTimeStamp + " " + walkList.size());
     }
 
     @Override
