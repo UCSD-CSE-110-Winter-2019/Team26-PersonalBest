@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical"
+    android:padding="20dp"
     tools:context=".MainActivity">
 
     <TextView
@@ -17,25 +17,33 @@
         android:text="" />
 
     <Button
-        android:id="@+id/buttonWalk"
+        android:id="@+id/btnStartWalk"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/textSteps"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginEnd="123dp"
-        android:layout_marginRight="123dp"
-        android:layout_marginBottom="-50dp"
         android:text="@string/start_walk"
         android:theme="@style/Button.StartWalk" />
 
+    <Button
+        android:id="@+id/btnEndWalk"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/end_walk"
+        android:theme="@style/Button.EndWalk"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/textWalkData"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="" />
+
     <com.github.mikephil.charting.charts.CombinedChart
         android:id="@+id/chart1"
-        android:layout_width="303dp"
-        android:layout_height="281dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="35dp" />
+        android:layout_width="match_parent"
+        android:layout_height="280dp"
+        android:layout_margin="30dp"/>
 
-</RelativeLayout>
+</LinearLayout>
