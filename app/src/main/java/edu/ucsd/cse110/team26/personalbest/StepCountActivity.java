@@ -1,11 +1,13 @@
 package edu.ucsd.cse110.team26.personalbest;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -33,11 +35,14 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import android.app.AlertDialog.Builder;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import java.lang.*;
 
 // reference: https://www.studytutorial.in/android-combined-line-and-bar-chart-using-mpandroid-library-android-tutorial
 
 public class StepCountActivity extends AppCompatActivity {
-
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
 
     private static final String TAG = "StepCountActivity";
@@ -56,6 +61,8 @@ public class StepCountActivity extends AppCompatActivity {
     private boolean goalCompleted;
     private List<Integer> stepCounts = new ArrayList<>();
     private List<Walk> walkList = new ArrayList<>();
+
+    private boolean hasSuggestHappend = false;
 
     private long startTimeStamp = -1;
     private long initialSteps = 0;
@@ -164,6 +171,9 @@ public class StepCountActivity extends AppCompatActivity {
 
         fitnessService.setup();
 
+
+
+
         btnStartWalk = findViewById(R.id.btnStartWalk);
         btnEndWalk = findViewById(R.id.btnEndWalk);
         textWalkData = findViewById(R.id.textWalkData);
@@ -216,6 +226,22 @@ public class StepCountActivity extends AppCompatActivity {
         user_height = user.getInt("height", 0);
         if(user_height == 0) {
             launchGetHeightActivity();
+        }
+
+        //check if dialog box has been shown and if it's a new week:
+        if(hasSuggestHappend == false && timeStamper.isToday(timeStamper.weekStart())){
+            int averageStepsWeek = 0;
+            for(int stepsPerDay:stepCounts){
+                averageStepsWeek +=stepsPerDay;
+            }
+            createAlertDialog(averageStepsWeek/7);
+            hasSuggestHappend = true;
+        }
+        else if(hasSuggestHappend == true && !timeStamper.isToday(timeStamper.weekStart())){
+            hasSuggestHappend = false;
+        }
+        else{
+            //do nothing; keep suggestHappened as true since it's still sunday.
         }
 
         setStepCount(currentSteps);
@@ -317,6 +343,38 @@ public class StepCountActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void createAlertDialog(int averageForWeek) {
+        AlertDialog alertDialog = new AlertDialog.Builder(StepCountActivity.this).create();
+        alertDialog.setTitle("Suggesting Goals");
+        int suggestedGoal;
+        if(averageForWeek <= 1000){
+            suggestedGoal = 1000;
+        }
+        else if(averageForWeek >= 15000){
+            suggestedGoal = 15000;
+        }
+        else{
+            //set goal to upper 500. i.e. if 1001 steps on average, suggested goal would be 1500.
+            suggestedGoal = (int) (Math.ceil(averageForWeek/ 500.0) * 500.0);
+        }
+        alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoal);
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        //update stuff
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
     }
 
     public void launchGetHeightActivity() {
