@@ -1,57 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tableLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:stretchColumns="1">
-    <TableRow>
-        <TextView
-            android:text="@string/height"
-            android:padding="3dip"
-            android:layout_margin="10sp"
-            android:textSize="30sp"/>
-        <EditText
-            android:text=""
-            android:gravity="end"
-            android:padding="3dip"
-            android:id = "@+id/heightEdit"
-            android:layout_margin="10dp"
-            android:textSize="30sp"
-            android:background="@drawable/edit_text_style"
-            android:importantForAutofill="no" />
-    </TableRow>
 
-    <TableRow>
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:padding="3dip"
+        android:text="@string/height"
+        android:textSize="30sp"
+        android:layout_marginStart="50dp"
+        android:layout_marginLeft="50dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+         />
 
-        <TextView
-            android:layout_margin="10sp"
-            android:padding="3dip"
-            android:text="@string/goal"
-            android:textSize="30sp"/>
+    <NumberPicker
+        android:id="@+id/feetNumberPicker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginRight="10dp"
+        android:gravity="end"
+        android:padding="3dip"
+        android:text=""
+        android:textSize="20sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/inchesNumberPicker" />
 
-        <EditText
-            android:gravity="end"
-            android:padding="3dip"
-            android:text=""
-            android:id = "@+id/goalEdit"
-            android:layout_margin="10dp"
-            android:textSize="30sp"
-            android:background="@drawable/edit_text_style"
-            android:importantForAutofill="no"
-            android:inputType="number"/>
-    </TableRow>
+    <NumberPicker
+        android:id="@+id/inchesNumberPicker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
+        android:gravity="end"
+        android:padding="3dip"
+        android:text=""
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <TableRow
-        android:layout_marginTop="300dp">
 
-        <Button
-            android:id="@+id/btnSettingsSave"
-            android:layout_width="201dp"
-            android:text="@string/save"
-            android:textSize="30sp" />
 
-        <Button
-            android:id="@+id/btnSettingsGoBack"
-            android:text="@string/go_back"
-            android:textSize="30sp"/>
-    </TableRow>
-</TableLayout>
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginRight="20dp"
+        android:padding="3dip"
+        android:text="@string/goal"
+        android:textSize="30sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/goalEdit"
+        app:layout_constraintEnd_toStartOf="@+id/goalEdit"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/goalEdit"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/edit_text_style"
+        android:gravity="end"
+        android:importantForAutofill="no"
+        android:inputType="number"
+        android:padding="3dip"
+        android:text=""
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textView2"
+        app:layout_constraintTop_toBottomOf="@+id/feetNumberPicker" />
+
+
+    <Button
+        android:id="@+id/btnSettingsSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/save"
+        android:textSize="30sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/btnSettingsGoBack"
+        app:layout_constraintEnd_toStartOf="@+id/btnSettingsGoBack"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnSettingsGoBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="@string/go_back"
+        android:textSize="30sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btnSettingsSave" />
+
+</android.support.constraint.ConstraintLayout>
