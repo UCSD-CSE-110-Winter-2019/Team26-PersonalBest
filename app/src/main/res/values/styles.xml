@@ -8,4 +8,11 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="Button.StartWalk" parent="AppTheme">
+        <item name="colorAccent">@color/green</item>
+    </style>
+    <style name="Button.EndWalk" parent="AppTheme">
+        <item name="colorAccent">@color/red</item>
+    </style>
+
 </resources>
