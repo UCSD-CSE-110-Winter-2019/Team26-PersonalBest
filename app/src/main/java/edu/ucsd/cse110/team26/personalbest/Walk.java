@@ -26,6 +26,10 @@ class Walk {
         this.steps = steps;
     }
 
+    boolean inTimeRange(long startTimeStamp, long endTimeStamp) {
+        return (this.startTimeStamp > startTimeStamp && this.endTimeStamp < endTimeStamp);
+    }
+
     long getDurationInMillis() {
         if(endTimeStamp != 0) {
             return endTimeStamp - startTimeStamp;
