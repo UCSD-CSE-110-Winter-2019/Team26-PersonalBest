@@ -12,7 +12,7 @@
         android:id="@+id/textSteps"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:padding="20dp"
         android:textSize="30sp"
         android:text="" />
 
@@ -38,7 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="20sp"
-        android:text="" />
+        android:text="\n\n\n\n" />
 
     <com.github.mikephil.charting.charts.CombinedChart
         android:id="@+id/chart1"

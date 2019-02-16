@@ -189,7 +189,7 @@ public class GoogleFitAdapter implements FitnessService {
                                     }
                                     //Log.i(TAG, "Data returned for Data type " + dataSet.getDataType().getName() + ": " + tally);
                                 }
-                                walkList.add(new Walk(startTimeStamp, endTimeStamp, tally));
+                                walkList.add(new Walk(tally, startTimeStamp, endTimeStamp));
                             }
                         }
                     })
@@ -209,10 +209,11 @@ public class GoogleFitAdapter implements FitnessService {
                     .aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
                     .bucketByTime(1, TimeUnit.DAYS)
                     .setTimeRange(startTimeStamp, endTimeStamp, TimeUnit.MILLISECONDS)
+                    .enableServerQueries()
                     .build();
 
-            Task<DataReadResponse> response = Fitness.getHistoryClient(activity, lastSignedInAccount)
-                    .readData(readRequest).addOnSuccessListener(new OnSuccessListener<DataReadResponse>() {
+            Fitness.getHistoryClient(activity, lastSignedInAccount).readData(readRequest)
+                    .addOnSuccessListener(new OnSuccessListener<DataReadResponse>() {
                         @Override
                         public void onSuccess(DataReadResponse dataReadResponse) {
                             List<Bucket> buckets = dataReadResponse.getBuckets();

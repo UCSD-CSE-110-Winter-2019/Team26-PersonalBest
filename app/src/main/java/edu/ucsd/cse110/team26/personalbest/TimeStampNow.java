@@ -79,14 +79,13 @@ public class TimeStampNow implements TimeStamper {
     }
 
     @Override
-    public String timeSince(long timeStamp) {
-        long diff = now() - timeStamp;
-        if(diff < 60000) {
-            return "" + diff/1000 + "s";
-        } else if(diff < 60*60*1000) {
-            return "" + diff/60000 + "m " + (diff % 60000)/1000 + "s";
+    public String durationToString(long duration) {
+        if(duration < 60000) {
+            return "" + duration/1000 + "s";
+        } else if(duration < 60*60*1000) {
+            return "" + duration/60000 + "m " + (duration % 60000)/1000 + "s";
         } else {
-            return "" + diff/3600000 + ":" + (diff % 3600000)/60000;
+            return "" + duration/3600000 + ":" + (duration % 3600000)/60000;
         }
     }
 

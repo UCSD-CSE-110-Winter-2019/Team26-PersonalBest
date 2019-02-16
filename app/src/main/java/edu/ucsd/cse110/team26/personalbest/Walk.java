@@ -1,22 +1,48 @@
 package edu.ucsd.cse110.team26.personalbest;
 
-public class Walk {
+class Walk {
 
-    private long startTimeStamp;
-    private long endTimeStamp;
     private long steps;
+    private long startTimeStamp;
+    private long endTimeStamp = 0;
+    private TimeStamper timeStamper = new TimeStampNow();
 
-    public Walk(long startTimeStamp, long endTimeStamp, long steps) {
+    Walk(long steps, long startTimeStamp, long endTimeStamp) {
+        this.steps = steps;
         this.startTimeStamp = startTimeStamp;
         this.endTimeStamp = endTimeStamp;
-        this.steps = steps;
     }
 
-    public long getSteps() {
+    Walk(long steps, long startTimeStamp) {
+        this.steps = steps;
+        this.startTimeStamp = startTimeStamp;
+    }
+
+    long getSteps() {
         return steps;
     }
 
-    public long getDurationInMillis() {
-        return endTimeStamp - startTimeStamp;
+    void setSteps(long steps) {
+        this.steps = steps;
+    }
+
+    long getDurationInMillis() {
+        if(endTimeStamp != 0) {
+            return endTimeStamp - startTimeStamp;
+        } else {
+            return timeStamper.now() - startTimeStamp;
+        }
+    }
+
+    double stepsToFeet(long height) {
+        double feetPerStep = height * 0.03441666666;
+        return steps * feetPerStep;
+    }
+
+    double averageMph(long height) {
+        long duration = getDurationInMillis();
+        if(duration == 0) return 0;
+        double hours = (double) duration / (60*60*1000);
+        return stepsToFeet(height) / 5280 / hours;
     }
 }
