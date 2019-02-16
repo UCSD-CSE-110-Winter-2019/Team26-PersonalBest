@@ -8,4 +8,5 @@ public interface FitnessService {
     void updateStepCount();
     void walk(long startTimeStamp, long endTimeStamp);
     void getWalks(long startTimeStamp, long endTimeStamp, List<Walk> walkList);
+    void getStepsCount(long startTimeStamp, long endTimeStamp, List<Integer> stepsList);
 }

@@ -4,7 +4,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "edu.ucsd.cse110.team26.personalbest"
-        minSdkVersion 16
+        minSdkVersion 26
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -22,7 +22,7 @@ android {
         }
     }
 
-    lintOptions{
+    lintOptions {
         abortOnError false
     }
 }
