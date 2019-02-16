@@ -8,5 +8,5 @@ public interface TimeStamper {
     long endOfDay(long timeStamp);
     long startOfDay(long timeStamp);
     long nextDay(long timeStamp);
-    String timeSince(long timeStamp);
+    String durationToString(long duration);
 }

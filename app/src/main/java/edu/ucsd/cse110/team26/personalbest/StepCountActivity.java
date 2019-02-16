@@ -58,6 +58,8 @@ public class StepCountActivity extends AppCompatActivity {
     private List<Walk> walkList = new ArrayList<>();
 
     private long startTimeStamp = -1;
+    private long initialSteps = 0;
+    private Walk currentWalk;
 
     TimeStamper timeStamper;
 
@@ -71,15 +73,12 @@ public class StepCountActivity extends AppCompatActivity {
                 resp = params[0];
                 while(run) {
                     fitnessService.updateStepCount();
+                    Thread.sleep(500);
                     stepCounts.clear();
                     walkList.clear();
                     fitnessService.getStepsCount(timeStamper.weekStart(), timeStamper.weekEnd(), stepCounts);
                     fitnessService.getWalks(timeStamper.weekStart(), timeStamper.weekEnd(), walkList);
-                    Thread.sleep(1000);
-                    Log.i(TAG, stepCounts.toString());
-                    /*for(Walk walk : walkList) {
-                        Log.i(TAG, "Walk of duration " + walk.getDurationInMillis() + "ms with steps: " + walk.getSteps());
-                    }*/
+                    Thread.sleep(500);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -173,11 +172,13 @@ public class StepCountActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if(startTimeStamp == -1) {
                     startTimeStamp = timeStamper.now();
+                    initialSteps = currentSteps;
                     SharedPreferences.Editor editor = getSharedPreferences("walk", MODE_PRIVATE).edit();
                     editor.putLong("startTimeStamp", startTimeStamp)
-                            .putLong("initialSteps", currentSteps).apply();
+                            .putLong("initialSteps", initialSteps).apply();
                     btnStartWalk.setVisibility(View.GONE);
                     btnEndWalk.setVisibility(View.VISIBLE);
+                    currentWalk = new Walk(0, startTimeStamp);
                     updateWalkData();
                 }
             }
@@ -193,6 +194,7 @@ public class StepCountActivity extends AppCompatActivity {
                     }
                     fitnessService.walk(startTimeStamp, timeStamper.now());
                     startTimeStamp = -1;
+                    currentWalk = null;
                     SharedPreferences.Editor editor = getSharedPreferences("walk", MODE_PRIVATE).edit();
                     editor.putLong("startTimeStamp", -1).apply();
                     btnStartWalk.setVisibility(View.VISIBLE);
@@ -221,6 +223,7 @@ public class StepCountActivity extends AppCompatActivity {
         // Check if the user started a walk and has not stopped it
         SharedPreferences walkInfo = getSharedPreferences("walk", MODE_PRIVATE );
         startTimeStamp = walkInfo.getLong("startTimeStamp", -1);
+        initialSteps = walkInfo.getLong("initialSteps", 0);
         if(startTimeStamp != -1) {
             if (!timeStamper.isToday(startTimeStamp)) {
                 fitnessService.walk(startTimeStamp, timeStamper.endOfDay(startTimeStamp)); // terminate walk at end of day
@@ -232,7 +235,6 @@ public class StepCountActivity extends AppCompatActivity {
             } else {
                 btnStartWalk.setVisibility(View.GONE);
                 btnEndWalk.setVisibility(View.VISIBLE);
-                updateWalkData();
             }
         }
     }
@@ -262,7 +264,7 @@ public class StepCountActivity extends AppCompatActivity {
 
     public void setStepCount(long stepCount) {
         currentSteps = stepCount;
-        textSteps.setText(String.format(Locale.getDefault(),"%d/%d", currentSteps, goalSteps));
+        textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", currentSteps, goalSteps));
         updateWalkData();
         if(currentSteps >= goalSteps && !goalCompleted ) {
             Toast completeGoalToast = Toast.makeText(getApplicationContext(),
@@ -279,15 +281,24 @@ public class StepCountActivity extends AppCompatActivity {
 
     private void updateWalkData() {
         if(startTimeStamp != -1) {
-            long initialSteps = getSharedPreferences("walk", MODE_PRIVATE).getLong("initialSteps", 0);
-            long walkSteps = currentSteps - initialSteps;
+            initialSteps = getSharedPreferences("walk", MODE_PRIVATE).getLong("initialSteps", 0);
+            currentWalk.setSteps(currentSteps - initialSteps);
             textWalkData.setText(String.format(Locale.getDefault(),
-                    "Walk duration: %s, %d steps taken",
-                    timeStamper.timeSince(startTimeStamp),
-                    walkSteps));
-        } else {
-            textWalkData.setText("");
+                    "Current walk:\nWalk duration: %s\n%d steps taken\nDistance walked: %.1f feet\nAverage speed: %.1fmph",
+                    timeStamper.durationToString(timeStamper.now() - startTimeStamp),
+                    currentWalk.getSteps(),
+                    currentWalk.stepsToFeet(user_height),
+                    currentWalk.averageMph(user_height)));
+        } else if(!walkList.isEmpty()) {
+            Walk lastWalk = walkList.get(walkList.size() - 1);
+            textWalkData.setText(String.format(Locale.getDefault(),
+                    "Last walk:\nWalk duration: %s\n%d steps taken\nDistance walked: %.1f feet\nAverage speed: %.1fmph",
+                    timeStamper.durationToString(lastWalk.getDurationInMillis()),
+                    lastWalk.getSteps(),
+                    lastWalk.stepsToFeet(user_height),
+                    lastWalk.averageMph(user_height)));
         }
+        Log.i(TAG, "updateWalkData" + startTimeStamp + " " + walkList.size());
     }
 
     @Override
