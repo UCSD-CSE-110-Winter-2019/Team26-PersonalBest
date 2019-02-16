@@ -8,13 +8,16 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessActivities;
 import com.google.android.gms.fitness.FitnessOptions;
+import com.google.android.gms.fitness.data.Bucket;
 import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.data.Session;
+import com.google.android.gms.fitness.request.DataReadRequest;
 import com.google.android.gms.fitness.request.SessionInsertRequest;
 import com.google.android.gms.fitness.request.SessionReadRequest;
+import com.google.android.gms.fitness.result.DataReadResponse;
 import com.google.android.gms.fitness.result.SessionReadResponse;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -141,8 +144,16 @@ public class GoogleFitAdapter implements FitnessService {
         }
     }
 
+
+    /**
+     * Asynchronous call to the Google Fit History to retrieve walk info, and populates the
+     * provided list with the Walk info upon retrieving info successfully.
+     * @param startTimeStamp Starting time of the interval to query for
+     * @param endTimeStamp Ending time of the interval to query for
+     * @param walkList List of Walks to be filled by the function
+     */
     @Override
-    public void getWalks(long startTimeStamp, long endTimeStamp, List<Walk> walkList) {
+    public void getWalks(long startTimeStamp, long endTimeStamp, final List<Walk> walkList) {
 
         SessionReadRequest readRequest = new SessionReadRequest.Builder()
                 .setTimeInterval(startTimeStamp, endTimeStamp, TimeUnit.MILLISECONDS)
@@ -178,6 +189,45 @@ public class GoogleFitAdapter implements FitnessService {
                                     }
                                     Log.i(TAG, "Data returned for Data type " + dataSet.getDataType().getName() + ": " + tally);
                                 }
+                                walkList.add(new Walk(startTimeStamp, endTimeStamp, tally));
+                            }
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.i(TAG, "Failed to read session");
+                        }
+                    });
+        }
+    }
+
+    @Override
+    public void getStepsCount(long startTimeStamp, long endTimeStamp, final List<Integer> stepsList) {
+        if(lastSignedInAccount != null) {
+            DataReadRequest readRequest = new DataReadRequest.Builder()
+                    .aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
+                    .bucketByTime(1, TimeUnit.DAYS)
+                    .setTimeRange(startTimeStamp, endTimeStamp, TimeUnit.MILLISECONDS)
+                    .build();
+
+            Task<DataReadResponse> response = Fitness.getHistoryClient(activity, lastSignedInAccount)
+                    .readData(readRequest).addOnSuccessListener(new OnSuccessListener<DataReadResponse>() {
+                        @Override
+                        public void onSuccess(DataReadResponse dataReadResponse) {
+                            List<Bucket> buckets = dataReadResponse.getBuckets();
+                            Log.i(TAG, "Step counts retrieved: " + buckets.size());
+                            for (Bucket bucket : buckets) {
+                                int tally = 0;
+                                DataSet dataSet = bucket.getDataSet(DataType.TYPE_STEP_COUNT_DELTA);
+                                if(dataSet == null) continue;
+                                for (DataPoint dp : dataSet.getDataPoints()) {
+                                    for (Field field : dp.getDataType().getFields()) {
+                                        tally += dp.getValue(field).asInt();
+                                    }
+                                    Log.i(TAG, "Data returned for Data type " + dataSet.getDataType().getName() + ": " + tally);
+                                }
+                                stepsList.add(tally);
                             }
                         }
                     })
