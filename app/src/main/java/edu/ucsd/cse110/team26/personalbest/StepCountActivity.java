@@ -153,8 +153,6 @@ public class StepCountActivity extends AppCompatActivity {
 
         timeStamper = new TimeStampNow();
 
-        // Check if the user started a walk and has not stopped it
-        SharedPreferences walkInfo = getSharedPreferences("walk", MODE_PRIVATE );
 
 
         SharedPreferences user = getSharedPreferences("user",MODE_PRIVATE);
@@ -165,6 +163,8 @@ public class StepCountActivity extends AppCompatActivity {
             launchGetHeightActivity();
         }
 
+        // Check if the user started a walk and has not stopped it
+        SharedPreferences walkInfo = getSharedPreferences("walk", MODE_PRIVATE );
         long startTimeStamp = walkInfo.getLong("startTimeStamp", -1);
         if(startTimeStamp != -1 && !timeStamper.isToday(startTimeStamp)) {
             fitnessService.walk(startTimeStamp, timeStamper.endOfDay(startTimeStamp)); // terminate walk at end of day
@@ -173,7 +173,7 @@ public class StepCountActivity extends AppCompatActivity {
             e.apply();
         }
 
-        Button btnWalk = findViewById(R.id.buttonUpdateSteps);
+        Button btnWalk = findViewById(R.id.buttonWalk);
         btnWalk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -217,8 +217,8 @@ public class StepCountActivity extends AppCompatActivity {
 
     public void setStepCount(long stepCount) {
         currentSteps = stepCount;
-        textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today!", currentSteps, goalSteps));
-        if( currentSteps >= stepCount && !goalCompleted ) {
+        textSteps.setText(String.format(Locale.getDefault(),"%d/%d", currentSteps, goalSteps));
+        if( currentSteps >= goalSteps && !goalCompleted ) {
             Toast completeGoalToast = Toast.makeText(getApplicationContext(),
                     String.format(Locale.getDefault(),"Congratulations, you've completed " +
                             "your goal of %d steps today!", goalSteps),
