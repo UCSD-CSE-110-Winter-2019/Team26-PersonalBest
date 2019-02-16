@@ -11,6 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".GetHeightActivity"></activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -18,8 +19,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".StepCountActivity"/>
-        <activity android:name=".SettingsActivity"
+        <activity android:name=".StepCountActivity" />
+        <activity
+            android:name=".SettingsActivity"
             android:parentActivityName=".StepCountActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
