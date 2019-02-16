@@ -58,12 +58,36 @@ public class TimeStampNow implements TimeStamper {
         return cal.getTimeInMillis();
     }
 
+
+    @Override
+    public long startOfDay(long timeStamp) {
+        Calendar cal = Calendar.getInstance(TimeZone.getDefault());
+        cal.setTimeInMillis(timeStamp);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTimeInMillis();
+    }
+
     @Override
     public long nextDay(long timeStamp) {
         Calendar cal = Calendar.getInstance(TimeZone.getDefault());
         cal.setTimeInMillis(timeStamp);
         cal.add(Calendar.DATE, 1);
         return cal.getTimeInMillis();
+    }
+
+    @Override
+    public String timeSince(long timeStamp) {
+        long diff = now() - timeStamp;
+        if(diff < 60000) {
+            return "" + diff/1000 + "s";
+        } else if(diff < 60*60*1000) {
+            return "" + diff/60000 + "m " + (diff % 60000)/1000 + "s";
+        } else {
+            return "" + diff/3600000 + ":" + (diff % 3600000)/60000;
+        }
     }
 
 }

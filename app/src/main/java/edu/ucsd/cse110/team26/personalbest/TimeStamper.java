@@ -6,5 +6,7 @@ public interface TimeStamper {
     long weekEnd();
     boolean isToday(long timeStamp);
     long endOfDay(long timeStamp);
+    long startOfDay(long timeStamp);
     long nextDay(long timeStamp);
+    String timeSince(long timeStamp);
 }

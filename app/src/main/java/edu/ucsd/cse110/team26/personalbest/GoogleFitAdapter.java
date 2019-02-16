@@ -187,7 +187,7 @@ public class GoogleFitAdapter implements FitnessService {
                                             tally += dp.getValue(field).asInt();
                                         }
                                     }
-                                    Log.i(TAG, "Data returned for Data type " + dataSet.getDataType().getName() + ": " + tally);
+                                    //Log.i(TAG, "Data returned for Data type " + dataSet.getDataType().getName() + ": " + tally);
                                 }
                                 walkList.add(new Walk(startTimeStamp, endTimeStamp, tally));
                             }
@@ -225,7 +225,7 @@ public class GoogleFitAdapter implements FitnessService {
                                     for (Field field : dp.getDataType().getFields()) {
                                         tally += dp.getValue(field).asInt();
                                     }
-                                    Log.i(TAG, "Data returned for Data type " + dataSet.getDataType().getName() + ": " + tally);
+                                    //Log.i(TAG, "Data returned for Data type " + dataSet.getDataType().getName() + ": " + tally);
                                 }
                                 stepsList.add(tally);
                             }

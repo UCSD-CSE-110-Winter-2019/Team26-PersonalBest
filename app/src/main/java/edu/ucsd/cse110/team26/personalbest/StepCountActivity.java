@@ -45,24 +45,31 @@ public class StepCountActivity extends AppCompatActivity {
     private UpdateStep updateStep;
 
     private TextView textSteps;
+    private TextView textWalkData;
+    private Button btnStartWalk;
+    private Button btnEndWalk;
+
     private FitnessService fitnessService;
     private long currentSteps = 0;
     private long goalSteps = 0;
+    private int user_height;
     private boolean goalCompleted;
     private List<Integer> stepCounts = new ArrayList<>();
     private List<Walk> walkList = new ArrayList<>();
 
-    private String user_height;
+    private long startTimeStamp = -1;
+
     TimeStamper timeStamper;
 
     private class UpdateStep extends AsyncTask<Integer, Integer, Integer> {
+        private boolean run = true;
         private int resp;
 
         @Override
         protected Integer doInBackground(Integer... params) {
             try {
                 resp = params[0];
-                while(true) {
+                while(run) {
                     fitnessService.updateStepCount();
                     stepCounts.clear();
                     walkList.clear();
@@ -70,16 +77,19 @@ public class StepCountActivity extends AppCompatActivity {
                     fitnessService.getWalks(timeStamper.weekStart(), timeStamper.weekEnd(), walkList);
                     Thread.sleep(1000);
                     Log.i(TAG, stepCounts.toString());
-                    for(Walk walk : walkList) {
-                        Log.i(TAG, "Walk starting at " + walk.getDurationInMillis() + " with steps: " + walk.getSteps());
-                    }
-                    Thread.sleep(9000);
+                    /*for(Walk walk : walkList) {
+                        Log.i(TAG, "Walk of duration " + walk.getDurationInMillis() + "ms with steps: " + walk.getSteps());
+                    }*/
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.e(TAG, e.getMessage());
             }
             return resp;
+        }
+
+        void setRun(boolean run) {
+            this.run = run;
         }
     }
 
@@ -88,7 +98,7 @@ public class StepCountActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_step_count);
 
-        CombinedChart mChart = (CombinedChart) findViewById(R.id.chart1);
+        CombinedChart mChart = findViewById(R.id.chart1);
         mChart.setDrawGridBackground(false);
         mChart.getDescription().setText("");
         mChart.setHighlightFullBarEnabled(false);
@@ -105,7 +115,7 @@ public class StepCountActivity extends AppCompatActivity {
         mChart.getAxisRight().setAxisMinimum(0.0f);
 
         ArrayList<BarEntry> entries = new ArrayList<>();
-        entries = getBarEnteries(entries);
+        getBarEntries(entries);
 
         BarDataSet dataSet = new BarDataSet(entries, "Step Count");
         dataSet.setStackLabels(new String[] {"Intentional Walks", "Unintentional Walks"});
@@ -153,34 +163,43 @@ public class StepCountActivity extends AppCompatActivity {
 
         timeStamper = new TimeStampNow();
 
-        // Check if the user started a walk and has not stopped it
-        SharedPreferences walkInfo = getSharedPreferences("walk", MODE_PRIVATE );
+        fitnessService.setup();
 
-
-        SharedPreferences user = getSharedPreferences("user",MODE_PRIVATE);
-        user_height = user.getString("height", "");
-
-        if(user_height == "")
-        {
-            launchGetHeightActivity();
-        }
-
-        long startTimeStamp = walkInfo.getLong("startTimeStamp", -1);
-        if(startTimeStamp != -1 && !timeStamper.isToday(startTimeStamp)) {
-            fitnessService.walk(startTimeStamp, timeStamper.endOfDay(startTimeStamp)); // terminate walk at end of day
-            SharedPreferences.Editor e = walkInfo.edit();
-            e.putLong("startTimeStamp", -1);
-            e.apply();
-        }
-
-        Button btnWalk = findViewById(R.id.buttonUpdateSteps);
-        btnWalk.setOnClickListener(new View.OnClickListener() {
+        btnStartWalk = findViewById(R.id.btnStartWalk);
+        btnEndWalk = findViewById(R.id.btnEndWalk);
+        textWalkData = findViewById(R.id.textWalkData);
+        btnStartWalk.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
+                if(startTimeStamp == -1) {
+                    startTimeStamp = timeStamper.now();
+                    SharedPreferences.Editor editor = getSharedPreferences("walk", MODE_PRIVATE).edit();
+                    editor.putLong("startTimeStamp", startTimeStamp)
+                            .putLong("initialSteps", currentSteps).apply();
+                    btnStartWalk.setVisibility(View.GONE);
+                    btnEndWalk.setVisibility(View.VISIBLE);
+                    updateWalkData();
+                }
             }
         });
-
-        fitnessService.setup();
+        btnEndWalk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(startTimeStamp != -1) {
+                    // ensure that any walk will end at the end of the day - splits off by midnight
+                    if(!timeStamper.isToday(startTimeStamp)) {
+                        fitnessService.walk(startTimeStamp, timeStamper.endOfDay(startTimeStamp));
+                        startTimeStamp = timeStamper.startOfDay(timeStamper.now());
+                    }
+                    fitnessService.walk(startTimeStamp, timeStamper.now());
+                    startTimeStamp = -1;
+                    SharedPreferences.Editor editor = getSharedPreferences("walk", MODE_PRIVATE).edit();
+                    editor.putLong("startTimeStamp", -1).apply();
+                    btnStartWalk.setVisibility(View.VISIBLE);
+                    btnEndWalk.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 
     @Override
@@ -190,15 +209,41 @@ public class StepCountActivity extends AppCompatActivity {
         updateStep = new UpdateStep();
         updateStep.execute(-1);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE );
-        goalSteps = sharedPreferences.getInt("goal", 5000);
+        SharedPreferences user = getSharedPreferences("user", MODE_PRIVATE);
+        goalSteps = user.getInt("goal", 5000);
+        user_height = user.getInt("height", 0);
+        if(user_height == 0) {
+            launchGetHeightActivity();
+        }
+
         setStepCount(currentSteps);
+
+        // Check if the user started a walk and has not stopped it
+        SharedPreferences walkInfo = getSharedPreferences("walk", MODE_PRIVATE );
+        startTimeStamp = walkInfo.getLong("startTimeStamp", -1);
+        if(startTimeStamp != -1) {
+            if (!timeStamper.isToday(startTimeStamp)) {
+                fitnessService.walk(startTimeStamp, timeStamper.endOfDay(startTimeStamp)); // terminate walk at end of day
+                SharedPreferences.Editor e = walkInfo.edit();
+                e.putLong("startTimeStamp", -1);
+                e.apply();
+                btnStartWalk.setVisibility(View.VISIBLE);
+                btnEndWalk.setVisibility(View.GONE);
+            } else {
+                btnStartWalk.setVisibility(View.GONE);
+                btnEndWalk.setVisibility(View.VISIBLE);
+                updateWalkData();
+            }
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if(updateStep != null) updateStep.cancel(true);
+        if(updateStep != null) {
+            updateStep.setRun(false);
+            updateStep.cancel(true);
+        }
     }
 
     @Override
@@ -217,8 +262,9 @@ public class StepCountActivity extends AppCompatActivity {
 
     public void setStepCount(long stepCount) {
         currentSteps = stepCount;
-        textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today!", currentSteps, goalSteps));
-        if( currentSteps >= stepCount && !goalCompleted ) {
+        textSteps.setText(String.format(Locale.getDefault(),"%d/%d", currentSteps, goalSteps));
+        updateWalkData();
+        if(currentSteps >= goalSteps && !goalCompleted ) {
             Toast completeGoalToast = Toast.makeText(getApplicationContext(),
                     String.format(Locale.getDefault(),"Congratulations, you've completed " +
                             "your goal of %d steps today!", goalSteps),
@@ -226,8 +272,22 @@ public class StepCountActivity extends AppCompatActivity {
 
             completeGoalToast.show();
             goalCompleted = true;
-        } else
+        } else {
             goalCompleted = false;
+        }
+    }
+
+    private void updateWalkData() {
+        if(startTimeStamp != -1) {
+            long initialSteps = getSharedPreferences("walk", MODE_PRIVATE).getLong("initialSteps", 0);
+            long walkSteps = currentSteps - initialSteps;
+            textWalkData.setText(String.format(Locale.getDefault(),
+                    "Walk duration: %s, %d steps taken",
+                    timeStamper.timeSince(startTimeStamp),
+                    walkSteps));
+        } else {
+            textWalkData.setText("");
+        }
     }
 
     @Override
@@ -248,13 +308,12 @@ public class StepCountActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void launchGetHeightActivity()
-    {
+    public void launchGetHeightActivity() {
         Intent intent = new Intent(this, GetHeightActivity.class);
         startActivity(intent);
     }
 
-    private ArrayList<Entry> getLineEntriesData(ArrayList<Entry> entries){
+    private void getLineEntriesData(ArrayList<Entry> entries) {
         entries.add(new Entry(0, 10));
         entries.add(new Entry(1, 20));
         entries.add(new Entry(2, 20));
@@ -262,17 +321,15 @@ public class StepCountActivity extends AppCompatActivity {
         entries.add(new Entry(4, 20));
         entries.add(new Entry(5, 15));
         entries.add(new Entry(6, 20));
-
-        return entries;
     }
 
     private LineData generateLineData() {
 
         LineData d = new LineData();
 
-        ArrayList<Entry> entries = new ArrayList<Entry>();
+        ArrayList<Entry> entries = new ArrayList<>();
 
-        entries = getLineEntriesData(entries);
+        getLineEntriesData(entries);
 
         LineDataSet set = new LineDataSet(entries, "Goal");
         set.setLineWidth(2.5f);
@@ -290,7 +347,7 @@ public class StepCountActivity extends AppCompatActivity {
         return d;
     }
 
-    private ArrayList<BarEntry> getBarEnteries(ArrayList<BarEntry> entries){
+    private void getBarEntries(ArrayList<BarEntry> entries){
         entries.add(new BarEntry(0f, new float[] {1, 2}));
         entries.add(new BarEntry(1f, new float[] {3, 4}));
         entries.add(new BarEntry(2f, new float[] {1, 4}));
@@ -298,7 +355,6 @@ public class StepCountActivity extends AppCompatActivity {
         entries.add(new BarEntry(4f, new float[] {6, 2}));
         entries.add(new BarEntry(5f, new float[] {1, 3}));
         entries.add(new BarEntry(6f, new float[] {1, 4}));
-        return  entries;
     }
 }
 
