@@ -1,7 +1,11 @@
 package edu.ucsd.cse110.team26.personalbest;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -33,6 +37,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -108,7 +113,7 @@ public class StepCountActivity extends AppCompatActivity {
             previousDaySteps.set(0, 0);
             try {
                 fitnessService.getStepsCount( start, end, previousDaySteps);
-                sleep(10);
+                Thread.sleep(500);
             } catch( Exception e ) {
             }
             if( previousDaySteps.get(0) >= currentSteps ) {
@@ -248,9 +253,6 @@ public class StepCountActivity extends AppCompatActivity {
 
         Log.i(TAG, "Setting EncouragingMessage");
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            manager.setExact(AlarmManager.ELAPSED_REALTIME, timeStamper.now(), pendingIntent);
-        }
         manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
     }
 
