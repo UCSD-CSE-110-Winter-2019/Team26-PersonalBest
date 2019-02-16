@@ -58,4 +58,12 @@ public class TimeStampNow implements TimeStamper {
         return cal.getTimeInMillis();
     }
 
+    @Override
+    public long nextDay(long timeStamp) {
+        Calendar cal = Calendar.getInstance(TimeZone.getDefault());
+        cal.setTimeInMillis(timeStamp);
+        cal.add(Calendar.DATE, 1);
+        return cal.getTimeInMillis();
+    }
+
 }

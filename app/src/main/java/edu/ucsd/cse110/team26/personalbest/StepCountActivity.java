@@ -3,6 +3,7 @@ package edu.ucsd.cse110.team26.personalbest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -15,7 +16,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class StepCountActivity extends AppCompatActivity {
@@ -32,6 +35,8 @@ public class StepCountActivity extends AppCompatActivity {
     private long goalSteps = 0;
     private boolean goalCompleted;
     private Calendar firingCal;
+    private List<Integer> stepCounts = new ArrayList<>();
+    private List<Walk> walkList = new ArrayList<>();
 
     private String user_height;
     TimeStamper timeStamper;
@@ -45,7 +50,16 @@ public class StepCountActivity extends AppCompatActivity {
                 resp = params[0];
                 while(true) {
                     fitnessService.updateStepCount();
-                    Thread.sleep(10000);
+                    stepCounts.clear();
+                    walkList.clear();
+                    fitnessService.getStepsCount(timeStamper.weekStart(), timeStamper.weekEnd(), stepCounts);
+                    fitnessService.getWalks(timeStamper.weekStart(), timeStamper.weekEnd(), walkList);
+                    Thread.sleep(1000);
+                    Log.i(TAG, stepCounts.toString());
+                    for(Walk walk : walkList) {
+                        Log.i(TAG, "Walk starting at " + walk.getDurationInMillis() + " with steps: " + walk.getSteps());
+                    }
+                    Thread.sleep(9000);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -61,7 +75,7 @@ public class StepCountActivity extends AppCompatActivity {
         setContentView(R.layout.activity_step_count);
         textSteps = findViewById(R.id.textSteps);
 
-        String fitnessServiceKey = getIntent().getStringExtra(FITNESS_SERVICE_KEY);
+        final String fitnessServiceKey = getIntent().getStringExtra(FITNESS_SERVICE_KEY);
         fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
 
         timeStamper = new TimeStampNow();
@@ -90,7 +104,7 @@ public class StepCountActivity extends AppCompatActivity {
         btnWalk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                //fitnessService.walk(timeStamper.now() - 60*60*1000, timeStamper.now());
             }
         });
 
