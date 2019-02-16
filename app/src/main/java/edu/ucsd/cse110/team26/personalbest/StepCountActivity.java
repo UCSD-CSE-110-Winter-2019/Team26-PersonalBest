@@ -3,7 +3,6 @@ package edu.ucsd.cse110.team26.personalbest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -17,7 +16,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -34,7 +32,6 @@ public class StepCountActivity extends AppCompatActivity {
     private long currentSteps = 0;
     private long goalSteps = 0;
     private boolean goalCompleted;
-    private Calendar firingCal;
     private List<Integer> stepCounts = new ArrayList<>();
     private List<Walk> walkList = new ArrayList<>();
 
