@@ -43,7 +43,7 @@ public class GetHeightActivity extends AppCompatActivity {
 
                     int height_in_inch;
                     height_in_inch = np1.getValue() + np2.getValue()*12;
-                    SharedPreferences walkInfo = getSharedPreferences("user_height", MODE_PRIVATE);
+                    SharedPreferences walkInfo = getSharedPreferences("user", MODE_PRIVATE);
                     SharedPreferences.Editor editor = walkInfo.edit();
                     editor.putString("height",String.valueOf(height_in_inch) );
                     editor.apply();

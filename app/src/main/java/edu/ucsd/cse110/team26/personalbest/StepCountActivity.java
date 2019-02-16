@@ -68,7 +68,10 @@ public class StepCountActivity extends AppCompatActivity {
 
         // Check if the user started a walk and has not stopped it
         SharedPreferences walkInfo = getSharedPreferences("walk", MODE_PRIVATE );
-        user_height = walkInfo.getString("height", "");
+
+
+        SharedPreferences user = getSharedPreferences("user",MODE_PRIVATE);
+        user_height = user.getString("height", "");
 
         if(user_height == "")
         {
