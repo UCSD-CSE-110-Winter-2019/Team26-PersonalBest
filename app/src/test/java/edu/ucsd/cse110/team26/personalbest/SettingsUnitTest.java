@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.shadows.ShadowToast;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -49,6 +50,20 @@ public class SettingsUnitTest {
         saveBtn.performClick();
 
         assertEquals( 10000, sharedPreferences.getInt("goal", 5000) );
+    }
+
+    @Test
+    public void testErrorSaveGoal() {
+
+        goalEdit.setText("1000");
+        saveBtn.performClick();
+
+        goalEdit.setText("1000000");
+        saveBtn.performClick();
+
+        assertEquals("Error: Goal should be less than 15000", ShadowToast.getTextOfLatestToast());
+        assertEquals( 1000, sharedPreferences.getInt("goal", 1000) );
+
     }
 
     @Test

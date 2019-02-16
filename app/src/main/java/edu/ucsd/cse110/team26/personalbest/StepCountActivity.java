@@ -1,10 +1,15 @@
 package edu.ucsd.cse110.team26.personalbest;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -31,8 +36,11 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+
+import static java.lang.Thread.sleep;
 
 // reference: https://www.studytutorial.in/android-combined-line-and-bar-chart-using-mpandroid-library-android-tutorial
 
@@ -56,6 +64,7 @@ public class StepCountActivity extends AppCompatActivity {
     private boolean goalCompleted;
     private List<Integer> stepCounts = new ArrayList<>();
     private List<Walk> walkList = new ArrayList<>();
+    private PendingIntent pendingIntent;
 
     private long startTimeStamp = -1;
     private long initialSteps = 0;
@@ -92,10 +101,37 @@ public class StepCountActivity extends AppCompatActivity {
         }
     }
 
+    public class EncouragingMessage extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i(TAG, "Encouragement Message to appear");
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DATE, -1);
+            long start = timeStamper.startOfDay(cal.getTimeInMillis());
+            long end = timeStamper.endOfDay(cal.getTimeInMillis());
+            List<Integer> previousDaySteps = new ArrayList<Integer>();
+            previousDaySteps.set(0, 0);
+            try {
+                fitnessService.getStepsCount( start, end, previousDaySteps);
+                sleep(10);
+            } catch( Exception e ) {
+            }
+            if( previousDaySteps.get(0) >= currentSteps ) {
+                return;
+            }
+            int improvementPercentage = (int) (currentSteps - previousDaySteps.get(0))/100;
+            String message = String.format(Locale.US, "Good job! You've improved by %d%% from yesterday", improvementPercentage);
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_step_count);
+
+        Intent alarmIntent = new Intent(StepCountActivity.this, EncouragingMessage.class);
+        pendingIntent = PendingIntent.getBroadcast(StepCountActivity.this, 0, alarmIntent, 0);
 
         CombinedChart mChart = findViewById(R.id.chart1);
         mChart.setDrawGridBackground(false);
@@ -204,6 +240,27 @@ public class StepCountActivity extends AppCompatActivity {
         });
     }
 
+    private void setEncouragingMessage() {
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 20);
+        calendar.set(Calendar.MINUTE, 0);
+
+        Log.i(TAG, "Setting EncouragingMessage");
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            manager.setExact(AlarmManager.ELAPSED_REALTIME, timeStamper.now(), pendingIntent);
+        }
+        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+    }
+
+    public void cancelEncouragingMessage() {
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        manager.cancel(pendingIntent);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -235,6 +292,7 @@ public class StepCountActivity extends AppCompatActivity {
             } else {
                 btnStartWalk.setVisibility(View.GONE);
                 btnEndWalk.setVisibility(View.VISIBLE);
+                updateWalkData();
             }
         }
     }
@@ -274,8 +332,10 @@ public class StepCountActivity extends AppCompatActivity {
 
             completeGoalToast.show();
             goalCompleted = true;
+            cancelEncouragingMessage();
         } else {
             goalCompleted = false;
+            setEncouragingMessage();
         }
     }
 

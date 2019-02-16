@@ -27,6 +27,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".StepCountActivity" />
         </activity>
+        <receiver  android:process=":remote" android:name=".StepCountActivity$EncouragingMessage"></receiver>
     </application>
 
 </manifest>
