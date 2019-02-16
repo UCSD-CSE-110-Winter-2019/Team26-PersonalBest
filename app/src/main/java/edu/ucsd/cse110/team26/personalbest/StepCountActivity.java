@@ -227,11 +227,14 @@ public class StepCountActivity extends AppCompatActivity {
         if(user_height == 0) {
             launchGetHeightActivity();
         }
+
+        //Checking to see if we need to suggest a new step goal.
         if(suggestGoal()){
             //check if dialog box has been shown and if it's a new week:
             if(hasSuggestHappend == false && timeStamper.isToday(timeStamper.weekStart())){
                 int suggestedGoal = (int)goalSteps+500;
                 createAlertDialog(suggestedGoal);
+                goalSteps = user.getInt("goal", 5000);
                 hasSuggestHappend = true;
             }
             else if(hasSuggestHappend == true && !timeStamper.isToday(timeStamper.weekStart())){
@@ -289,6 +292,7 @@ public class StepCountActivity extends AppCompatActivity {
 
     public void setStepCount(long stepCount) {
         currentSteps = stepCount;
+
         textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", currentSteps, goalSteps));
         updateWalkData();
         if(currentSteps >= goalSteps && !goalCompleted ) {
@@ -347,7 +351,15 @@ public class StepCountActivity extends AppCompatActivity {
     public boolean suggestGoal(){
         List<Integer> prevWeek = new ArrayList<>();
         int weekDif = 7*24*60*60*1000;
-        fitnessService.getStepsCount(timeStamper.weekStart()- weekDif, timeStamper.weekEnd()-weekDif, prevWeek);
+        try{
+            fitnessService.getStepsCount(timeStamper.weekStart()- weekDif, timeStamper.weekEnd()-weekDif, prevWeek);
+            Thread.sleep(500);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(TAG, e.getMessage());
+        }
+
+
         for(int stepsThatDay: prevWeek){
             if(stepsThatDay >= goalSteps){
                 return true;
@@ -369,7 +381,7 @@ public class StepCountActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         SharedPreferences user = getSharedPreferences("user", MODE_PRIVATE);
                         SharedPreferences.Editor editor = user.edit();
-                        editor.putInt("your_int_key", suggestedGoal);
+                        editor.putInt("goal", suggestedGoal);
                         editor.apply();
                         dialog.dismiss();
                     }
