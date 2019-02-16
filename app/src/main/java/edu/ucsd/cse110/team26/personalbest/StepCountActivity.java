@@ -33,6 +33,7 @@ public class StepCountActivity extends AppCompatActivity {
     private boolean goalCompleted;
     private Calendar firingCal;
 
+    private String user_height;
     TimeStamper timeStamper;
 
     private class UpdateStep extends AsyncTask<Integer, Integer, Integer> {
@@ -67,6 +68,16 @@ public class StepCountActivity extends AppCompatActivity {
 
         // Check if the user started a walk and has not stopped it
         SharedPreferences walkInfo = getSharedPreferences("walk", MODE_PRIVATE );
+
+
+        SharedPreferences user = getSharedPreferences("user",MODE_PRIVATE);
+        user_height = user.getString("height", "");
+
+        if(user_height == "")
+        {
+            launchGetHeightActivity();
+        }
+
         long startTimeStamp = walkInfo.getLong("startTimeStamp", -1);
         if(startTimeStamp != -1 && !timeStamper.isToday(startTimeStamp)) {
             fitnessService.walk(startTimeStamp, timeStamper.endOfDay(startTimeStamp)); // terminate walk at end of day
@@ -149,6 +160,12 @@ public class StepCountActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void launchGetHeightActivity()
+    {
+        Intent intent = new Intent(this, GetHeightActivity.class);
+        startActivity(intent);
     }
 
 }
