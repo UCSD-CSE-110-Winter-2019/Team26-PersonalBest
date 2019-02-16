@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.NumberPicker;
+import android.widget.TextView;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,44 +18,32 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import static android.content.Context.MODE_PRIVATE;
 import static org.junit.Assert.assertEquals;
 
-
 @RunWith(RobolectricTestRunner.class)
-public class SettingsUnitTest {
-    private EditText goalEdit;
-    private EditText heightEdit;
-    private Button saveBtn;
+public class GetHeightUnitTest {
+
+    private NumberPicker inch;
+    private NumberPicker feet;
+
+    private Button confirm;
     private Context context;
     private SharedPreferences sharedPreferences;
 
     @Before
     public void setup() {
         context = InstrumentationRegistry.getInstrumentation().getContext();
-        SettingsActivity settingsActivity = Robolectric.setupActivity(SettingsActivity.class);
-        goalEdit = settingsActivity.findViewById(R.id.goalEdit);
-        heightEdit = settingsActivity.findViewById(R.id.heightEdit);
-        saveBtn = settingsActivity.findViewById(R.id.btnSettingsSave);
+        GetHeightActivity getHeightActivity = Robolectric.setupActivity(GetHeightActivity.class);
+        inch = getHeightActivity.findViewById(R.id.inch);
+        feet = getHeightActivity.findViewById(R.id.feet);
+        confirm = getHeightActivity.findViewById(R.id.confirm);
         sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
     }
 
     @Test
-    public void testSaveGoal() {
-        goalEdit.setText("1000");
-        saveBtn.performClick();
-
-        assertEquals( 1000, sharedPreferences.getInt("goal", 5000) );
-
-        goalEdit.setText("10000");
-        saveBtn.performClick();
-
-        assertEquals( 10000, sharedPreferences.getInt("goal", 5000) );
-    }
-
-    @Test
-    public void testSaveHeight() {
+    public void testSetHeight() {
+        feet.setValue(5);
+        inch.setValue(10);
+        confirm.performClick();
         SharedPreferences sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
-
-        heightEdit.setText("8");
-        saveBtn.performClick();
-        assertEquals( 8, sharedPreferences.getInt("height", 0) );
+        assertEquals( 70, sharedPreferences.getInt("height", 0 ));
     }
 }
