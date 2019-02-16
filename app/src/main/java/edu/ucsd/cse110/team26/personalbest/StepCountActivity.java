@@ -1,17 +1,12 @@
 package edu.ucsd.cse110.team26.personalbest;
 
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -38,11 +33,8 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-
-import static java.lang.Thread.sleep;
 
 // reference: https://www.studytutorial.in/android-combined-line-and-bar-chart-using-mpandroid-library-android-tutorial
 
@@ -316,7 +308,7 @@ public class StepCountActivity extends AppCompatActivity {
             } else {
                 btnStartWalk.setVisibility(View.GONE);
                 btnEndWalk.setVisibility(View.VISIBLE);
-                updateWalkData();
+                currentWalk = new Walk(currentSteps - initialSteps, startTimeStamp);
             }
         }
     }
@@ -383,7 +375,6 @@ public class StepCountActivity extends AppCompatActivity {
                     lastWalk.stepsToFeet(user_height),
                     lastWalk.averageMph(user_height)));
         }
-        Log.i(TAG, "updateWalkData" + startTimeStamp + " " + walkList.size());
     }
 
     @Override
