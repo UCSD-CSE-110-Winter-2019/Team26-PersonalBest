@@ -187,7 +187,6 @@ public class StepCountActivity extends AppCompatActivity {
         btnWalk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //fitnessService.walk(timeStamper.now() - 60*60*1000, timeStamper.now());
             }
         });
 
