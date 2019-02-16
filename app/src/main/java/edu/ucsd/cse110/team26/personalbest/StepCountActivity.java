@@ -1,11 +1,13 @@
 package edu.ucsd.cse110.team26.personalbest;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -33,11 +35,14 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import android.app.AlertDialog.Builder;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import java.lang.*;
 
 // reference: https://www.studytutorial.in/android-combined-line-and-bar-chart-using-mpandroid-library-android-tutorial
 
 public class StepCountActivity extends AppCompatActivity {
-
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
 
     private static final String TAG = "StepCountActivity";
@@ -56,6 +61,8 @@ public class StepCountActivity extends AppCompatActivity {
     private boolean goalCompleted;
     private List<Integer> stepCounts = new ArrayList<>();
     private List<Walk> walkList = new ArrayList<>();
+
+    private boolean hasSuggestHappend = false;
 
     private long startTimeStamp = -1;
     private long initialSteps = 0;
@@ -164,6 +171,9 @@ public class StepCountActivity extends AppCompatActivity {
 
         fitnessService.setup();
 
+
+
+
         btnStartWalk = findViewById(R.id.btnStartWalk);
         btnEndWalk = findViewById(R.id.btnEndWalk);
         textWalkData = findViewById(R.id.textWalkData);
@@ -218,6 +228,24 @@ public class StepCountActivity extends AppCompatActivity {
             launchGetHeightActivity();
         }
 
+        //Checking to see if we need to suggest a new step goal.
+        if(suggestGoal()){
+            //check if dialog box has been shown and if it's a new week:
+            if(hasSuggestHappend == false && timeStamper.isToday(timeStamper.weekStart())){
+                int suggestedGoal = (int)goalSteps+500;
+                createAlertDialog(suggestedGoal);
+                goalSteps = user.getInt("goal", 5000);
+                hasSuggestHappend = true;
+            }
+            else if(hasSuggestHappend == true && !timeStamper.isToday(timeStamper.weekStart())){
+                hasSuggestHappend = false;
+            }
+            else{
+                //do nothing; keep suggestHappened as true since it's still sunday.
+            }
+        }
+
+
         setStepCount(currentSteps);
 
         // Check if the user started a walk and has not stopped it
@@ -264,6 +292,7 @@ public class StepCountActivity extends AppCompatActivity {
 
     public void setStepCount(long stepCount) {
         currentSteps = stepCount;
+
         textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", currentSteps, goalSteps));
         updateWalkData();
         if(currentSteps >= goalSteps && !goalCompleted ) {
@@ -317,6 +346,54 @@ public class StepCountActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public boolean suggestGoal(){
+        List<Integer> prevWeek = new ArrayList<>();
+        int weekDif = 7*24*60*60*1000;
+        try{
+            fitnessService.getStepsCount(timeStamper.weekStart()- weekDif, timeStamper.weekEnd()-weekDif, prevWeek);
+            Thread.sleep(500);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(TAG, e.getMessage());
+        }
+
+
+        for(int stepsThatDay: prevWeek){
+            if(stepsThatDay >= goalSteps){
+                return true;
+            }
+
+        }
+        return false;
+    }
+
+    public void createAlertDialog(final int suggestedGoal) {
+        AlertDialog alertDialog = new AlertDialog.Builder(StepCountActivity.this).create();
+        alertDialog.setTitle("Suggesting Goals");
+
+
+
+        alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoal);
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        SharedPreferences user = getSharedPreferences("user", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = user.edit();
+                        editor.putInt("goal", suggestedGoal);
+                        editor.apply();
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        alertDialog.show();
     }
 
     public void launchGetHeightActivity() {
