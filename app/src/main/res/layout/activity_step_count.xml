@@ -5,16 +5,16 @@
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:padding="20dp"
+    android:padding="10dp"
     tools:context=".MainActivity">
 
     <TextView
         android:id="@+id/textSteps"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="20dp"
-        android:textSize="30sp"
-        android:text="" />
+        android:layout_height="56dp"
+        android:padding="10dp"
+        android:text=""
+        android:textSize="20sp" />
 
     <Button
         android:id="@+id/btnStartWalk"
@@ -37,7 +37,7 @@
         android:id="@+id/textWalkData"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
+        android:textSize="10sp"
         android:text="\n\n\n\n" />
 
     <com.github.mikephil.charting.charts.CombinedChart

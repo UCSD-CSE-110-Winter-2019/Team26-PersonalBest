@@ -116,63 +116,8 @@ public class StepCountActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_step_count);
 
-        CombinedChart mChart = findViewById(R.id.chart1);
-        mChart.setDrawGridBackground(false);
-        mChart.getDescription().setText("");
-        mChart.setHighlightFullBarEnabled(false);
-        mChart.setDrawOrder(new CombinedChart.DrawOrder[]{
-                CombinedChart.DrawOrder.BAR,  CombinedChart.DrawOrder.LINE
-        });
 
-        mChart.setDrawBarShadow(false);
-        mChart.setHighlightFullBarEnabled(false);
-
-        mChart.getAxisRight().setDrawGridLines(false);
-        mChart.getAxisLeft().setDrawGridLines(false);
-        mChart.getAxisLeft().setAxisMinimum(0.0f); // this replaces setStartAtZero(true)
-        mChart.getAxisRight().setAxisMinimum(0.0f);
-
-        ArrayList<BarEntry> entries = new ArrayList<>();
-        getBarEntries(entries);
-
-        BarDataSet dataSet = new BarDataSet(entries, "Step Count");
-        dataSet.setStackLabels(new String[] {"Intentional Walks", "Unintentional Walks"});
-
-        final String[] labels = new String[] {
-                "Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"
-        };
-
-        dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
-
-        float barWidth = 0.45f; // x2 dataset
-        BarData d = new BarData(dataSet);
-        d.setBarWidth(barWidth);
-        BarData data = new BarData(dataSet);
-
-        mChart.getXAxis().setLabelCount(dataSet.getEntryCount());
-
-        XAxis xAxis = mChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTH_SIDED);
-        xAxis.setAxisMinimum(0f);
-        xAxis.setGranularity(1f);
-        xAxis.setValueFormatter(new IAxisValueFormatter() {
-            @Override
-            public String getFormattedValue(float value, AxisBase axis) {
-                return labels[(int) value % labels.length];
-            }
-        });
-
-        dataSet.setColors(new int[] {ContextCompat.getColor(mChart.getContext(), R.color.colorAccent),
-                ContextCompat.getColor(mChart.getContext(), R.color.colorPrimary),});
-
-        CombinedData dataCombined = new CombinedData();
-        dataCombined.setData( generateLineData());
-        dataCombined.setData(data);
-
-        mChart.getXAxis().setAxisMaximum(data.getXMax() + 0.25f);
-        mChart.getXAxis().setAxisMinimum(data.getXMin() - 0.25f);
-        mChart.setData(dataCombined);
-
+        //createBarChart();
 
         textSteps = findViewById(R.id.textSteps);
 
@@ -229,6 +174,7 @@ public class StepCountActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        createBarChart();
         if(updateStep != null && !updateStep.isCancelled()) updateStep.cancel(true);
         updateStep = new UpdateStep();
         updateStep.execute(-1);
@@ -305,7 +251,7 @@ public class StepCountActivity extends AppCompatActivity {
 
     public void setStepCount(long stepCount) {
         currentSteps = stepCount;
-
+        //createBarChart();
         textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", currentSteps, goalSteps));
         updateWalkData();
         if(currentSteps >= goalSteps && !goalCompleted ) {
@@ -413,14 +359,76 @@ public class StepCountActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void createBarChart()
+    {
+        CombinedChart mChart = findViewById(R.id.chart1);
+        mChart.setDrawGridBackground(false);
+        mChart.getDescription().setText("");
+        mChart.setHighlightFullBarEnabled(false);
+        mChart.setDrawOrder(new CombinedChart.DrawOrder[]{
+                CombinedChart.DrawOrder.BAR,  CombinedChart.DrawOrder.LINE
+        });
+
+        mChart.setDrawBarShadow(false);
+        mChart.setHighlightFullBarEnabled(false);
+
+        mChart.getAxisRight().setDrawGridLines(false);
+        mChart.getAxisLeft().setDrawGridLines(false);
+        mChart.getAxisLeft().setAxisMinimum(0.0f); // this replaces setStartAtZero(true)
+        mChart.getAxisRight().setAxisMinimum(0.0f);
+
+        ArrayList<BarEntry> entries = new ArrayList<>();
+        getBarEntries(entries);
+
+        BarDataSet dataSet = new BarDataSet(entries, "Step Count");
+        dataSet.setStackLabels(new String[] {"Intentional Walks", "Unintentional Walks"});
+
+        final String[] labels = new String[] {"Sun",
+                "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"};
+
+        dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+
+        float barWidth = 0.45f; // x2 dataset
+        BarData d = new BarData(dataSet);
+        d.setBarWidth(barWidth);
+        BarData data = new BarData(dataSet);
+
+        mChart.getXAxis().setLabelCount(dataSet.getEntryCount());
+
+        XAxis xAxis = mChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTH_SIDED);
+        xAxis.setAxisMinimum(0f);
+        xAxis.setGranularity(1f);
+        xAxis.setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                return labels[(int) value % labels.length];
+            }
+        });
+
+        dataSet.setColors(new int[] {ContextCompat.getColor(mChart.getContext(), R.color.colorAccent),
+                ContextCompat.getColor(mChart.getContext(), R.color.colorPrimary),});
+
+        CombinedData dataCombined = new CombinedData();
+        dataCombined.setData( generateLineData());
+        dataCombined.setData(data);
+
+        mChart.getXAxis().setAxisMaximum(data.getXMax() + 0.25f);
+        mChart.getXAxis().setAxisMinimum(data.getXMin() - 0.25f);
+        mChart.setData(dataCombined);
+    }
+
     private void getLineEntriesData(ArrayList<Entry> entries) {
-        entries.add(new Entry(0, 10));
-        entries.add(new Entry(1, 20));
-        entries.add(new Entry(2, 20));
-        entries.add(new Entry(3, 18));
-        entries.add(new Entry(4, 20));
-        entries.add(new Entry(5, 15));
-        entries.add(new Entry(6, 20));
+
+        SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
+        int goal = sharedPreferences.getInt("goal", 5000);
+        entries.add(new Entry(0, goal));
+        entries.add(new Entry(1, goal));
+        entries.add(new Entry(2, goal));
+        entries.add(new Entry(3, goal));
+        entries.add(new Entry(4, goal));
+        entries.add(new Entry(5, goal));
+        entries.add(new Entry(6, goal));
     }
 
     private LineData generateLineData() {
@@ -448,13 +456,31 @@ public class StepCountActivity extends AppCompatActivity {
     }
 
     private void getBarEntries(ArrayList<BarEntry> entries){
-        entries.add(new BarEntry(0f, new float[] {1, 2}));
-        entries.add(new BarEntry(1f, new float[] {3, 4}));
-        entries.add(new BarEntry(2f, new float[] {1, 4}));
-        entries.add(new BarEntry(3f, new float[] {5, 2}));
-        entries.add(new BarEntry(4f, new float[] {6, 2}));
-        entries.add(new BarEntry(5f, new float[] {1, 3}));
-        entries.add(new BarEntry(6f, new float[] {1, 4}));
+        long[] totalStep = new long[7];
+        int count = 0;
+        for(Integer i: stepCounts)
+        {
+            totalStep[count] = totalStep[count] + i;
+            count++;
+        }
+        long[] totalIntent = new long[7];
+        count = 0;
+        for(ArrayList<Walk> i : walkData)
+        {
+            totalIntent[count] = 0;
+            for(Walk j: i)
+            {
+                totalIntent[count] = totalIntent[count] + j.getSteps();
+            }
+            count++;
+        }
+        entries.add(new BarEntry(0f, new float[] {totalIntent[0],totalStep[0]- totalIntent[0]}));
+        entries.add(new BarEntry(1f, new float[] {totalIntent[1],totalStep[1]- totalIntent[1]}));
+        entries.add(new BarEntry(2f, new float[] {totalIntent[2],totalStep[2]- totalIntent[2]}));
+        entries.add(new BarEntry(3f, new float[] {totalIntent[3],totalStep[3]- totalIntent[3]}));
+        entries.add(new BarEntry(4f, new float[] {totalIntent[4],totalStep[4]- totalIntent[4]}));
+        entries.add(new BarEntry(5f, new float[] {totalIntent[5],totalStep[5]- totalIntent[5]}));
+        entries.add(new BarEntry(6f, new float[] {totalIntent[6],totalStep[6]- totalIntent[6]}));
     }
 }
 
