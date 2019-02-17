@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -63,7 +62,6 @@ public class StepCountActivity extends AppCompatActivity {
     private List<Integer> stepCounts = new ArrayList<>();
     private List<ArrayList<Walk>> walkData = new ArrayList<>();
     private List<Walk> walksToday;
-    private List<Walk> walkList = new ArrayList<>();
     private PendingIntent pendingIntent;
 
     private boolean hasSuggestHappend = false;
@@ -111,30 +109,6 @@ public class StepCountActivity extends AppCompatActivity {
 
         void setRun(boolean run) {
             this.run = run;
-        }
-    }
-
-    public class EncouragingMessage extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.i(TAG, "Encouragement Message to appear");
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.DATE, -1);
-            long start = timeStamper.startOfDay(cal.getTimeInMillis());
-            long end = timeStamper.endOfDay(cal.getTimeInMillis());
-            List<Integer> previousDaySteps = new ArrayList<Integer>();
-            previousDaySteps.set(0, 0);
-            try {
-                fitnessService.getStepsCount( start, end, previousDaySteps);
-                Thread.sleep(500);
-            } catch( Exception e ) {
-            }
-            if( previousDaySteps.get(0) >= currentSteps ) {
-                return;
-            }
-            int improvementPercentage = (int) (currentSteps - previousDaySteps.get(0))/100;
-            String message = String.format(Locale.US, "Good job! You've improved by %d%% from yesterday", improvementPercentage);
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         }
     }
 
