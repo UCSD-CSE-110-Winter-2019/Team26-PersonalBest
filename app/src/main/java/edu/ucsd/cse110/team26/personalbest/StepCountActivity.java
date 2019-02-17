@@ -60,7 +60,8 @@ public class StepCountActivity extends AppCompatActivity {
     private int user_height;
     private boolean goalCompleted;
     private List<Integer> stepCounts = new ArrayList<>();
-    private List<Walk> walkList = new ArrayList<>();
+    private List<ArrayList<Walk>> walkData = new ArrayList<>();
+    private List<Walk> walksToday;
 
     private boolean hasSuggestHappend = false;
 
@@ -80,12 +81,23 @@ public class StepCountActivity extends AppCompatActivity {
                 resp = params[0];
                 while(run) {
                     fitnessService.updateStepCount();
-                    Thread.sleep(500);
                     stepCounts.clear();
-                    walkList.clear();
                     fitnessService.getStepsCount(timeStamper.weekStart(), timeStamper.weekEnd(), stepCounts);
-                    fitnessService.getWalks(timeStamper.weekStart(), timeStamper.weekEnd(), walkList);
-                    Thread.sleep(500);
+
+                    walkData.clear();
+                    long ts = timeStamper.startOfDay(timeStamper.weekStart());
+                    for(int i = 0; i < 7; i++) {
+                        ArrayList<Walk> list = new ArrayList<>();
+                        walkData.add(list);
+                        fitnessService.getWalks(ts, timeStamper.endOfDay(ts), list);
+                        if(timeStamper.isToday(ts)) walksToday = list;
+                        ts = timeStamper.nextDay(ts);
+                    }
+
+                    Thread.sleep(10000);
+                    for(List<Walk> walklist : walkData) {
+                        Log.i(TAG, walklist.toString());
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -319,8 +331,8 @@ public class StepCountActivity extends AppCompatActivity {
                     currentWalk.getSteps(),
                     currentWalk.stepsToFeet(user_height),
                     currentWalk.averageMph(user_height)));
-        } else if(!walkList.isEmpty()) {
-            Walk lastWalk = walkList.get(walkList.size() - 1);
+        } else if(walksToday != null && !walksToday.isEmpty()) {
+            Walk lastWalk = walksToday.get(walksToday.size() - 1);
             textWalkData.setText(String.format(Locale.getDefault(),
                     "Last walk:\nWalk duration: %s\n%d steps taken\nDistance walked: %.1f feet\nAverage speed: %.1fmph",
                     timeStamper.durationToString(lastWalk.getDurationInMillis()),
