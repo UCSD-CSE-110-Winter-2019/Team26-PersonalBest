@@ -117,7 +117,7 @@ public class StepCountActivity extends AppCompatActivity {
         setContentView(R.layout.activity_step_count);
 
 
-        //createBarChart();
+        createBarChart();
 
         textSteps = findViewById(R.id.textSteps);
 
