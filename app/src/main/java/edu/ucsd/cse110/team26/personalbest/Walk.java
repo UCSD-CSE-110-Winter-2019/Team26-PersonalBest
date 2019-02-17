@@ -49,4 +49,9 @@ class Walk {
         double hours = (double) duration / (60*60*1000);
         return stepsToFeet(height) / 5280 / hours;
     }
+
+    @Override
+    public String toString() {
+        return "" + startTimeStamp + "-" + endTimeStamp + ": " +  steps;
+    }
 }
