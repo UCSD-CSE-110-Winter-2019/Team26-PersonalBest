@@ -1,13 +1,16 @@
 package edu.ucsd.cse110.team26.personalbest;
 
 import android.app.Activity;
-import android.app.Dialog;
+import android.app.AlarmManager;
+import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -33,12 +36,9 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import android.app.AlertDialog.Builder;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import java.lang.*;
 
 // reference: https://www.studytutorial.in/android-combined-line-and-bar-chart-using-mpandroid-library-android-tutorial
 
@@ -62,6 +62,7 @@ public class StepCountActivity extends AppCompatActivity {
     private List<Integer> stepCounts = new ArrayList<>();
     private List<ArrayList<Walk>> walkData = new ArrayList<>();
     private List<Walk> walksToday;
+    private PendingIntent pendingIntent;
 
     private boolean hasSuggestHappend = false;
 
@@ -115,6 +116,9 @@ public class StepCountActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_step_count);
+
+        Intent alarmIntent = new Intent(StepCountActivity.this, EncouragingMessage.class);
+        pendingIntent = PendingIntent.getBroadcast(StepCountActivity.this, 0, alarmIntent, 0);
 
         CombinedChart mChart = findViewById(R.id.chart1);
         mChart.setDrawGridBackground(false);
@@ -226,6 +230,24 @@ public class StepCountActivity extends AppCompatActivity {
         });
     }
 
+    private void setEncouragingMessage() {
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 20);
+        calendar.set(Calendar.MINUTE, 0);
+
+        Log.i(TAG, "Setting EncouragingMessage");
+
+        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+    }
+
+    public void cancelEncouragingMessage() {
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        manager.cancel(pendingIntent);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -316,8 +338,10 @@ public class StepCountActivity extends AppCompatActivity {
 
             completeGoalToast.show();
             goalCompleted = true;
+            cancelEncouragingMessage();
         } else {
             goalCompleted = false;
+            setEncouragingMessage();
         }
     }
 
