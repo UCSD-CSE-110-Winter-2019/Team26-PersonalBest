@@ -4,13 +4,13 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -210,12 +210,9 @@ public class StepCountActivity extends AppCompatActivity {
         final String fitnessServiceKey = getIntent().getStringExtra(FITNESS_SERVICE_KEY);
         fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
 
-        timeStamper = new TimeStampNow();
+        timeStamper = new ConcreteTimeStamper();
 
         fitnessService.setup();
-
-
-
 
         btnStartWalk = findViewById(R.id.btnStartWalk);
         btnEndWalk = findViewById(R.id.btnEndWalk);
@@ -282,9 +279,10 @@ public class StepCountActivity extends AppCompatActivity {
         updateStep = new UpdateStep();
         updateStep.execute(-1);
 
+        Settings settings = new Settings(getApplicationContext());
         SharedPreferences user = getSharedPreferences("user", MODE_PRIVATE);
-        goalSteps = user.getInt("goal", 5000);
-        user_height = user.getInt("height", 0);
+        goalSteps = settings.getGoal();
+        user_height = settings.getHeight();
         if(user_height == 0) {
             launchGetHeightActivity();
         }
@@ -295,7 +293,7 @@ public class StepCountActivity extends AppCompatActivity {
             if(hasSuggestHappend == false && timeStamper.isToday(timeStamper.weekStart())){
                 int suggestedGoal = (int)goalSteps+500;
                 createAlertDialog(suggestedGoal);
-                goalSteps = user.getInt("goal", 5000);
+                goalSteps = settings.getGoal();
                 hasSuggestHappend = true;
             }
             else if(hasSuggestHappend == true && !timeStamper.isToday(timeStamper.weekStart())){
@@ -353,8 +351,8 @@ public class StepCountActivity extends AppCompatActivity {
     }
 
     public void setStepCount(long stepCount) {
+        Settings settings = new Settings(getApplicationContext());
         currentSteps = stepCount;
-
         textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", currentSteps, goalSteps));
         updateWalkData();
         if(currentSteps >= goalSteps && !goalCompleted ) {
@@ -442,10 +440,8 @@ public class StepCountActivity extends AppCompatActivity {
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        SharedPreferences user = getSharedPreferences("user", MODE_PRIVATE);
-                        SharedPreferences.Editor editor = user.edit();
-                        editor.putInt("goal", suggestedGoal);
-                        editor.apply();
+                        Settings settings = new Settings(getApplicationContext());
+                        settings.saveGoal(suggestedGoal);
                         dialog.dismiss();
                     }
                 });
