@@ -5,7 +5,7 @@ class Walk {
     private long steps;
     private long startTimeStamp;
     private long endTimeStamp = 0;
-    private TimeStamper timeStamper = new TimeStampNow();
+    private TimeStamper timeStamper = new ConcreteTimeStamper();
 
     Walk(long steps, long startTimeStamp, long endTimeStamp) {
         this.steps = steps;

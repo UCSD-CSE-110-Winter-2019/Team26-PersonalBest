@@ -9,7 +9,7 @@ class MockFitnessAdapter implements FitnessService {
 
     private long steps = 0;
     private List<Walk> walks = new ArrayList<>();
-    private TimeStamper timeStamper = new TimeStampNow();
+    private TimeStamper timeStamper = new ConcreteTimeStamper();
 
     MockFitnessAdapter(StepCountActivity activity) {
         this.activity = activity;
