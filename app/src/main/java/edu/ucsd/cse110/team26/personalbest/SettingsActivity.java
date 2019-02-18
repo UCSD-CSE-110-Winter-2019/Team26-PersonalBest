@@ -51,6 +51,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         editor.putInt("height", Integer.parseInt(heightEdit.getText().toString()));
         editor.putBoolean("new_week", false);
+        editor.putInt("goal",Integer.parseInt(goalEdit.getText().toString()));
 
         int new_goal = Integer.parseInt(goalEdit.getText().toString());
         Calendar calendar = Calendar.getInstance();
