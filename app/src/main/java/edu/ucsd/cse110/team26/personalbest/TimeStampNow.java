@@ -2,6 +2,7 @@ package edu.ucsd.cse110.team26.personalbest;
 
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 
 public class TimeStampNow implements TimeStamper {
@@ -43,7 +44,6 @@ public class TimeStampNow implements TimeStamper {
 
         Calendar cal = Calendar.getInstance(TimeZone.getDefault());
         cal.setTimeInMillis(timeStamp);
-
         return today.before(cal);
     }
 
@@ -87,6 +87,15 @@ public class TimeStampNow implements TimeStamper {
         } else {
             return "" + duration/3600000 + ":" + (duration % 3600000)/60000;
         }
+    }
+
+    @Override
+    public String getDay()
+    {
+        Calendar cal = Calendar.getInstance(TimeZone.getDefault());
+        //Date currentDay = cal.getTime();
+        int dayOfWeek = cal.get(Calendar.DAY_OF_WEEK);
+        return String.valueOf(dayOfWeek);
     }
 
 }

@@ -9,5 +9,5 @@ public interface TimeStamper {
     long startOfDay(long timeStamp);
     long nextDay(long timeStamp);
     String durationToString(long duration);
-    //String getDay(long timeStamp);
+    String getDay();
 }

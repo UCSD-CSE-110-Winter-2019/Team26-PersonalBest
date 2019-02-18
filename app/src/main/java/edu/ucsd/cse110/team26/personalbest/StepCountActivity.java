@@ -32,7 +32,9 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
+import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import android.app.AlertDialog.Builder;
@@ -70,6 +72,7 @@ public class StepCountActivity extends AppCompatActivity {
     private Walk currentWalk;
 
     TimeStamper timeStamper;
+
 
     private class UpdateStep extends AsyncTask<Integer, Integer, Integer> {
         private boolean run = true;
@@ -117,7 +120,7 @@ public class StepCountActivity extends AppCompatActivity {
         setContentView(R.layout.activity_step_count);
 
 
-        createBarChart();
+
 
         textSteps = findViewById(R.id.textSteps);
 
@@ -128,8 +131,23 @@ public class StepCountActivity extends AppCompatActivity {
 
         fitnessService.setup();
 
+        SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        //check if this is the beginning of the new week
+        //if yes => new_week is true and we set the goal of this new_week to last goal on Sat (goal_Sat)
+        Calendar calendar = Calendar.getInstance();
+        int current_day = calendar.get(Calendar.DAY_OF_WEEK);
+        TimeStampNow timeStampNow = new TimeStampNow();
+        long current_time = timeStampNow.now();
+        if(current_time == timeStampNow.weekStart() &&  current_day == Calendar.SUNDAY)
+        {
+            editor.putBoolean("new_week", true);
+        }
+        editor.apply();
 
 
+        createBarChart();
 
         btnStartWalk = findViewById(R.id.btnStartWalk);
         btnEndWalk = findViewById(R.id.btnEndWalk);
@@ -169,6 +187,7 @@ public class StepCountActivity extends AppCompatActivity {
                 }
             }
         });
+
     }
 
     @Override
@@ -224,6 +243,7 @@ public class StepCountActivity extends AppCompatActivity {
                 currentWalk = new Walk(currentSteps - initialSteps, startTimeStamp);
             }
         }
+
     }
 
     @Override
@@ -419,16 +439,37 @@ public class StepCountActivity extends AppCompatActivity {
     }
 
     private void getLineEntriesData(ArrayList<Entry> entries) {
-
         SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
-        int goal = sharedPreferences.getInt("goal", 5000);
-        entries.add(new Entry(0, goal));
-        entries.add(new Entry(1, goal));
-        entries.add(new Entry(2, goal));
-        entries.add(new Entry(3, goal));
-        entries.add(new Entry(4, goal));
-        entries.add(new Entry(5, goal));
-        entries.add(new Entry(6, goal));
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        if(sharedPreferences.getBoolean("new_week",false) )
+        {
+            int previous_goal = sharedPreferences.getInt("goal_Sat", 5000);
+            editor.putInt("goal_Sun", previous_goal);
+            editor.putInt("goal_Mon", previous_goal);
+            editor.putInt("goal_Tue", previous_goal);
+            editor.putInt("goal_Wed", previous_goal);
+            editor.putInt("goal_Thu", previous_goal);
+            editor.putInt("goal_Fri", previous_goal);
+            editor.putInt("goal_Sat", previous_goal);
+            editor.putBoolean("new_week",false);
+        }
+        editor.apply();
+        int goal_sun = sharedPreferences.getInt("goal_Sun", 5000);
+        int goal_mon = sharedPreferences.getInt("goal_Mon", 5000);
+        int goal_tue = sharedPreferences.getInt("goal_Tue", 5000);
+        int goal_wed = sharedPreferences.getInt("goal_Wed", 5000);
+        int goal_thu = sharedPreferences.getInt("goal_Thu", 5000);
+        int goal_fri = sharedPreferences.getInt("goal_Fri", 5000);
+        int goal_sat = sharedPreferences.getInt("goal_Sat", 5000);
+
+
+        entries.add(new Entry(0, goal_sun));
+        entries.add(new Entry(1, goal_mon));
+        entries.add(new Entry(2, goal_tue));
+        entries.add(new Entry(3, goal_wed));
+        entries.add(new Entry(4, goal_thu));
+        entries.add(new Entry(5, goal_fri));
+        entries.add(new Entry(6, goal_sat));
     }
 
     private LineData generateLineData() {
@@ -456,11 +497,18 @@ public class StepCountActivity extends AppCompatActivity {
     }
 
     private void getBarEntries(ArrayList<BarEntry> entries){
+        SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        String[] intent_walk = {"intent_Sun","intent_Mon","intent_Tue","intent_Wed",
+                "intent_Thu","intent_Fri","intent_Sat" };
+        String[] unintent_walk = {"unintent_Sun","unintent_Mon","unintent_Tue","unintent_Wed",
+                "unintent_Thu","unintent_Fri","unintent_Sat" };
         long[] totalStep = new long[7];
         int count = 0;
         for(Integer i: stepCounts)
         {
             totalStep[count] = totalStep[count] + i;
+            //editor.putLong(intent_walk[i],totalStep[count]);
             count++;
         }
         long[] totalIntent = new long[7];
@@ -472,8 +520,10 @@ public class StepCountActivity extends AppCompatActivity {
             {
                 totalIntent[count] = totalIntent[count] + j.getSteps();
             }
+            //editor.putLong(unintent_walk[count], totalStep[count] - totalIntent[count]);
             count++;
         }
+
         entries.add(new BarEntry(0f, new float[] {totalIntent[0],totalStep[0]- totalIntent[0]}));
         entries.add(new BarEntry(1f, new float[] {totalIntent[1],totalStep[1]- totalIntent[1]}));
         entries.add(new BarEntry(2f, new float[] {totalIntent[2],totalStep[2]- totalIntent[2]}));
@@ -481,6 +531,23 @@ public class StepCountActivity extends AppCompatActivity {
         entries.add(new BarEntry(4f, new float[] {totalIntent[4],totalStep[4]- totalIntent[4]}));
         entries.add(new BarEntry(5f, new float[] {totalIntent[5],totalStep[5]- totalIntent[5]}));
         entries.add(new BarEntry(6f, new float[] {totalIntent[6],totalStep[6]- totalIntent[6]}));
+
+        /*entries.add(new BarEntry(0f, new float[] {sharedPreferences.getLong(intent_walk[0], 0),
+                sharedPreferences.getLong(unintent_walk[0],0)}));
+        entries.add(new BarEntry(1f, new float[] {sharedPreferences.getLong(intent_walk[1], 0),
+                sharedPreferences.getLong(unintent_walk[1],0)}));
+        entries.add(new BarEntry(2f, new float[] {sharedPreferences.getLong(intent_walk[2], 0),
+                sharedPreferences.getLong(unintent_walk[2],0)}));
+        entries.add(new BarEntry(3f, new float[] {sharedPreferences.getLong(intent_walk[3], 0),
+                sharedPreferences.getLong(unintent_walk[3],0)}));
+        entries.add(new BarEntry(4f, new float[] {sharedPreferences.getLong(intent_walk[4], 0),
+                sharedPreferences.getLong(unintent_walk[4],0)}));
+        entries.add(new BarEntry(5f, new float[] {sharedPreferences.getLong(intent_walk[5], 0),
+                sharedPreferences.getLong(unintent_walk[5],0)}));
+        entries.add(new BarEntry(6f, new float[] {sharedPreferences.getLong(intent_walk[6], 0),
+                sharedPreferences.getLong(unintent_walk[6],0)}));*/
+
+        editor.apply();
     }
 }
 
