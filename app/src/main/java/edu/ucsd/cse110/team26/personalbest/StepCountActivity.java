@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -39,6 +40,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+
+import static java.lang.Thread.sleep;
 
 // reference: https://www.studytutorial.in/android-combined-line-and-bar-chart-using-mpandroid-library-android-tutorial
 
@@ -109,6 +112,30 @@ public class StepCountActivity extends AppCompatActivity {
 
         void setRun(boolean run) {
             this.run = run;
+        }
+    }
+
+    public class EncouragingMessage extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i(TAG, "Encouragement Message to appear");
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DATE, -1);
+            long start = timeStamper.startOfDay(cal.getTimeInMillis());
+            long end = timeStamper.endOfDay(cal.getTimeInMillis());
+            List<Integer> previousDaySteps = new ArrayList<Integer>();
+            previousDaySteps.set(0, 0);
+            try {
+                fitnessService.getStepsCount( start, end, previousDaySteps);
+                sleep(10);
+            } catch( Exception e ) {
+            }
+            if( previousDaySteps.get(0) >= currentSteps ) {
+                return;
+            }
+            int improvementPercentage = (int) (currentSteps - previousDaySteps.get(0))/100;
+            String message = String.format(Locale.US, "Good job! You've improved by %d%% from yesterday", improvementPercentage);
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -183,12 +210,9 @@ public class StepCountActivity extends AppCompatActivity {
         final String fitnessServiceKey = getIntent().getStringExtra(FITNESS_SERVICE_KEY);
         fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
 
-        timeStamper = new TimeStampNow();
+        timeStamper = new ConcreteTimeStamper();
 
         fitnessService.setup();
-
-
-
 
         btnStartWalk = findViewById(R.id.btnStartWalk);
         btnEndWalk = findViewById(R.id.btnEndWalk);
@@ -255,9 +279,10 @@ public class StepCountActivity extends AppCompatActivity {
         updateStep = new UpdateStep();
         updateStep.execute(-1);
 
+        Settings settings = new Settings(getApplicationContext());
         SharedPreferences user = getSharedPreferences("user", MODE_PRIVATE);
-        goalSteps = user.getInt("goal", 5000);
-        user_height = user.getInt("height", 0);
+        goalSteps = settings.getGoal();
+        user_height = settings.getHeight();
         if(user_height == 0) {
             launchGetHeightActivity();
         }
@@ -268,7 +293,7 @@ public class StepCountActivity extends AppCompatActivity {
             if(hasSuggestHappend == false && timeStamper.isToday(timeStamper.weekStart())){
                 int suggestedGoal = (int)goalSteps+500;
                 createAlertDialog(suggestedGoal);
-                goalSteps = user.getInt("goal", 5000);
+                goalSteps = settings.getGoal();
                 hasSuggestHappend = true;
             }
             else if(hasSuggestHappend == true && !timeStamper.isToday(timeStamper.weekStart())){
@@ -326,8 +351,8 @@ public class StepCountActivity extends AppCompatActivity {
     }
 
     public void setStepCount(long stepCount) {
+        Settings settings = new Settings(getApplicationContext());
         currentSteps = stepCount;
-
         textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", currentSteps, goalSteps));
         updateWalkData();
         if(currentSteps >= goalSteps && !goalCompleted ) {
@@ -415,10 +440,8 @@ public class StepCountActivity extends AppCompatActivity {
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        SharedPreferences user = getSharedPreferences("user", MODE_PRIVATE);
-                        SharedPreferences.Editor editor = user.edit();
-                        editor.putInt("goal", suggestedGoal);
-                        editor.apply();
+                        Settings settings = new Settings(getApplicationContext());
+                        settings.saveGoal(suggestedGoal);
                         dialog.dismiss();
                     }
                 });

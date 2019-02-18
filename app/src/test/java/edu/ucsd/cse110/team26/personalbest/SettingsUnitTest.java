@@ -15,7 +15,6 @@ import org.robolectric.shadows.ShadowToast;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import static android.content.Context.MODE_PRIVATE;
 import static org.junit.Assert.assertEquals;
 
 
@@ -27,6 +26,7 @@ public class SettingsUnitTest {
     private Button saveBtn;
     private Context context;
     private SharedPreferences sharedPreferences;
+    private Settings settings;
 
     @Before
     public void setup() {
@@ -36,7 +36,7 @@ public class SettingsUnitTest {
         feetNp = settingsActivity.findViewById(R.id.feetNumberPicker);
         inchesNp = settingsActivity.findViewById(R.id.inchesNumberPicker);
         saveBtn = settingsActivity.findViewById(R.id.btnSettingsSave);
-        sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
+        settings = new Settings(context);
     }
 
     @Test
@@ -44,12 +44,12 @@ public class SettingsUnitTest {
         goalEdit.setText("1000");
         saveBtn.performClick();
 
-        assertEquals( 1000, sharedPreferences.getInt("goal", 5000) );
+        assertEquals( 1000,  settings.getGoal());
 
         goalEdit.setText("10000");
         saveBtn.performClick();
 
-        assertEquals( 10000, sharedPreferences.getInt("goal", 5000) );
+        assertEquals( 10000, settings.getGoal() );
     }
 
     @Test
@@ -62,18 +62,16 @@ public class SettingsUnitTest {
         saveBtn.performClick();
 
         assertEquals("Error: Goal should be less than 15000", ShadowToast.getTextOfLatestToast());
-        assertEquals( 1000, sharedPreferences.getInt("goal", 1000) );
+        assertEquals( 1000, settings.getGoal());
 
     }
 
     @Test
     public void testSaveHeight() {
-        SharedPreferences sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
-
         feetNp.setValue(100 / 12);
         inchesNp.setValue(100 % 12);
         saveBtn.performClick();
 
-        assertEquals( 100, sharedPreferences.getInt("height", 0) );
+        assertEquals( 100, settings.getHeight() );
     }
 }

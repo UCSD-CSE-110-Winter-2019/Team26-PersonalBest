@@ -4,7 +4,7 @@ package edu.ucsd.cse110.team26.personalbest;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-public class TimeStampNow implements TimeStamper {
+public class ConcreteTimeStamper implements TimeStamper {
 
     @Override
     public long now() {

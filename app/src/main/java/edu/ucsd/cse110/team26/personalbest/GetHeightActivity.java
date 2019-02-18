@@ -1,9 +1,7 @@
 package edu.ucsd.cse110.team26.personalbest;
 
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.NumberPicker;
@@ -12,6 +10,7 @@ import android.widget.TextView;
 public class GetHeightActivity extends AppCompatActivity {
 
     private String fitnessServiceKey = "GOOGLE_FIT";
+    private Settings settings;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,12 +40,8 @@ public class GetHeightActivity extends AppCompatActivity {
                     resultFeet.setText(String.valueOf(np1.getValue()));
                     resultInch.setText(String.valueOf(np2.getValue()));
 
-                    int height_in_inch;
-                    height_in_inch = np1.getValue()*12 + np2.getValue();
-                    SharedPreferences walkInfo = getSharedPreferences("user", MODE_PRIVATE);
-                    SharedPreferences.Editor editor = walkInfo.edit();
-                    editor.putInt("height",height_in_inch);
-                    editor.apply();
+                    settings = new Settings(getApplicationContext());
+                    settings.saveHeight(np1.getValue(), np2.getValue());
 
                     confirmButton.setText("Done");
                     v.setTag(0);
