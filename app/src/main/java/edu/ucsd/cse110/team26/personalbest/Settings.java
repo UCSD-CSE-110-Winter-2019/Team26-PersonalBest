@@ -39,39 +39,20 @@ public class Settings {
         switch( TimeMachine.getCalendar().get(DAY_OF_WEEK) ) {
             case SUNDAY:
                 editor.putInt("goal_sunday", goal);
-                editor.putInt("goal_monday", goal);
-                editor.putInt("goal_tuesday", goal);
-                editor.putInt("goal_wednesday", goal);
-                editor.putInt("goal_thursday", goal);
-                editor.putInt("goal_friday", goal);
-                editor.putInt("goal_saturday", goal); break;
             case MONDAY:
                 editor.putInt("goal_monday", goal);
-                editor.putInt("goal_tuesday", goal);
-                editor.putInt("goal_wednesday", goal);
-                editor.putInt("goal_thursday", goal);
-                editor.putInt("goal_friday", goal);
-                editor.putInt("goal_saturday", goal); break;
             case TUESDAY:
                 editor.putInt("goal_tuesday", goal);
-                editor.putInt("goal_wednesday", goal);
-                editor.putInt("goal_thursday", goal);
-                editor.putInt("goal_friday", goal);
-                editor.putInt("goal_saturday", goal); break;
             case WEDNESDAY:
                 editor.putInt("goal_wednesday", goal);
-                editor.putInt("goal_thursday", goal);
-                editor.putInt("goal_friday", goal);
-                editor.putInt("goal_saturday", goal); break;
             case THURSDAY:
                 editor.putInt("goal_thursday", goal);
-                editor.putInt("goal_friday", goal);
-                editor.putInt("goal_saturday", goal); break;
             case FRIDAY:
                 editor.putInt("goal_friday", goal);
-                editor.putInt("goal_saturday", goal); break;
             case SATURDAY:
                 editor.putInt("goal_saturday", goal); break;
+                default:
+                    break;
         }
         editor.apply();
     }
