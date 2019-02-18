@@ -144,8 +144,6 @@ public class StepCountActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_step_count);
 
-
-
         Intent alarmIntent = new Intent(StepCountActivity.this, EncouragingMessage.class);
         pendingIntent = PendingIntent.getBroadcast(StepCountActivity.this, 0, alarmIntent, 0);
 
@@ -229,7 +227,8 @@ public class StepCountActivity extends AppCompatActivity {
 
         Settings settings = new Settings(getApplicationContext());
         SharedPreferences user = getSharedPreferences("user", MODE_PRIVATE);
-        goalSteps = settings.getGoal();
+        settings.saveGoal(((int)currentSteps)+5);
+        goalSteps = currentSteps+5;i
         user_height = settings.getHeight();
         if(user_height == 0) {
             launchGetHeightActivity();
@@ -567,7 +566,6 @@ public class StepCountActivity extends AppCompatActivity {
             {
                 totalIntent[count] = totalIntent[count] + j.getSteps();
             }
-            //editor.putLong(unintent_walk[count], totalStep[count] - totalIntent[count]);
             count++;
         }
 
@@ -579,20 +577,6 @@ public class StepCountActivity extends AppCompatActivity {
         entries.add(new BarEntry(5f, new float[] {totalIntent[5],totalStep[5]- totalIntent[5]}));
         entries.add(new BarEntry(6f, new float[] {totalIntent[6],totalStep[6]- totalIntent[6]}));
 
-        /*entries.add(new BarEntry(0f, new float[] {sharedPreferences.getLong(intent_walk[0], 0),
-                sharedPreferences.getLong(unintent_walk[0],0)}));
-        entries.add(new BarEntry(1f, new float[] {sharedPreferences.getLong(intent_walk[1], 0),
-                sharedPreferences.getLong(unintent_walk[1],0)}));
-        entries.add(new BarEntry(2f, new float[] {sharedPreferences.getLong(intent_walk[2], 0),
-                sharedPreferences.getLong(unintent_walk[2],0)}));
-        entries.add(new BarEntry(3f, new float[] {sharedPreferences.getLong(intent_walk[3], 0),
-                sharedPreferences.getLong(unintent_walk[3],0)}));
-        entries.add(new BarEntry(4f, new float[] {sharedPreferences.getLong(intent_walk[4], 0),
-                sharedPreferences.getLong(unintent_walk[4],0)}));
-        entries.add(new BarEntry(5f, new float[] {sharedPreferences.getLong(intent_walk[5], 0),
-                sharedPreferences.getLong(unintent_walk[5],0)}));
-        entries.add(new BarEntry(6f, new float[] {sharedPreferences.getLong(intent_walk[6], 0),
-                sharedPreferences.getLong(unintent_walk[6],0)}));*/
 
         editor.apply();
     }

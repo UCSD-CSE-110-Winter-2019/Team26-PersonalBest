@@ -26,9 +26,7 @@ public class GoogleLoginTest {
     public void googleLoginTest() {
         try {
             onView(withText("GOOGLE LOG IN")).check(matches(isDisplayed()));
-            //view is displayed logic
         } catch (NoMatchingViewException e) {
-            //view not displayed logic
         }
     }
 
