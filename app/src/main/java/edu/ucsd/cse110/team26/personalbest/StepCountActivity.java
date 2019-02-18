@@ -227,8 +227,7 @@ public class StepCountActivity extends AppCompatActivity {
 
         Settings settings = new Settings(getApplicationContext());
         SharedPreferences user = getSharedPreferences("user", MODE_PRIVATE);
-        settings.saveGoal(((int)currentSteps)+5);
-        goalSteps = currentSteps+5;
+        goalSteps = settings.getGoal();
         user_height = settings.getHeight();
         if(user_height == 0) {
             launchGetHeightActivity();
