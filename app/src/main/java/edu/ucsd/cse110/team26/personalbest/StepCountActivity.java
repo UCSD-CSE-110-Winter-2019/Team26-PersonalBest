@@ -75,6 +75,15 @@ public class StepCountActivity extends AppCompatActivity {
 
     TimeStamper timeStamper;
 
+    // BarChart object
+    private CreateBarChart createBarChart;
+
+
+    /* ================
+    Description: keep the UI update with the current number of taken steps
+    Pre:
+    Post:
+    ================ */
     private class UpdateStep extends AsyncTask<Integer, Integer, Integer> {
         private boolean run = true;
         private int resp;
@@ -115,6 +124,11 @@ public class StepCountActivity extends AppCompatActivity {
         }
     }
 
+    /* ================
+    Description:
+    Pre:
+    Post:
+    ================ */
     public class EncouragingMessage extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -144,6 +158,8 @@ public class StepCountActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_step_count);
 
+
+
         Intent alarmIntent = new Intent(StepCountActivity.this, EncouragingMessage.class);
         pendingIntent = PendingIntent.getBroadcast(StepCountActivity.this, 0, alarmIntent, 0);
 
@@ -156,8 +172,12 @@ public class StepCountActivity extends AppCompatActivity {
 
         fitnessService.setup();
 
-        checkNewWeek();
-        createBarChart();
+
+        CombinedChart mChart = findViewById(R.id.chart1);
+        createBarChart = new CreateBarChart(getApplicationContext(),mChart, stepCounts, walkData);
+        createBarChart.draw();
+
+
 
         btnStartWalk = findViewById(R.id.btnStartWalk);
         btnEndWalk = findViewById(R.id.btnEndWalk);
@@ -220,7 +240,7 @@ public class StepCountActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        createBarChart();
+        createBarChart.draw();
         if(updateStep != null && !updateStep.isCancelled()) updateStep.cancel(true);
         updateStep = new UpdateStep();
         updateStep.execute(-1);
@@ -271,6 +291,8 @@ public class StepCountActivity extends AppCompatActivity {
                 currentWalk = new Walk(currentSteps - initialSteps, startTimeStamp);
             }
         }
+
+
     }
 
     @Override
@@ -423,162 +445,7 @@ public class StepCountActivity extends AppCompatActivity {
         }
         editor.apply();
     }
-    private void createBarChart()
-    {
-        CombinedChart mChart = findViewById(R.id.chart1);
-        mChart.setDrawGridBackground(false);
-        mChart.getDescription().setText("");
-        mChart.setHighlightFullBarEnabled(false);
-        mChart.setDrawOrder(new CombinedChart.DrawOrder[]{
-                CombinedChart.DrawOrder.BAR,  CombinedChart.DrawOrder.LINE
-        });
 
-        mChart.setDrawBarShadow(false);
-        mChart.setHighlightFullBarEnabled(false);
-
-        mChart.getAxisRight().setDrawGridLines(false);
-        mChart.getAxisLeft().setDrawGridLines(false);
-        mChart.getAxisLeft().setAxisMinimum(0.0f); // this replaces setStartAtZero(true)
-        mChart.getAxisRight().setAxisMinimum(0.0f);
-
-        ArrayList<BarEntry> entries = new ArrayList<>();
-        getBarEntries(entries);
-
-        BarDataSet dataSet = new BarDataSet(entries, "Step Count");
-        dataSet.setStackLabels(new String[] {"Intentional Walks", "Unintentional Walks"});
-
-        final String[] labels = new String[] {
-                "Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"
-        };
-
-        dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
-
-        float barWidth = 0.45f; // x2 dataset
-        BarData d = new BarData(dataSet);
-        d.setBarWidth(barWidth);
-        BarData data = new BarData(dataSet);
-
-        mChart.getXAxis().setLabelCount(dataSet.getEntryCount());
-
-        XAxis xAxis = mChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTH_SIDED);
-        xAxis.setAxisMinimum(0f);
-        xAxis.setGranularity(1f);
-        xAxis.setValueFormatter(new IAxisValueFormatter() {
-            @Override
-            public String getFormattedValue(float value, AxisBase axis) {
-                return labels[(int) value % labels.length];
-            }
-        });
-
-        dataSet.setColors(new int[] {ContextCompat.getColor(mChart.getContext(), R.color.colorAccent),
-                ContextCompat.getColor(mChart.getContext(), R.color.colorPrimary),});
-
-        CombinedData dataCombined = new CombinedData();
-        dataCombined.setData( generateLineData());
-        dataCombined.setData(data);
-
-        mChart.getXAxis().setAxisMaximum(data.getXMax() + 0.25f);
-        mChart.getXAxis().setAxisMinimum(data.getXMin() - 0.25f);
-        mChart.setData(dataCombined);
-    }
-
-    private void getLineEntriesData(ArrayList<Entry> entries) {
-        SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        if(sharedPreferences.getBoolean("new_week",false) )
-        {
-            int previous_goal = sharedPreferences.getInt("goal_Sat", 5000);
-            editor.putInt("goal_Sun", previous_goal);
-            editor.putInt("goal_Mon", previous_goal);
-            editor.putInt("goal_Tue", previous_goal);
-            editor.putInt("goal_Wed", previous_goal);
-            editor.putInt("goal_Thu", previous_goal);
-            editor.putInt("goal_Fri", previous_goal);
-            editor.putInt("goal_Sat", previous_goal);
-            editor.putBoolean("new_week",false);
-        }
-        editor.apply();
-        int goal_sun = sharedPreferences.getInt("goal_Sun", 5000);
-        int goal_mon = sharedPreferences.getInt("goal_Mon", 5000);
-        int goal_tue = sharedPreferences.getInt("goal_Tue", 5000);
-        int goal_wed = sharedPreferences.getInt("goal_Wed", 5000);
-        int goal_thu = sharedPreferences.getInt("goal_Thu", 5000);
-        int goal_fri = sharedPreferences.getInt("goal_Fri", 5000);
-        int goal_sat = sharedPreferences.getInt("goal_Sat", 5000);
-
-
-        entries.add(new Entry(0, goal_sun));
-        entries.add(new Entry(1, goal_mon));
-        entries.add(new Entry(2, goal_tue));
-        entries.add(new Entry(3, goal_wed));
-        entries.add(new Entry(4, goal_thu));
-        entries.add(new Entry(5, goal_fri));
-        entries.add(new Entry(6, goal_sat));
-    }
-
-    private LineData generateLineData() {
-
-        LineData d = new LineData();
-
-        ArrayList<Entry> entries = new ArrayList<>();
-
-        getLineEntriesData(entries);
-
-        LineDataSet set = new LineDataSet(entries, "Goal");
-        set.setLineWidth(2.5f);
-        set.setCircleColor(Color.rgb(60, 79, 109));
-        set.setCircleRadius(5f);
-        set.setFillColor(Color.rgb(60, 79, 109));
-        set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-        set.setDrawValues(true);
-        set.setValueTextSize(10f);
-        set.setValueTextColor(Color.rgb(60, 79, 109));
-
-        set.setAxisDependency(YAxis.AxisDependency.LEFT);
-        d.addDataSet(set);
-
-        return d;
-    }
-
-    private void getBarEntries(ArrayList<BarEntry> entries){
-        SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        String[] intent_walk = {"intent_Sun","intent_Mon","intent_Tue","intent_Wed",
-                "intent_Thu","intent_Fri","intent_Sat" };
-        String[] unintent_walk = {"unintent_Sun","unintent_Mon","unintent_Tue","unintent_Wed",
-                "unintent_Thu","unintent_Fri","unintent_Sat" };
-        long[] totalStep = new long[7];
-        int count = 0;
-        for(Integer i: stepCounts)
-        {
-            totalStep[count] = totalStep[count] + i;
-            //editor.putLong(intent_walk[i],totalStep[count]);
-            count++;
-        }
-        long[] totalIntent = new long[7];
-        count = 0;
-        for(ArrayList<Walk> i : walkData)
-        {
-            totalIntent[count] = 0;
-            for(Walk j: i)
-            {
-                totalIntent[count] = totalIntent[count] + j.getSteps();
-            }
-            count++;
-        }
-
-        entries.add(new BarEntry(0f, new float[] {totalIntent[0],totalStep[0]- totalIntent[0]}));
-        entries.add(new BarEntry(1f, new float[] {totalIntent[1],totalStep[1]- totalIntent[1]}));
-        entries.add(new BarEntry(2f, new float[] {totalIntent[2],totalStep[2]- totalIntent[2]}));
-        entries.add(new BarEntry(3f, new float[] {totalIntent[3],totalStep[3]- totalIntent[3]}));
-        entries.add(new BarEntry(4f, new float[] {totalIntent[4],totalStep[4]- totalIntent[4]}));
-        entries.add(new BarEntry(5f, new float[] {totalIntent[5],totalStep[5]- totalIntent[5]}));
-        entries.add(new BarEntry(6f, new float[] {totalIntent[6],totalStep[6]- totalIntent[6]}));
-
-
-        editor.apply();
-    }
 }
 
 
