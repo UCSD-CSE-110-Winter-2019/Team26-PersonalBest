@@ -46,9 +46,9 @@ import static java.lang.Thread.sleep;
 // reference: https://www.studytutorial.in/android-combined-line-and-bar-chart-using-mpandroid-library-android-tutorial
 
 public class StepCountActivity extends AppCompatActivity {
-    public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
 
     private static final String TAG = "StepCountActivity";
+    private static boolean DEBUG;
 
     private UpdateStep updateStep;
 
@@ -165,8 +165,8 @@ public class StepCountActivity extends AppCompatActivity {
 
         textSteps = findViewById(R.id.textSteps);
 
-        final String fitnessServiceKey = getIntent().getStringExtra(FITNESS_SERVICE_KEY);
-        fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
+        DEBUG = getIntent().getExtras().getBoolean("DEBUG");
+        fitnessService = FitnessServiceFactory.create(DEBUG, this);
 
         timeStamper = new ConcreteTimeStamper();
 
