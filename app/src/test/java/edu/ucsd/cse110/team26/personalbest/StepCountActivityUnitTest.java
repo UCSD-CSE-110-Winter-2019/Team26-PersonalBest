@@ -19,7 +19,6 @@ import static org.junit.Assert.assertNull;
 
 @RunWith(RobolectricTestRunner.class)
 public class StepCountActivityUnitTest {
-    private static final String TEST_SERVICE = "TEST_SERVICE";
 
     private StepCountActivity activity;
     private TextView textSteps;
@@ -31,15 +30,9 @@ public class StepCountActivityUnitTest {
 
     @Before
     public void setUp() throws Exception {
-        FitnessServiceFactory.put(TEST_SERVICE, new FitnessServiceFactory.BluePrint() {
-            @Override
-            public FitnessService create(StepCountActivity stepCountActivity) {
-                return new MockFitnessAdapter(stepCountActivity);
-            }
-        });
 
         Intent intent = new Intent(RuntimeEnvironment.application, StepCountActivity.class);
-        intent.putExtra(StepCountActivity.FITNESS_SERVICE_KEY, TEST_SERVICE);
+        intent.putExtra("DEBUG", true);
         activity = Robolectric.buildActivity(StepCountActivity.class, intent).create().get();
 
         textSteps = activity.findViewById(R.id.textSteps);
