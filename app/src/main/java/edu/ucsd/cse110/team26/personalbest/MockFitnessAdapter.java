@@ -1,9 +1,13 @@
 package edu.ucsd.cse110.team26.personalbest;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
 class MockFitnessAdapter implements FitnessService {
+
+    private final static String TAG = "[MockFitnessAdapter]";
 
     private StepCountActivity activity;
 
@@ -29,6 +33,7 @@ class MockFitnessAdapter implements FitnessService {
     public void updateStepCount() {
         steps += 1;
         activity.setStepCount(steps);
+        Log.d(TAG, "update steps: " + steps);
     }
 
     @Override
