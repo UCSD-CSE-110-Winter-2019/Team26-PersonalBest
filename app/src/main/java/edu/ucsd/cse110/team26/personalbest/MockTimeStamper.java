@@ -2,7 +2,7 @@ package edu.ucsd.cse110.team26.personalbest;
 
 import java.util.Calendar;
 
-public class TimeMachine implements TimeStamper {
+public class MockTimeStamper implements TimeStamper {
     private static Calendar cal = Calendar.getInstance();
 
     @Override

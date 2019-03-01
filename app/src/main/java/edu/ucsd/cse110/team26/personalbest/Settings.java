@@ -36,7 +36,7 @@ public class Settings {
 
     public void saveGoal( int goal ) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        switch( TimeMachine.getCalendar().get(DAY_OF_WEEK) ) {
+        switch( MockTimeStamper.getCalendar().get(DAY_OF_WEEK) ) {
             case SUNDAY:
                 editor.putInt("goal_sunday", goal);
             case MONDAY:
@@ -58,7 +58,7 @@ public class Settings {
     }
 
     public int getGoal() {
-        switch( TimeMachine.getCalendar().get(DAY_OF_WEEK) ) {
+        switch( MockTimeStamper.getCalendar().get(DAY_OF_WEEK) ) {
             case SUNDAY:
                 if( !sharedPreferences.contains("goal_sunday"))
                     saveGoal(defGoal);

@@ -1,18 +1,13 @@
 package edu.ucsd.cse110.team26.personalbest;
 
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -24,17 +19,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.CombinedChart;
-import com.github.mikephil.charting.components.AxisBase;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.data.CombinedData;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -59,6 +43,8 @@ public class StepCountActivity extends AppCompatActivity {
 
     private FitnessService fitnessService;
     private long currentSteps = 0;
+    private long previousDaySteps = 0;
+    private long lastEncouragingMessageSteps = 0;
     private long goalSteps = 0;
     private int user_height;
     private boolean goalCompleted;
@@ -71,6 +57,8 @@ public class StepCountActivity extends AppCompatActivity {
 
     private long startTimeStamp = -1;
     private long initialSteps = 0;
+    private long currentDate;
+
     private Walk currentWalk;
 
     TimeStamper timeStamper;
@@ -93,6 +81,9 @@ public class StepCountActivity extends AppCompatActivity {
             try {
                 resp = params[0];
                 while(run) {
+                    if( !timeStamper.isToday(currentDate) )
+                        newDay();
+                        currentDate = timeStamper.now();
                     fitnessService.updateStepCount();
                     stepCounts.clear();
                     fitnessService.getStepsCount(timeStamper.weekStart(), timeStamper.weekEnd(), stepCounts);
@@ -124,44 +115,10 @@ public class StepCountActivity extends AppCompatActivity {
         }
     }
 
-    /* ================
-    Description:
-    Pre:
-    Post:
-    ================ */
-    public class EncouragingMessage extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.i(TAG, "Encouragement Message to appear");
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.DATE, -1);
-            long start = timeStamper.startOfDay(cal.getTimeInMillis());
-            long end = timeStamper.endOfDay(cal.getTimeInMillis());
-            List<Integer> previousDaySteps = new ArrayList<Integer>();
-            previousDaySteps.set(0, 0);
-            try {
-                fitnessService.getStepsCount( start, end, previousDaySteps);
-                sleep(10);
-            } catch( Exception e ) {
-            }
-            if( previousDaySteps.get(0) >= currentSteps ) {
-                return;
-            }
-            int improvementPercentage = (int) (currentSteps - previousDaySteps.get(0))/100;
-            String message = String.format(Locale.US, "Good job! You've improved by %d%% from yesterday", improvementPercentage);
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_step_count);
-
-
-
-        Intent alarmIntent = new Intent(StepCountActivity.this, EncouragingMessage.class);
-        pendingIntent = PendingIntent.getBroadcast(StepCountActivity.this, 0, alarmIntent, 0);
 
         textSteps = findViewById(R.id.textSteps);
 
@@ -172,12 +129,11 @@ public class StepCountActivity extends AppCompatActivity {
 
         fitnessService.setup();
 
-
         CombinedChart mChart = findViewById(R.id.chart1);
         createBarChart = new CreateBarChart(getApplicationContext(),mChart, stepCounts, walkData);
         createBarChart.draw();
 
-
+        currentDate = timeStamper.now();
 
         btnStartWalk = findViewById(R.id.btnStartWalk);
         btnEndWalk = findViewById(R.id.btnEndWalk);
@@ -217,24 +173,6 @@ public class StepCountActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    private void setEncouragingMessage() {
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 20);
-        calendar.set(Calendar.MINUTE, 0);
-
-        Log.i(TAG, "Setting EncouragingMessage");
-
-        manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
-    }
-
-    public void cancelEncouragingMessage() {
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        manager.cancel(pendingIntent);
     }
 
     @Override
@@ -321,20 +259,33 @@ public class StepCountActivity extends AppCompatActivity {
     public void setStepCount(long stepCount) {
         Settings settings = new Settings(getApplicationContext());
         currentSteps = stepCount;
+        goalSteps = settings.getGoal();
         textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", currentSteps, goalSteps));
         updateWalkData();
-        if(currentSteps >= goalSteps && !goalCompleted ) {
+        if(currentSteps >= goalSteps && !goalCompleted && goalSteps!= 0) {
             Toast completeGoalToast = Toast.makeText(getApplicationContext(),
-                    String.format(Locale.getDefault(),"Congratulations, you've completed " +
-                            "your goal of %d steps today!", goalSteps),
+                    String.format(Locale.getDefault(),"Congratulations, you've completed your goal of %d steps today!", goalSteps),
                     Toast.LENGTH_SHORT);
 
             completeGoalToast.show();
             goalCompleted = true;
-            cancelEncouragingMessage();
         } else {
             goalCompleted = false;
-            setEncouragingMessage();
+            int improvementPercentage = 0;
+            if( previousDaySteps != 0 && currentSteps < goalSteps ) {
+                if (lastEncouragingMessageSteps == 0 && previousDaySteps + 500 <= currentSteps) {
+                    lastEncouragingMessageSteps = currentSteps - (currentSteps - previousDaySteps) % 500;
+                    improvementPercentage = (int) ((currentSteps - previousDaySteps) / previousDaySteps)*100;
+                    String message = String.format(Locale.US, "Good job! You've improved by %d%% from yesterday", improvementPercentage);
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+                } else if (lastEncouragingMessageSteps + 500 <= currentSteps && lastEncouragingMessageSteps != 0 ) {
+                    lastEncouragingMessageSteps = currentSteps - (currentSteps - previousDaySteps) % 500;
+                    improvementPercentage = (int) ((currentSteps - previousDaySteps)  / previousDaySteps)* 100;
+                    String message = String.format(Locale.US, "Good job! You've improved by %d%% from yesterday", improvementPercentage);
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+                }
+            }
+
         }
     }
 
@@ -444,6 +395,31 @@ public class StepCountActivity extends AppCompatActivity {
             editor.putBoolean("new_week", true);
         }
         editor.apply();
+    }
+
+    /**
+     * Resets previousDaySteps and saves previous day's goal as new goal
+     */
+    public void newDay() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -1);
+        long start = timeStamper.startOfDay(cal.getTimeInMillis());
+        long end = timeStamper.endOfDay(cal.getTimeInMillis());
+        List<Integer> previousSteps = new ArrayList<Integer>();
+        try {
+            fitnessService.getStepsCount( start, end, previousSteps);
+            sleep(10);
+        } catch( Exception e ) {
+            e.printStackTrace();
+        }
+        if( previousSteps.size() == 0)
+            previousSteps.add(0);
+        previousDaySteps = previousSteps.get(0);
+        Log.i(TAG, String.format("New day. Setting previous day's steps to %d", previousDaySteps));
+        Settings settings = new Settings(getApplicationContext());
+        settings.saveGoal((int)goalSteps);
+        lastEncouragingMessageSteps = 0;
+
     }
 
 }

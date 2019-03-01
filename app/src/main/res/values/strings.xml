@@ -13,4 +13,5 @@
     <string name="feet">Feet</string>
     <string name="start_walk">Start Walk</string>
     <string name="end_walk">End Walk</string>
+    <string name="empty_space">\n\n\n\n"</string>
 </resources>

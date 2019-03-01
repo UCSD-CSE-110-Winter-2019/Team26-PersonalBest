@@ -39,6 +39,8 @@ public class GetHeightActivity extends AppCompatActivity {
                 if(status == 1) {
                     resultFeet.setText(String.valueOf(np1.getValue()));
                     resultInch.setText(String.valueOf(np2.getValue()));
+                    np1.setEnabled(false);
+                    np2.setEnabled(false);
 
                     settings = new Settings(getApplicationContext());
                     settings.saveHeight(np1.getValue(), np2.getValue());

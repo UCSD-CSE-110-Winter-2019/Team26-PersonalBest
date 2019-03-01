@@ -27,21 +27,17 @@ public class CompleteGoalUnitTest {
 
     @Before
     public void setUp() throws Exception {
-        FitnessServiceFactory.put(TEST_SERVICE, new FitnessServiceFactory.BluePrint() {
-            @Override
-            public FitnessService create(StepCountActivity stepCountActivity) {
-                return new MockFitnessAdapter(stepCountActivity);
-            }
-        });
-
         Intent intent = new Intent(RuntimeEnvironment.application, StepCountActivity.class);
-        intent.putExtra(StepCountActivity.FITNESS_SERVICE_KEY, TEST_SERVICE);
+        intent.putExtra("DEBUG", true);
         activity = Robolectric.buildActivity(StepCountActivity.class, intent).create().get();
 
         textSteps = activity.findViewById(R.id.textSteps);
     }
 
 
+    /**
+     * Tests whether toast appears when goal is completed
+     */
     @Test
     public void testCompleteGoal() {
         activity.setStepCount(5000);
@@ -60,6 +56,9 @@ public class CompleteGoalUnitTest {
         assertEquals(Toast.LENGTH_SHORT, ShadowToast.getLatestToast().getDuration());
     }
 
+    /**
+     * Tests whether toast does not appear when is goal is not completed
+     */
     @Test
     public void testUncompletedGoal() {
         activity.setStepCount(5);

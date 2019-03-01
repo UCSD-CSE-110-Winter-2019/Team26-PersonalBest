@@ -28,20 +28,17 @@ public class EncouragingMessageUnitTest {
 
     @Before
     public void setUp() throws Exception {
-        FitnessServiceFactory.put(TEST_SERVICE, new FitnessServiceFactory.BluePrint() {
-            @Override
-            public FitnessService create(StepCountActivity stepCountActivity) {
-                return new MockFitnessAdapter(stepCountActivity);
-            }
-        });
-
         Intent intent = new Intent(RuntimeEnvironment.application, StepCountActivity.class);
-        intent.putExtra(StepCountActivity.FITNESS_SERVICE_KEY, TEST_SERVICE);
+        intent.putExtra("DEBUG", true);
         activity = Robolectric.buildActivity(StepCountActivity.class, intent).create().get();
+
 
         textSteps = activity.findViewById(R.id.textSteps);
     }
 
+    /**
+     * Tests whether correct toast appears on the right conditions
+     */
     @Test
     public void testEncouragingMessage() {
         activity.newDay();
@@ -68,6 +65,9 @@ public class EncouragingMessageUnitTest {
         assertEquals(Toast.LENGTH_SHORT, ShadowToast.getLatestToast().getDuration());
     }
 
+    /**
+     * Tests whether encouraging message does not appear when goal is completed
+     */
     @Test
     public void testEncouragingMessageAfterCompletedGoal() {
         activity.newDay();
