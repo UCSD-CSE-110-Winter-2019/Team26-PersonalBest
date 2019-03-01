@@ -21,6 +21,11 @@ public class MockTimeStamper implements TimeStamper {
     }
 
     @Override
+    public int getDayOfTheWeek() {
+        return 0;
+    }
+
+    @Override
     public boolean isToday(long timeStamp) {
         return false;
     }

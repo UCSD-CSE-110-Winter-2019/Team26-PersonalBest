@@ -36,7 +36,7 @@ public class SettingsUnitTest {
         feetNp = settingsActivity.findViewById(R.id.feetNumberPicker);
         inchesNp = settingsActivity.findViewById(R.id.inchesNumberPicker);
         saveBtn = settingsActivity.findViewById(R.id.btnSettingsSave);
-        settings = new Settings(context);
+        settings = new Settings(context, new ConcreteTimeStamper());
     }
 
     @Test

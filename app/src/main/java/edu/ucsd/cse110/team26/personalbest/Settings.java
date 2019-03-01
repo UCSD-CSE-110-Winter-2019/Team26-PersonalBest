@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
-import static java.util.Calendar.DAY_OF_WEEK;
 import static java.util.Calendar.FRIDAY;
 import static java.util.Calendar.MONDAY;
 import static java.util.Calendar.SATURDAY;
@@ -19,9 +18,11 @@ import static java.util.Calendar.WEDNESDAY;
 public class Settings {
     private SharedPreferences sharedPreferences;
     private int defGoal = 5000;
+    TimeStamper timeStamper;
 
-    public Settings (Context context) {
+    public Settings (Context context, TimeStamper timeStamper) {
         sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE );
+        this.timeStamper = timeStamper;
     }
 
     public void saveHeight( int feet, int inches ) {
@@ -36,7 +37,7 @@ public class Settings {
 
     public void saveGoal( int goal ) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        switch( MockTimeStamper.getCalendar().get(DAY_OF_WEEK) ) {
+        switch( timeStamper.getDayOfTheWeek() ) {
             case SUNDAY:
                 editor.putInt("goal_sunday", goal);
             case MONDAY:
@@ -58,7 +59,7 @@ public class Settings {
     }
 
     public int getGoal() {
-        switch( MockTimeStamper.getCalendar().get(DAY_OF_WEEK) ) {
+        switch( timeStamper.getDayOfTheWeek() ) {
             case SUNDAY:
                 if( !sharedPreferences.contains("goal_sunday"))
                     saveGoal(defGoal);

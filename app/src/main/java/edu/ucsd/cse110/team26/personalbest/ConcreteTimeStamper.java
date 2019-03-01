@@ -12,6 +12,9 @@ public class ConcreteTimeStamper implements TimeStamper {
     }
 
     @Override
+    public int getDayOfTheWeek() { return Calendar.getInstance().DAY_OF_WEEK; }
+
+    @Override
     public long weekStart() {
         Calendar cal = Calendar.getInstance(TimeZone.getDefault());
         cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
