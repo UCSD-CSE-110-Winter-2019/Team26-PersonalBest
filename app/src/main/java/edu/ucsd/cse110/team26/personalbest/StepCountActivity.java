@@ -257,7 +257,7 @@ public class StepCountActivity extends AppCompatActivity {
     }
 
     public void setStepCount(long stepCount) {
-        Settings settings = new Settings(getApplicationContext(), timeStamper);
+        Settings settings = new Settings(getApplicationContext(), new ConcreteTimeStamper());
         currentSteps = stepCount;
         goalSteps = settings.getGoal();
         textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", currentSteps, goalSteps));
@@ -359,7 +359,7 @@ public class StepCountActivity extends AppCompatActivity {
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        Settings settings = new Settings(getApplicationContext(), timeStamper);
+                        Settings settings = new Settings(getApplicationContext(), new ConcreteTimeStamper());
                         settings.saveGoal(suggestedGoal);
                         dialog.dismiss();
                     }
@@ -416,7 +416,7 @@ public class StepCountActivity extends AppCompatActivity {
             previousSteps.add(0);
         previousDaySteps = previousSteps.get(0);
         Log.i(TAG, String.format("New day. Setting previous day's steps to %d", previousDaySteps));
-        Settings settings = new Settings(getApplicationContext(), timeStamper);
+        Settings settings = new Settings(getApplicationContext(), new ConcreteTimeStamper());
         settings.saveGoal((int)goalSteps);
         lastEncouragingMessageSteps = 0;
 

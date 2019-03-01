@@ -12,7 +12,7 @@ public class ConcreteTimeStamper implements TimeStamper {
     }
 
     @Override
-    public int getDayOfTheWeek() { return Calendar.getInstance().DAY_OF_WEEK; }
+    public int getDayOfWeek() { return Calendar.getInstance().get(Calendar.DAY_OF_WEEK);}
 
     @Override
     public long weekStart() {

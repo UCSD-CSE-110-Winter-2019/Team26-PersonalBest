@@ -17,8 +17,8 @@ import static java.util.Calendar.WEDNESDAY;
 
 public class Settings {
     private SharedPreferences sharedPreferences;
+    private TimeStamper timeStamper;
     private int defGoal = 5000;
-    TimeStamper timeStamper;
 
     public Settings (Context context, TimeStamper timeStamper) {
         sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE );
@@ -37,7 +37,7 @@ public class Settings {
 
     public void saveGoal( int goal ) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        switch( timeStamper.getDayOfTheWeek() ) {
+        switch( timeStamper.getDayOfWeek() ) {
             case SUNDAY:
                 editor.putInt("goal_sunday", goal);
             case MONDAY:
@@ -59,7 +59,7 @@ public class Settings {
     }
 
     public int getGoal() {
-        switch( timeStamper.getDayOfTheWeek() ) {
+        switch( timeStamper.getDayOfWeek() ) {
             case SUNDAY:
                 if( !sharedPreferences.contains("goal_sunday"))
                     saveGoal(defGoal);

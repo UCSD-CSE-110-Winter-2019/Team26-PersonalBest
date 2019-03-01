@@ -11,17 +11,15 @@ public class MockTimeStamper implements TimeStamper {
     }
 
     @Override
+    public int getDayOfWeek() { return 0;}
+
+    @Override
     public long weekStart() {
         return 0;
     }
 
     @Override
     public long weekEnd() {
-        return 0;
-    }
-
-    @Override
-    public int getDayOfTheWeek() {
         return 0;
     }
 
@@ -50,11 +48,4 @@ public class MockTimeStamper implements TimeStamper {
         return null;
     }
 
-    public static void useFixedCalendar(Calendar newCal) {
-        cal = newCal;
-    }
-
-    public static Calendar getCalendar() {
-        return cal;
-    }
 }

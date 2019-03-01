@@ -50,7 +50,7 @@ public class StepCountActivityUnitTest {
         activity.setStepCount(nextStepCount+100);
         assertEquals("1437/5000 steps today", textSteps.getText().toString());
 
-        Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext());
+        Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
 
         settings.saveGoal(10000);
 

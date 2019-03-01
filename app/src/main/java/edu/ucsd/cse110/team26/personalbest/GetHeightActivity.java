@@ -42,7 +42,7 @@ public class GetHeightActivity extends AppCompatActivity {
                     np1.setEnabled(false);
                     np2.setEnabled(false);
 
-                    settings = new Settings(getApplicationContext());
+                    settings = new Settings(getApplicationContext(), new ConcreteTimeStamper());
                     settings.saveHeight(np1.getValue(), np2.getValue());
 
                     confirmButton.setText("Done");

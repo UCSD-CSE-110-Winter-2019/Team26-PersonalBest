@@ -42,7 +42,7 @@ public class EncouragingMessageUnitTest {
     @Test
     public void testEncouragingMessage() {
         activity.newDay();
-        Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext());
+        Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
         settings.saveGoal(10000);
         activity.setStepCount(500);
 
@@ -71,7 +71,7 @@ public class EncouragingMessageUnitTest {
     @Test
     public void testEncouragingMessageAfterCompletedGoal() {
         activity.newDay();
-        Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext());
+        Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
         settings.saveGoal(1000);
         activity.setStepCount(1000);
 

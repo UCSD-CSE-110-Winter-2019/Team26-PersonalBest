@@ -47,7 +47,7 @@ public class CompleteGoalUnitTest {
         assertEquals(Toast.LENGTH_SHORT, ShadowToast.getLatestToast().getDuration());
 
         activity.setStepCount(5000);
-        Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext());
+        Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
         settings.saveGoal(10000);
 
         activity.setStepCount(12000);
