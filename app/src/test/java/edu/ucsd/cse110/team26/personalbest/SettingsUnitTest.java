@@ -1,7 +1,6 @@
 package edu.ucsd.cse110.team26.personalbest;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.NumberPicker;
@@ -25,7 +24,6 @@ public class SettingsUnitTest {
     private NumberPicker inchesNp;
     private Button saveBtn;
     private Context context;
-    private SharedPreferences sharedPreferences;
     private Settings settings;
 
     @Before
@@ -36,7 +34,7 @@ public class SettingsUnitTest {
         feetNp = settingsActivity.findViewById(R.id.feetNumberPicker);
         inchesNp = settingsActivity.findViewById(R.id.inchesNumberPicker);
         saveBtn = settingsActivity.findViewById(R.id.btnSettingsSave);
-        settings = new Settings(context);
+        settings = new Settings(context, new ConcreteTimeStamper());
     }
 
     @Test

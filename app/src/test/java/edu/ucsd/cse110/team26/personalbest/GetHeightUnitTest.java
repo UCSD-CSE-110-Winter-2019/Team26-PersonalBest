@@ -3,9 +3,7 @@ package edu.ucsd.cse110.team26.personalbest;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.NumberPicker;
-import android.widget.TextView;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +15,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import static android.content.Context.MODE_PRIVATE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 @RunWith(RobolectricTestRunner.class)
 public class GetHeightUnitTest {
@@ -43,6 +42,8 @@ public class GetHeightUnitTest {
         feet.setValue(5);
         inch.setValue(10);
         confirm.performClick();
+        assertFalse(feet.isEnabled());
+        assertFalse(inch.isEnabled());
         SharedPreferences sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
         assertEquals( 70, sharedPreferences.getInt("height", 0 ));
     }

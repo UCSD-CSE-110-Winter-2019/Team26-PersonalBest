@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private void checkEnvironment() {
 
         // check if running debug build variant
-        //DEBUG = BuildConfig.DEBUG;
+        DEBUG = BuildConfig.DEBUG;
 
         // check if running in Firebase Test Lab
         String testLabSetting = Settings.System.getString(getContentResolver(), "firebase.test.lab");

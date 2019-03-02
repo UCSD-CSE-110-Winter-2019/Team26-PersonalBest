@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
-import static java.util.Calendar.DAY_OF_WEEK;
 import static java.util.Calendar.FRIDAY;
 import static java.util.Calendar.MONDAY;
 import static java.util.Calendar.SATURDAY;
@@ -18,10 +17,12 @@ import static java.util.Calendar.WEDNESDAY;
 
 public class Settings {
     private SharedPreferences sharedPreferences;
+    private TimeStamper timeStamper;
     private int defGoal = 5000;
 
-    public Settings (Context context) {
+    public Settings (Context context, TimeStamper timeStamper) {
         sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE );
+        this.timeStamper = timeStamper;
     }
 
     public void saveHeight( int feet, int inches ) {
@@ -36,19 +37,19 @@ public class Settings {
 
     public void saveGoal( int goal ) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        switch( TimeMachine.getCalendar().get(DAY_OF_WEEK) ) {
+        switch( timeStamper.getDayOfWeek() ) {
             case SUNDAY:
-                editor.putInt("goal_sunday", goal);
+                editor.putInt("goal_sunday", goal); break;
             case MONDAY:
-                editor.putInt("goal_monday", goal);
+                editor.putInt("goal_monday", goal); break;
             case TUESDAY:
-                editor.putInt("goal_tuesday", goal);
+                editor.putInt("goal_tuesday", goal); break;
             case WEDNESDAY:
-                editor.putInt("goal_wednesday", goal);
+                editor.putInt("goal_wednesday", goal); break;
             case THURSDAY:
-                editor.putInt("goal_thursday", goal);
+                editor.putInt("goal_thursday", goal); break;
             case FRIDAY:
-                editor.putInt("goal_friday", goal);
+                editor.putInt("goal_friday", goal); break;
             case SATURDAY:
                 editor.putInt("goal_saturday", goal); break;
                 default:
@@ -58,7 +59,7 @@ public class Settings {
     }
 
     public int getGoal() {
-        switch( TimeMachine.getCalendar().get(DAY_OF_WEEK) ) {
+        switch( timeStamper.getDayOfWeek() ) {
             case SUNDAY:
                 if( !sharedPreferences.contains("goal_sunday"))
                     saveGoal(defGoal);
@@ -84,7 +85,7 @@ public class Settings {
                     saveGoal(defGoal);
                 return sharedPreferences.getInt("goal_friday", defGoal);
             case SATURDAY:
-                if( !sharedPreferences.contains("goal_friday"))
+                if( !sharedPreferences.contains("goal_saturday"))
                     saveGoal(defGoal);
                 return sharedPreferences.getInt("goal_saturday", defGoal);
         }

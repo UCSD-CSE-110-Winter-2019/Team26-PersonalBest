@@ -17,6 +17,7 @@ android {
         }
     }
     testOptions {
+        execution 'ANDROID_TEST_ORCHESTRATOR'
         unitTests {
             includeAndroidResources = true
         }
@@ -28,7 +29,6 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:support-media-compat:28.0.0'
     implementation 'com.android.support:support-annotations:28.0.0'
@@ -42,5 +42,6 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    androidTestUtil 'com.android.support.test:orchestrator:1.0.2'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.2'
 }

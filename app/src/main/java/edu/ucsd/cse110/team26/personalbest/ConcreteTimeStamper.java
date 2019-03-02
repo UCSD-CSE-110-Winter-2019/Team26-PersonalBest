@@ -12,6 +12,9 @@ public class ConcreteTimeStamper implements TimeStamper {
     }
 
     @Override
+    public int getDayOfWeek() { return Calendar.getInstance().get(Calendar.DAY_OF_WEEK);}
+
+    @Override
     public long weekStart() {
         Calendar cal = Calendar.getInstance(TimeZone.getDefault());
         cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
@@ -31,6 +34,13 @@ public class ConcreteTimeStamper implements TimeStamper {
         cal.set(Calendar.SECOND, 59);
         cal.set(Calendar.MILLISECOND, 999);
         return cal.getTimeInMillis();
+    }
+
+    @Override
+    public long[] getPreviousDay() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -1);
+        return new long[]{startOfDay(cal.getTimeInMillis()), endOfDay(cal.getTimeInMillis())};
     }
 
     @Override
