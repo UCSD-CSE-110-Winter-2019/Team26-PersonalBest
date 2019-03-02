@@ -37,6 +37,13 @@ public class ConcreteTimeStamper implements TimeStamper {
     }
 
     @Override
+    public long[] getPreviousDay() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -1);
+        return new long[]{startOfDay(cal.getTimeInMillis()), endOfDay(cal.getTimeInMillis())};
+    }
+
+    @Override
     public boolean isToday(long timeStamp) {
         Calendar today = Calendar.getInstance(TimeZone.getDefault());
         today.set(Calendar.HOUR_OF_DAY, 0);

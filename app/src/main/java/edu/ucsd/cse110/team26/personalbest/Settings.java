@@ -39,17 +39,17 @@ public class Settings {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         switch( timeStamper.getDayOfWeek() ) {
             case SUNDAY:
-                editor.putInt("goal_sunday", goal);
+                editor.putInt("goal_sunday", goal); break;
             case MONDAY:
-                editor.putInt("goal_monday", goal);
+                editor.putInt("goal_monday", goal); break;
             case TUESDAY:
-                editor.putInt("goal_tuesday", goal);
+                editor.putInt("goal_tuesday", goal); break;
             case WEDNESDAY:
-                editor.putInt("goal_wednesday", goal);
+                editor.putInt("goal_wednesday", goal); break;
             case THURSDAY:
-                editor.putInt("goal_thursday", goal);
+                editor.putInt("goal_thursday", goal); break;
             case FRIDAY:
-                editor.putInt("goal_friday", goal);
+                editor.putInt("goal_friday", goal); break;
             case SATURDAY:
                 editor.putInt("goal_saturday", goal); break;
                 default:
@@ -85,7 +85,7 @@ public class Settings {
                     saveGoal(defGoal);
                 return sharedPreferences.getInt("goal_friday", defGoal);
             case SATURDAY:
-                if( !sharedPreferences.contains("goal_friday"))
+                if( !sharedPreferences.contains("goal_saturday"))
                     saveGoal(defGoal);
                 return sharedPreferences.getInt("goal_saturday", defGoal);
         }

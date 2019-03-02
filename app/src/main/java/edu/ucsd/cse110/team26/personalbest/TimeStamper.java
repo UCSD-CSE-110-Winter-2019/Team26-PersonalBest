@@ -5,6 +5,7 @@ public interface TimeStamper {
     long now();
     long weekStart();
     long weekEnd();
+    long[] getPreviousDay();
     int getDayOfWeek();
     boolean isToday(long timeStamp);
     long endOfDay(long timeStamp);

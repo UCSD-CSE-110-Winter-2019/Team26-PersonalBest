@@ -24,6 +24,11 @@ public class MockTimeStamper implements TimeStamper {
     }
 
     @Override
+    public long[] getPreviousDay() {
+        return new long[0];
+    }
+
+    @Override
     public boolean isToday(long timeStamp) {
         return false;
     }

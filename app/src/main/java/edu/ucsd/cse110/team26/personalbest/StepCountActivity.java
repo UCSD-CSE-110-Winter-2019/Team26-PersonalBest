@@ -81,9 +81,10 @@ public class StepCountActivity extends AppCompatActivity {
             try {
                 resp = params[0];
                 while(run) {
-                    if( !timeStamper.isToday(currentDate) )
-                        newDay();
+                    if( !timeStamper.isToday(currentDate) ) {
+                        initalizeNewDay();
                         currentDate = timeStamper.now();
+                    }
                     fitnessService.updateStepCount();
                     stepCounts.clear();
                     fitnessService.getStepsCount(timeStamper.weekStart(), timeStamper.weekEnd(), stepCounts);
@@ -257,7 +258,7 @@ public class StepCountActivity extends AppCompatActivity {
     }
 
     public void setStepCount(long stepCount) {
-        Settings settings = new Settings(getApplicationContext(), new ConcreteTimeStamper());
+        Settings settings = new Settings(getApplicationContext(), timeStamper);
         currentSteps = stepCount;
         goalSteps = settings.getGoal();
         textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", currentSteps, goalSteps));
@@ -271,16 +272,14 @@ public class StepCountActivity extends AppCompatActivity {
             goalCompleted = true;
         } else {
             goalCompleted = false;
-            int improvementPercentage = 0;
             if( previousDaySteps != 0 && currentSteps < goalSteps ) {
+                int improvementPercentage = (int) ((currentSteps - previousDaySteps) / previousDaySteps)*100;
                 if (lastEncouragingMessageSteps == 0 && previousDaySteps + 500 <= currentSteps) {
                     lastEncouragingMessageSteps = currentSteps - (currentSteps - previousDaySteps) % 500;
-                    improvementPercentage = (int) ((currentSteps - previousDaySteps) / previousDaySteps)*100;
                     String message = String.format(Locale.US, "Good job! You've improved by %d%% from yesterday", improvementPercentage);
                     Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
                 } else if (lastEncouragingMessageSteps + 500 <= currentSteps && lastEncouragingMessageSteps != 0 ) {
                     lastEncouragingMessageSteps = currentSteps - (currentSteps - previousDaySteps) % 500;
-                    improvementPercentage = (int) ((currentSteps - previousDaySteps)  / previousDaySteps)* 100;
                     String message = String.format(Locale.US, "Good job! You've improved by %d%% from yesterday", improvementPercentage);
                     Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
                 }
@@ -359,7 +358,7 @@ public class StepCountActivity extends AppCompatActivity {
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        Settings settings = new Settings(getApplicationContext(), new ConcreteTimeStamper());
+                        Settings settings = new Settings(getApplicationContext(), timeStamper);
                         settings.saveGoal(suggestedGoal);
                         dialog.dismiss();
                     }
@@ -400,14 +399,11 @@ public class StepCountActivity extends AppCompatActivity {
     /**
      * Resets previousDaySteps and saves previous day's goal as new goal
      */
-    public void newDay() {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DATE, -1);
-        long start = timeStamper.startOfDay(cal.getTimeInMillis());
-        long end = timeStamper.endOfDay(cal.getTimeInMillis());
+    public void initalizeNewDay() {
+        long prev[] = timeStamper.getPreviousDay();
         List<Integer> previousSteps = new ArrayList<Integer>();
         try {
-            fitnessService.getStepsCount( start, end, previousSteps);
+            fitnessService.getStepsCount( prev[0], prev[1], previousSteps);
             sleep(10);
         } catch( Exception e ) {
             e.printStackTrace();
@@ -416,7 +412,7 @@ public class StepCountActivity extends AppCompatActivity {
             previousSteps.add(0);
         previousDaySteps = previousSteps.get(0);
         Log.i(TAG, String.format("New day. Setting previous day's steps to %d", previousDaySteps));
-        Settings settings = new Settings(getApplicationContext(), new ConcreteTimeStamper());
+        Settings settings = new Settings(getApplicationContext(), timeStamper);
         settings.saveGoal((int)goalSteps);
         lastEncouragingMessageSteps = 0;
 
