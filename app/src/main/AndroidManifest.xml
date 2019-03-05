@@ -14,7 +14,7 @@
         <activity
             android:name=".FriendsActivity"
             android:label="@string/title_activity_friends"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".GetHeightActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
