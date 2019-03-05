@@ -2,7 +2,6 @@ package edu.ucsd.cse110.team26.personalbest;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -33,6 +32,7 @@ public class StepCountActivity extends AppCompatActivity {
 
     private static final String TAG = "StepCountActivity";
     private static boolean DEBUG;
+    private static boolean ESPRESSO;
 
     private UpdateStep updateStep;
 
@@ -41,7 +41,7 @@ public class StepCountActivity extends AppCompatActivity {
     private Button btnStartWalk;
     private Button btnEndWalk;
 
-    private FitnessService fitnessService;
+    FitnessService fitnessService;
     private long currentSteps = 0;
     private long previousDaySteps = 0;
     private long lastEncouragingMessageSteps = 0;
@@ -50,10 +50,7 @@ public class StepCountActivity extends AppCompatActivity {
     private boolean goalCompleted;
     private List<Integer> stepCounts = new ArrayList<>();
     private List<ArrayList<Walk>> walkData = new ArrayList<>();
-    private List<Walk> walksToday;
-    private PendingIntent pendingIntent;
-
-    private boolean hasSuggestHappend = false;
+    List<Walk> walksToday;
 
     private long startTimeStamp = -1;
     private long initialSteps = 0;
@@ -82,7 +79,7 @@ public class StepCountActivity extends AppCompatActivity {
                 resp = params[0];
                 while(run) {
                     if( !timeStamper.isToday(currentDate) ) {
-                        initalizeNewDay();
+                        initializeNewDay();
                         currentDate = timeStamper.now();
                     }
                     fitnessService.updateStepCount();
@@ -124,6 +121,7 @@ public class StepCountActivity extends AppCompatActivity {
         textSteps = findViewById(R.id.textSteps);
 
         DEBUG = getIntent().getExtras().getBoolean("DEBUG");
+        ESPRESSO = getIntent().getExtras().getBoolean("ESPRESSO");
         fitnessService = FitnessServiceFactory.create(DEBUG, this);
 
         timeStamper = new ConcreteTimeStamper();
@@ -180,9 +178,15 @@ public class StepCountActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         createBarChart.draw();
-        if(updateStep != null && !updateStep.isCancelled()) updateStep.cancel(true);
-        updateStep = new UpdateStep();
-        updateStep.execute(-1);
+        if(updateStep != null && !updateStep.isCancelled()) {
+            updateStep.cancel(true);
+        }
+
+        // If espresso test is not running, start async task
+        if( ESPRESSO == false ) {
+            updateStep = new UpdateStep();
+            updateStep.execute(-1);
+        }
 
         Settings settings = new Settings(getApplicationContext(), timeStamper);
         SharedPreferences user = getSharedPreferences("user", MODE_PRIVATE);
@@ -191,24 +195,6 @@ public class StepCountActivity extends AppCompatActivity {
         if(user_height == 0) {
             launchGetHeightActivity();
         }
-
-        //Checking to see if we need to suggest a new step goal.
-        if(suggestGoal()){
-            //check if dialog box has been shown and if it's a new week:
-            if(hasSuggestHappend == false && timeStamper.isToday(timeStamper.weekStart())){
-                int suggestedGoal = (int)goalSteps+500;
-                createAlertDialog(suggestedGoal);
-                goalSteps = settings.getGoal();
-                hasSuggestHappend = true;
-            }
-            else if(hasSuggestHappend == true && !timeStamper.isToday(timeStamper.weekStart())){
-                hasSuggestHappend = false;
-            }
-            else{
-                //do nothing; keep suggestHappened as true since it's still sunday.
-            }
-        }
-
 
         setStepCount(currentSteps);
 
@@ -246,7 +232,7 @@ public class StepCountActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // If authentication was required during google fit setup, this will be called after the user authenticates
-        if (resultCode == Activity.RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK && ESPRESSO == false) {
             if (requestCode == fitnessService.getRequestCode()) {
                 if(updateStep != null && !updateStep.isCancelled()) updateStep.cancel(true);
                 updateStep = new UpdateStep();
@@ -264,6 +250,38 @@ public class StepCountActivity extends AppCompatActivity {
         textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", currentSteps, goalSteps));
         updateWalkData();
         if(currentSteps >= goalSteps && !goalCompleted && goalSteps!= 0) {
+            //do dialog box as well.
+
+            AlertDialog alertDialog = new AlertDialog.Builder(StepCountActivity.this).create();
+            alertDialog.setTitle("Suggesting Goals");
+
+            int suggestedGoalNum = (int)goalSteps;
+
+            if(goalSteps+500 <= 15000){
+                suggestedGoalNum += 500;
+            }
+            else{
+                suggestedGoalNum = 15000;
+            }
+            alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoalNum);
+            final int finalSuggestedGoalNum = suggestedGoalNum;
+            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            Settings settings = new Settings(getApplicationContext(), timeStamper);
+                            settings.saveGoal(finalSuggestedGoalNum);
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+
             Toast completeGoalToast = Toast.makeText(getApplicationContext(),
                     String.format(Locale.getDefault(),"Congratulations, you've completed your goal of %d steps today!", goalSteps),
                     Toast.LENGTH_SHORT);
@@ -288,8 +306,8 @@ public class StepCountActivity extends AppCompatActivity {
         }
     }
 
-    private void updateWalkData() {
-        if(startTimeStamp != -1) {
+    public void updateWalkData() {
+        if(startTimeStamp != -1 ) {
             initialSteps = getSharedPreferences("walk", MODE_PRIVATE).getLong("initialSteps", 0);
             currentWalk.setSteps(currentSteps - initialSteps);
             textWalkData.setText(String.format(Locale.getDefault(),
@@ -325,27 +343,6 @@ public class StepCountActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    public boolean suggestGoal(){
-        List<Integer> prevWeek = new ArrayList<>();
-        int weekDif = 7*24*60*60*1000;
-        try{
-            fitnessService.getStepsCount(timeStamper.weekStart()- weekDif, timeStamper.weekEnd()-weekDif, prevWeek);
-            Thread.sleep(500);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e(TAG, e.getMessage());
-        }
-
-
-        for(int stepsThatDay: prevWeek){
-            if(stepsThatDay >= goalSteps){
-                return true;
-            }
-
-        }
-        return false;
     }
 
     public void createAlertDialog(final int suggestedGoal) {
@@ -399,7 +396,7 @@ public class StepCountActivity extends AppCompatActivity {
     /**
      * Resets previousDaySteps and saves previous day's goal as new goal
      */
-    public void initalizeNewDay() {
+    public void initializeNewDay() {
         long prev[] = timeStamper.getPreviousDay();
         List<Integer> previousSteps = new ArrayList<Integer>();
         try {
