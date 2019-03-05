@@ -42,10 +42,10 @@ public class SettingsActivityTest {
         onView(withId(R.id.feetNumberPicker)).check(matches(isDisplayed()));
         onView(withId(R.id.inchesNumberPicker)).check(matches(isDisplayed()));
 
-        onView(withId(R.id.textView)).check(matches(isDisplayed()));
-        onView(withId(R.id.textView)).check(matches(withText("Height:")));
-        onView(withId(R.id.textView2)).check(matches(isDisplayed()));
-        onView(withId(R.id.textView2)).check(matches(withText("Goal:")));
+        onView(withId(R.id.heightLabel)).check(matches(isDisplayed()));
+        onView(withId(R.id.heightLabel)).check(matches(withText("Height:")));
+        onView(withId(R.id.goalLabel)).check(matches(isDisplayed()));
+        onView(withId(R.id.goalLabel)).check(matches(withText("Goal:")));
 
     }
     private static Matcher<View> childAtPosition(
