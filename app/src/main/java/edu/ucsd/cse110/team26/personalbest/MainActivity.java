@@ -32,10 +32,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        checkEnvironment();
+
         FirebaseApp.initializeApp(this);
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mAuth.getCurrentUser();
-        if(user != null) {
+        if(user != null || DEBUG) {
             launchStepCountActivity();
         }
 
@@ -53,8 +55,6 @@ public class MainActivity extends AppCompatActivity {
             Intent signInIntent = gsoclient.getSignInIntent();
             startActivityForResult(signInIntent, SIGN_IN_REQUEST_CODE);
         });
-
-        checkEnvironment();
     }
 
     @Override
