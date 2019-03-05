@@ -11,6 +11,7 @@ import android.widget.Button;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "[MainActivity]";
     private boolean DEBUG = false;
+    private boolean ESPRESSO = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,20 +31,28 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkEnvironment() {
 
-        // check if running debug build variant
-        DEBUG = BuildConfig.DEBUG;
 
         // check if running in Firebase Test Lab
         String testLabSetting = Settings.System.getString(getContentResolver(), "firebase.test.lab");
         if ("true".equals(testLabSetting)) {
             DEBUG = true;
         }
+
         Log.i(TAG, "Env checked, debug flag is " + DEBUG);
+
+        try {
+            Class.forName("android.support.test.espresso.Espresso");
+            ESPRESSO = true;
+        } catch (ClassNotFoundException e) {
+            ESPRESSO = false;
+        }
+        Log.i(TAG, "Env checked, espresso flag is " + ESPRESSO);
     }
 
     public void launchStepCountActivity() {
         Intent intent = new Intent(this, StepCountActivity.class);
         intent.putExtra("DEBUG", DEBUG);
+        intent.putExtra("ESPRESSO", ESPRESSO);
         startActivity(intent);
     }
 

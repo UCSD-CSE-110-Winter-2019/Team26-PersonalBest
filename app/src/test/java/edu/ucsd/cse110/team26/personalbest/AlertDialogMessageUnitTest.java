@@ -3,7 +3,6 @@ package edu.ucsd.cse110.team26.personalbest;
 import android.app.Dialog;
 import android.content.Intent;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +11,6 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.shadows.ShadowAlertDialog;
-import org.robolectric.shadows.ShadowToast;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -44,7 +42,7 @@ public class AlertDialogMessageUnitTest {
      */
     @Test
     public void testAlertDialogBeforeCompletedGoal() {
-        activity.initalizeNewDay();
+        activity.initializeNewDay();
         Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
         settings.saveGoal(2000);
         activity.setStepCount(1000);
@@ -57,7 +55,7 @@ public class AlertDialogMessageUnitTest {
      */
     @Test
     public void testAlertDialogAfterCompletedGoal() {
-        activity.initalizeNewDay();
+        activity.initializeNewDay();
         Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
         settings.saveGoal(2000);
 
@@ -74,7 +72,7 @@ public class AlertDialogMessageUnitTest {
      */
     @Test
     public void testAlertDialogAcceptNewGoal() {
-        activity.initalizeNewDay();
+        activity.initializeNewDay();
         Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
         settings.saveGoal(2000);
 
@@ -89,7 +87,7 @@ public class AlertDialogMessageUnitTest {
      */
     @Test
     public void testAlertDialogDeclineNewGoal() {
-        activity.initalizeNewDay();
+        activity.initializeNewDay();
         Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
         settings.saveGoal(2000);
 

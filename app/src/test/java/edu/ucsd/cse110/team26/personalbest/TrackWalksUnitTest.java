@@ -12,7 +12,8 @@ import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-import androidx.test.platform.app.InstrumentationRegistry;
+import java.util.ArrayList;
+import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -33,6 +34,7 @@ public class TrackWalksUnitTest {
 
         Intent intent = new Intent(RuntimeEnvironment.application, StepCountActivity.class);
         intent.putExtra("DEBUG", true);
+        intent.putExtra("ESPRESSO", false);
         activity = Robolectric.buildActivity(StepCountActivity.class, intent).create().get();
 
         textSteps = activity.findViewById(R.id.textSteps);
@@ -43,19 +45,32 @@ public class TrackWalksUnitTest {
     }
 
     @Test
-    public void testUpdateSteps() {
+    public void testSimpleWalk() {
         activity.setStepCount(nextStepCount);
         assertEquals("1337/5000 steps today", textSteps.getText().toString());
-
+        btnStartWalk.performClick();
         activity.setStepCount(nextStepCount+100);
         assertEquals("1437/5000 steps today", textSteps.getText().toString());
+        assertEquals("Current walk:\nWalk duration: 0s\n100 steps taken\nDistance walked: 0.0 feet\nAverage speed: 0.0mph", textWalkData.getText().toString());
+        btnEndWalk.performClick();
+        activity.updateWalkData();
+    }
 
-        Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
-
-        settings.saveGoal(10000);
-
-        activity.setStepCount(nextStepCount+1000);
-        assertEquals("2337/10000 steps today", textSteps.getText().toString());
+    @Test
+    public void testLastWalk() {
+        activity.setStepCount(0);
+        assertEquals("0/5000 steps today", textSteps.getText().toString());
+        Settings settings = new Settings(activity.getApplicationContext(), new ConcreteTimeStamper());
+        btnStartWalk.performClick();
+        activity.setStepCount(100);
+        assertEquals("100/5000 steps today", textSteps.getText().toString());
+        assertEquals("Current walk:\nWalk duration: 0s\n100 steps taken\nDistance walked: 0.0 feet\nAverage speed: 0.0mph", textWalkData.getText().toString());
+        activity.fitnessService.updateStepCount();
+        btnEndWalk.performClick();
+        activity.walksToday = new ArrayList<Walk>();
+        activity.walksToday.add(new Walk(100, Calendar.getInstance().getTimeInMillis()-5, Calendar.getInstance().getTimeInMillis()));
+        activity.updateWalkData();
+        assertEquals("Last walk:\nWalk duration: 0s\n100 steps taken\nDistance walked: 0.0 feet\nAverage speed: 0.0mph", textWalkData.getText().toString());
     }
 
     @Test
