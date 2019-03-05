@@ -34,26 +34,32 @@ public class MainActivity extends AppCompatActivity {
 
         checkEnvironment();
 
-        FirebaseApp.initializeApp(this);
-        mAuth = FirebaseAuth.getInstance();
-        FirebaseUser user = mAuth.getCurrentUser();
-        if(user != null || DEBUG) {
-            launchStepCountActivity();
+        if(!DEBUG) {
+            FirebaseApp.initializeApp(this);
+            mAuth = FirebaseAuth.getInstance();
+            FirebaseUser user = mAuth.getCurrentUser();
+            if (user != null) {
+                launchStepCountActivity();
+            }
+
+            GoogleSignInOptions signInOptions = new GoogleSignInOptions
+                    .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(getString(R.string.default_web_client_id))
+                    .requestProfile()
+                    .requestEmail()
+                    .build();
+
+            gsoclient = GoogleSignIn.getClient(this, signInOptions);
         }
-
-        GoogleSignInOptions signInOptions = new GoogleSignInOptions
-                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestProfile()
-                .requestEmail()
-                .build();
-
-        gsoclient = GoogleSignIn.getClient(this, signInOptions);
 
         View btnGoToSteps = findViewById(R.id.buttonGoToSteps);
         btnGoToSteps.setOnClickListener(v -> {
-            Intent signInIntent = gsoclient.getSignInIntent();
-            startActivityForResult(signInIntent, SIGN_IN_REQUEST_CODE);
+            if(DEBUG) {
+                launchStepCountActivity();
+            } else {
+                Intent signInIntent = gsoclient.getSignInIntent();
+                startActivityForResult(signInIntent, SIGN_IN_REQUEST_CODE);
+            }
         });
     }
 
@@ -115,11 +121,10 @@ public class MainActivity extends AppCompatActivity {
         }
         Log.i(TAG, "Env checked, debug flag is " + DEBUG);
         Log.i(TAG, "Env checked, espresso flag is " + ESPRESSO);
+
     }
 
     public void launchStepCountActivity() {
-        FirebaseUser tmp = FirebaseAuth.getInstance().getCurrentUser();
-        Log.d(TAG, "User email: " + tmp.getEmail() + " name: " + tmp.getDisplayName());
         Intent intent = new Intent(this, StepCountActivity.class);
         intent.putExtra("DEBUG", DEBUG);
         intent.putExtra("ESPRESSO", ESPRESSO);
