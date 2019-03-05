@@ -31,8 +31,8 @@ import static java.lang.Thread.sleep;
 public class StepCountActivity extends AppCompatActivity {
 
     private static final String TAG = "StepCountActivity";
-    private static boolean DEBUG = false;
-    private static boolean ESPRESSO= false;
+    private static boolean DEBUG;
+    private static boolean ESPRESSO;
 
     private UpdateStep updateStep;
 
@@ -182,7 +182,7 @@ public class StepCountActivity extends AppCompatActivity {
             updateStep.cancel(true);
         }
 
-        // If espresso test is not running, start the async task
+        // If espresso test is not running, start async task
         if( ESPRESSO == false ) {
             updateStep = new UpdateStep();
             updateStep.execute(-1);

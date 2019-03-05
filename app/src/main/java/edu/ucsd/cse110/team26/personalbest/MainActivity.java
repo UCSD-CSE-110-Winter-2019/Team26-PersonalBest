@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkEnvironment() {
 
-
         // check if running in Firebase Test Lab
         String testLabSetting = Settings.System.getString(getContentResolver(), "firebase.test.lab");
         if ("true".equals(testLabSetting)) {
@@ -43,9 +42,11 @@ public class MainActivity extends AppCompatActivity {
         try {
             Class.forName("android.support.test.espresso.Espresso");
             ESPRESSO = true;
+            DEBUG = true;
         } catch (ClassNotFoundException e) {
             ESPRESSO = false;
         }
+        Log.i(TAG, "Env checked, debug flag is " + DEBUG);
         Log.i(TAG, "Env checked, espresso flag is " + ESPRESSO);
     }
 
