@@ -193,21 +193,21 @@ public class StepCountActivity extends AppCompatActivity {
         }
 
         //Checking to see if we need to suggest a new step goal.
-        if(suggestGoal()){
-            //check if dialog box has been shown and if it's a new week:
-            if(hasSuggestHappend == false && timeStamper.isToday(timeStamper.weekStart())){
-                int suggestedGoal = (int)goalSteps+500;
-                createAlertDialog(suggestedGoal);
-                goalSteps = settings.getGoal();
-                hasSuggestHappend = true;
-            }
-            else if(hasSuggestHappend == true && !timeStamper.isToday(timeStamper.weekStart())){
-                hasSuggestHappend = false;
-            }
-            else{
-                //do nothing; keep suggestHappened as true since it's still sunday.
-            }
-        }
+//        if(suggestGoal()){
+//            //check if dialog box has been shown and if it's a new week:
+//            if(hasSuggestHappend == false && timeStamper.isToday(timeStamper.weekStart())){
+//                int suggestedGoal = (int)goalSteps+500;
+//                createAlertDialog(suggestedGoal);
+//                goalSteps = settings.getGoal();
+//                hasSuggestHappend = true;
+//            }
+//            else if(hasSuggestHappend == true && !timeStamper.isToday(timeStamper.weekStart())){
+//                hasSuggestHappend = false;
+//            }
+//            else{
+//                //do nothing; keep suggestHappened as true since it's still sunday.
+//            }
+//        }
 
 
         setStepCount(currentSteps);
@@ -264,6 +264,38 @@ public class StepCountActivity extends AppCompatActivity {
         textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", currentSteps, goalSteps));
         updateWalkData();
         if(currentSteps >= goalSteps && !goalCompleted && goalSteps!= 0) {
+            //do dialog box as well.
+
+            AlertDialog alertDialog = new AlertDialog.Builder(StepCountActivity.this).create();
+            alertDialog.setTitle("Suggesting Goals");
+
+            int suggestedGoalNum = (int)goalSteps;
+
+            if(goalSteps+500 <= 15000){
+                suggestedGoalNum += 500;
+            }
+            else{
+                suggestedGoalNum = 15000;
+            }
+            alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoalNum);
+            final int finalSuggestedGoalNum = suggestedGoalNum;
+            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            Settings settings = new Settings(getApplicationContext(), timeStamper);
+                            settings.saveGoal(finalSuggestedGoalNum);
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+            alertDialog.show();
+
             Toast completeGoalToast = Toast.makeText(getApplicationContext(),
                     String.format(Locale.getDefault(),"Congratulations, you've completed your goal of %d steps today!", goalSteps),
                     Toast.LENGTH_SHORT);
