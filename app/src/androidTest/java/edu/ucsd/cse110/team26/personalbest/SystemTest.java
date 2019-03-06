@@ -51,8 +51,7 @@ public class SystemTest {
      */
     @Test
     public void scenarioBasedSystemTest() {
-        onView(withText("GOOGLE LOG IN")).check(matches(isDisplayed()));
-        onView(withText("GOOGLE LOG IN")).perform(click());
+        onView(withId(R.id.buttonGoToSteps)).perform(click());
 
         onView(withId(R.id.feet)).perform(new setValueNumberPicker(5));
         onView(withId(R.id.inch)).perform(new setValueNumberPicker(5));

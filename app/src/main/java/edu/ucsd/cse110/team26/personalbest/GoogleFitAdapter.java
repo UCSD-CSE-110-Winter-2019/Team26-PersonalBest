@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessActivities;
 import com.google.android.gms.fitness.FitnessOptions;
@@ -63,18 +64,8 @@ public class GoogleFitAdapter implements FitnessService {
         if (lastSignedInAccount != null) {
             Fitness.getRecordingClient(activity, lastSignedInAccount)
                     .subscribe(DataType.TYPE_STEP_COUNT_CUMULATIVE)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Log.i(TAG, "Successfully subscribed!");
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.i(TAG, "There was a problem subscribing.");
-                        }
-                    });
+                    .addOnSuccessListener(aVoid -> Log.i(TAG, "Successfully subscribed!"))
+                    .addOnFailureListener(e -> Log.i(TAG, "There was a problem subscribing."));
         }
     }
 
@@ -86,25 +77,18 @@ public class GoogleFitAdapter implements FitnessService {
     public void updateStepCount() {
         lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);
         if (lastSignedInAccount != null) {
+            Log.i(TAG, "id: " + lastSignedInAccount.getId() + " name: " + lastSignedInAccount.getDisplayName() + " email: " + lastSignedInAccount.getEmail());
             Fitness.getHistoryClient(activity, lastSignedInAccount)
                     .readDailyTotal(DataType.TYPE_STEP_COUNT_DELTA)
-                    .addOnSuccessListener(new OnSuccessListener<DataSet>() {
-                        @Override
-                        public void onSuccess(DataSet dataSet) {
-                            int totalSteps = dataSet.isEmpty()
-                                    ? 0
-                                    : dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
-                            Log.i(TAG, "Steps successfully read: " + totalSteps);
+                    .addOnSuccessListener(dataSet -> {
+                        int totalSteps = dataSet.isEmpty()
+                                ? 0
+                                : dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
+                        Log.i(TAG, "Steps successfully read: " + totalSteps);
 
-                            activity.setStepCount(totalSteps);
-                        }
+                        activity.setStepCount(totalSteps);
                     })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.d(TAG, "There was a problem getting the step count.", e);
-                        }
-                    });
+                    .addOnFailureListener(e -> Log.d(TAG, "There was a problem getting the step count.", e));
         } else {
             Log.e(TAG, "Error reading step count: no login found");
         }
@@ -128,19 +112,9 @@ public class GoogleFitAdapter implements FitnessService {
             Log.i(TAG, "Inserting new walk in the Sessions API");
             Fitness.getSessionsClient(activity, lastSignedInAccount)
                     .insertSession(insertRequest)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Log.i(TAG, "Session insert was successful!");
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.i(TAG, "There was a problem inserting the session: " +
-                                    e.getLocalizedMessage());
-                        }
-                    });
+                    .addOnSuccessListener(aVoid -> Log.i(TAG, "Session insert was successful!"))
+                    .addOnFailureListener(e -> Log.i(TAG, "There was a problem inserting the session: " +
+                            e.getLocalizedMessage()));
         }
     }
 
@@ -166,39 +140,31 @@ public class GoogleFitAdapter implements FitnessService {
         if(lastSignedInAccount != null) {
             Task<SessionReadResponse> task = Fitness.getSessionsClient(activity, lastSignedInAccount)
                     .readSession(readRequest)
-                    .addOnSuccessListener(new OnSuccessListener<SessionReadResponse>() {
-                        @Override
-                        public void onSuccess(SessionReadResponse sessionReadResponse) {
-                            List<Session> sessions = sessionReadResponse.getSessions();
-                            Log.i(TAG, "Session read was successful. Number of returned sessions is: "
-                                    + sessions.size());
+                    .addOnSuccessListener(sessionReadResponse -> {
+                        List<Session> sessions = sessionReadResponse.getSessions();
+                        Log.i(TAG, "Session read was successful. Number of returned sessions is: "
+                                + sessions.size());
 
-                            for (Session session : sessions) {
-                                long startTimeStamp = session.getStartTime(TimeUnit.MILLISECONDS);
-                                long endTimeStamp = session.getEndTime(TimeUnit.MILLISECONDS);
-                                long tally = 0;
+                        for (Session session : sessions) {
+                            long startTimeStamp1 = session.getStartTime(TimeUnit.MILLISECONDS);
+                            long endTimeStamp1 = session.getEndTime(TimeUnit.MILLISECONDS);
+                            long tally = 0;
 
-                                List<DataSet> dataSets = sessionReadResponse.getDataSet(session, DataType.TYPE_STEP_COUNT_DELTA);
-                                if(dataSets.isEmpty()) continue;
-                                for (DataSet dataSet : dataSets) {
-                                    if(dataSet.isEmpty()) continue;
-                                    for (DataPoint dp : dataSet.getDataPoints()) {
-                                        for (Field field : dp.getDataType().getFields()) {
-                                            tally += dp.getValue(field).asInt();
-                                        }
+                            List<DataSet> dataSets = sessionReadResponse.getDataSet(session, DataType.TYPE_STEP_COUNT_DELTA);
+                            if(dataSets.isEmpty()) continue;
+                            for (DataSet dataSet : dataSets) {
+                                if(dataSet.isEmpty()) continue;
+                                for (DataPoint dp : dataSet.getDataPoints()) {
+                                    for (Field field : dp.getDataType().getFields()) {
+                                        tally += dp.getValue(field).asInt();
                                     }
-                                    //Log.i(TAG, "Data returned for Data type " + dataSet.getDataType().getName() + ": " + tally);
                                 }
-                                walkList.add(new Walk(tally, startTimeStamp, endTimeStamp));
+                                //Log.i(TAG, "Data returned for Data type " + dataSet.getDataType().getName() + ": " + tally);
                             }
+                            walkList.add(new Walk(tally, startTimeStamp1, endTimeStamp1));
                         }
                     })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.i(TAG, "Failed to read session");
-                        }
-                    });
+                    .addOnFailureListener(e -> Log.i(TAG, "Failed to read session"));
         }
     }
 
@@ -213,31 +179,23 @@ public class GoogleFitAdapter implements FitnessService {
                     .build();
 
             Fitness.getHistoryClient(activity, lastSignedInAccount).readData(readRequest)
-                    .addOnSuccessListener(new OnSuccessListener<DataReadResponse>() {
-                        @Override
-                        public void onSuccess(DataReadResponse dataReadResponse) {
-                            List<Bucket> buckets = dataReadResponse.getBuckets();
-                            Log.i(TAG, "Step counts retrieved: " + buckets.size());
-                            for (Bucket bucket : buckets) {
-                                int tally = 0;
-                                DataSet dataSet = bucket.getDataSet(DataType.TYPE_STEP_COUNT_DELTA);
-                                if(dataSet == null) continue;
-                                for (DataPoint dp : dataSet.getDataPoints()) {
-                                    for (Field field : dp.getDataType().getFields()) {
-                                        tally += dp.getValue(field).asInt();
-                                    }
-                                    //Log.i(TAG, "Data returned for Data type " + dataSet.getDataType().getName() + ": " + tally);
+                    .addOnSuccessListener(dataReadResponse -> {
+                        List<Bucket> buckets = dataReadResponse.getBuckets();
+                        Log.i(TAG, "Step counts retrieved: " + buckets.size());
+                        for (Bucket bucket : buckets) {
+                            int tally = 0;
+                            DataSet dataSet = bucket.getDataSet(DataType.TYPE_STEP_COUNT_DELTA);
+                            if(dataSet == null) continue;
+                            for (DataPoint dp : dataSet.getDataPoints()) {
+                                for (Field field : dp.getDataType().getFields()) {
+                                    tally += dp.getValue(field).asInt();
                                 }
-                                stepsList.add(tally);
+                                //Log.i(TAG, "Data returned for Data type " + dataSet.getDataType().getName() + ": " + tally);
                             }
+                            stepsList.add(tally);
                         }
                     })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.i(TAG, "Failed to read session");
-                        }
-                    });
+                    .addOnFailureListener(e -> Log.i(TAG, "Failed to read session"));
         }
     }
 
