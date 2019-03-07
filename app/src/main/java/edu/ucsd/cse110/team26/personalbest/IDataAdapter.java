@@ -21,6 +21,25 @@ interface IDataAdapter {
     void getUser(UserCallback userCallback);
 
     /**
+     * Updates the logged-in user's data stored in the database
+     * Calls given callback with true or false depending on if the server request was successful.
+     *
+     * @param user User's data to update
+     * @param booleanCallback callback lambda to handle success/failure
+     */
+    void updateUser(User user, BooleanCallback booleanCallback);
+
+    /**
+     * Gets the profile information of the friend with given email.
+     * Calls given callback with resulting data, or empty list if no such friend was found,
+     * or null list if server request failed.
+     *
+     * @param friendEmail email of friend to look up
+     * @param userCallback callback lambda to handle result
+     */
+    void getFriend(String friendEmail, UserCallback userCallback);
+
+    /**
      * Gets the last numOfDays Days of data of the friend with the specified ID,
      * calling the passed in callback with the resulting List of Day, or null if
      * the server request failed.
@@ -72,7 +91,7 @@ interface IDataAdapter {
 
     /**
      * Accepts the friend request made by the given requester to the currently logged in user.
-     * calls given callback with true or false depending on if the server request was successful.
+     * Calls given callback with true or false depending on if the server request was successful.
      *
      * @param requesterID the UID of the requester
      * @param booleanCallback callback to handle success/failure
