@@ -1,5 +1,7 @@
 package edu.ucsd.cse110.team26.personalbest;
 
+import android.support.annotation.NonNull;
+
 class Walk {
 
     private long steps;
@@ -50,6 +52,7 @@ class Walk {
         return stepsToFeet(height) / 5280 / hours;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "" + startTimeStamp + "-" + endTimeStamp + ": " +  steps;
