@@ -3,13 +3,13 @@ package edu.ucsd.cse110.team26.personalbest;
 import java.util.Calendar;
 import java.util.Date;
 
-public class DayInfo {
+public class Day {
     private int goal;
     private int totalStep;
     private int totalWalk;
     private Date date;
 
-    public DayInfo(int goal, int totalStep, int totalWalk, Date date)
+    public Day(int goal, int totalStep, int totalWalk, Date date)
     {
         this.goal = goal;
         this.totalStep = totalStep;

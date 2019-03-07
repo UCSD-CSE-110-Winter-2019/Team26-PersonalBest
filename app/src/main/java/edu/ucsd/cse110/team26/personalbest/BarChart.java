@@ -24,7 +24,7 @@ import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class CreateBarChart {
+public class BarChart {
     private CombinedChart mChart;
     private List<Integer> stepCounts;
     private List<ArrayList<Walk>> walkData;
@@ -33,7 +33,7 @@ public class CreateBarChart {
     private String userID;
     private String[] labels;
 
-    public CreateBarChart(Context context,CombinedChart mChart, List<Integer> stepCounts, List<ArrayList<Walk>> walkData)
+    public BarChart(Context context, CombinedChart mChart, List<Integer> stepCounts, List<ArrayList<Walk>> walkData)
     {
         this.context = context;
         this.mChart = mChart;
@@ -41,7 +41,7 @@ public class CreateBarChart {
         this.walkData = walkData;
     }
 
-    public CreateBarChart(String userID, int size)
+    public BarChart(String userID, int size)
     {
         this.size = size;
         this.userID = userID;

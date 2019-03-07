@@ -61,7 +61,7 @@ public class StepCountActivity extends AppCompatActivity {
     TimeStamper timeStamper;
 
     // BarChart object
-    private CreateBarChart createBarChart;
+    private BarChart createBarChart;
 
 
     /* ================
@@ -140,7 +140,7 @@ public class StepCountActivity extends AppCompatActivity {
         fitnessService.setup();
 
         CombinedChart mChart = findViewById(R.id.chart1);
-        createBarChart = new CreateBarChart(getApplicationContext(),mChart, stepCounts, walkData);
+        createBarChart = new BarChart(getApplicationContext(),mChart, stepCounts, walkData);
         createBarChart.draw();
 
         currentDate = timeStamper.now();

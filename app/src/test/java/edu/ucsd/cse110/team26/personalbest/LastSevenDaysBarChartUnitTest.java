@@ -25,7 +25,7 @@ public class LastSevenDaysBarChartUnitTest
 {
     private Context context;
     private CombinedChart mChart;
-    CreateBarChart createBarChart;
+    BarChart createBarChart;
     private StepCountActivity activity;
     @Before
     public void setUp()
@@ -41,11 +41,11 @@ public class LastSevenDaysBarChartUnitTest
         stepCounts.add(0);
 
         ArrayList<Walk> fakeWalk = new ArrayList<>();
-        Walk walk = new Walk();
+        Walk walk = new Walk(0,0);
         fakeWalk.add(walk);
         walkData.add(fakeWalk);
 
-        createBarChart = new CreateBarChart(context, mChart, stepCounts, walkData);
+        createBarChart = new BarChart(context, mChart, stepCounts, walkData);
         createBarChart.setupLabel();
     }
 
@@ -58,5 +58,19 @@ public class LastSevenDaysBarChartUnitTest
         String[] weekDay = new String[] {"Sun", "Mon","Tue", "Wed", "Thur", "Fri", "Sat"};
         assertEquals(lastDay, weekDay[todayDate-1]);
     }
+
+    @Test
+    public void testFirstDayLabel()
+    {
+        String firstDay = createBarChart.getFirstDayOfLabel();
+        Calendar date = Calendar.getInstance();
+        date.add(Calendar.DAY_OF_YEAR,-6);
+        int sevenDaysAgo = date.get(Calendar.DAY_OF_WEEK);
+        String[] weekDay = new String[] {"Sun", "Mon","Tue", "Wed", "Thur", "Fri", "Sat"};
+        assertEquals(firstDay, weekDay[sevenDaysAgo-1]);
+    }
+
+
+
 
 }

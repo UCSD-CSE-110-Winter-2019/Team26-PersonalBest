@@ -18,11 +18,6 @@ class Walk {
         this.startTimeStamp = startTimeStamp;
     }
 
-    Walk()
-    {
-
-    }
-
     long getSteps() {
         return steps;
     }
