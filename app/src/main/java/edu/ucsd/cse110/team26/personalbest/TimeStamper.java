@@ -4,6 +4,8 @@ package edu.ucsd.cse110.team26.personalbest;
 public interface TimeStamper {
     long now();
     long weekStart();
+    long lastSevenDays();
+    long today();
     long weekEnd();
     long[] getPreviousDay();
     int getDayOfWeek();

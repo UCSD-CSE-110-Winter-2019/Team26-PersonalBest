@@ -19,6 +19,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -28,6 +29,9 @@ public class CreateBarChart {
     private List<Integer> stepCounts;
     private List<ArrayList<Walk>> walkData;
     private Context context;
+    private int size;
+    private String userID;
+    private String[] labels;
 
     public CreateBarChart(Context context,CombinedChart mChart, List<Integer> stepCounts, List<ArrayList<Walk>> walkData)
     {
@@ -35,6 +39,12 @@ public class CreateBarChart {
         this.mChart = mChart;
         this.stepCounts = stepCounts;
         this.walkData = walkData;
+    }
+
+    public CreateBarChart(String userID, int size)
+    {
+        this.size = size;
+        this.userID = userID;
     }
 
     public void draw()
@@ -62,8 +72,7 @@ public class CreateBarChart {
         BarDataSet dataSet = new BarDataSet(entries, "Step Count");
         dataSet.setStackLabels(new String[] {"Intentional Walks", "Unintentional Walks"});
 
-        final String[] labels = new String[] {"Sun",
-                "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"};
+        setupLabel();
 
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
 
@@ -96,9 +105,38 @@ public class CreateBarChart {
         mChart.getXAxis().setAxisMinimum(data.getXMin() - 0.25f);
         mChart.setData(dataCombined);
 
-
     }
 
+    public void setupLabel()
+    {
+        Calendar date = Calendar.getInstance();
+        int today = date.get(Calendar.DAY_OF_WEEK);
+        switch (today)
+        {
+            case Calendar.MONDAY:
+                labels = new String[] {"Tue", "Wed", "Thur", "Fri", "Sat","Sun", "Mon"};
+                break;
+            case Calendar.TUESDAY:
+                labels = new String[] {"Wed", "Thur", "Fri", "Sat","Sun", "Mon","Tue"};
+                break;
+            case Calendar.WEDNESDAY:
+                labels = new String[] {"Thur", "Fri", "Sat","Sun", "Mon","Tue", "Wed"};
+                break;
+            case Calendar.THURSDAY:
+                labels = new String[] {"Fri", "Sat","Sun", "Mon","Tue", "Wed", "Thur"};
+                break;
+            case Calendar.FRIDAY:
+                labels = new String[] {"Sat","Sun", "Mon", "Tue", "Wed", "Thur", "Fri"};
+                break;
+            case Calendar.SATURDAY:
+                labels = new String[] {"Sun", "Mon","Tue", "Wed", "Thur", "Fri", "Sat"};
+                break;
+            case Calendar.SUNDAY:
+                labels = new String[] {"Mon", "Tue", "Wed", "Thur", "Fri", "Sat","Sun"};
+                break;
+
+        }
+    }
     private void getLineEntriesData(ArrayList<Entry> entries) {
         SharedPreferences sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
         int goal_sun = sharedPreferences.getInt("goal_Sun", 5000);
@@ -196,5 +234,14 @@ public class CreateBarChart {
         entries.add(new BarEntry(6f, new float[] {totalIntent[6],totalStep[6]- totalIntent[6]}));
 
         editor.apply();
+    }
+
+    public String getLastDayOfLabel()
+    {
+        return labels[6];
+    }
+    public String getFirstDayOfLabel()
+    {
+        return labels[0];
     }
 }
