@@ -136,9 +136,9 @@ public class StepCountActivity extends AppCompatActivity {
 
 
         fitnessService = FitnessServiceFactory.create(DEBUG, this);
+        dataAdapter = IDatabaseAdapterFactory.create(DEBUG, this.getApplicationContext());
 
         timeStamper = new ConcreteTimeStamper();
-        dataAdapter = new FirestoreAdapter(this.getApplicationContext());
         Log.i(TAG, "");
         //user = new User();
         dataAdapter.makeFriendRequest("nathanaelsee@gmail.com", (userList) -> {
