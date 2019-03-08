@@ -57,7 +57,9 @@ public class StepCountActivity extends AppCompatActivity {
     private long currentDate;
 
     private Walk currentWalk;
+    private User user;
 
+    IDataAdapter dataAdapter;
     TimeStamper timeStamper;
 
     // BarChart object
@@ -134,8 +136,14 @@ public class StepCountActivity extends AppCompatActivity {
 
 
         fitnessService = FitnessServiceFactory.create(DEBUG, this);
+        dataAdapter = IDatabaseAdapterFactory.create(DEBUG, this.getApplicationContext());
 
         timeStamper = new ConcreteTimeStamper();
+        Log.i(TAG, "");
+        //user = new User();
+        dataAdapter.makeFriendRequest("nathanaelsee@gmail.com", (userList) -> {
+            Log.d(TAG, "userlist: " + userList);
+        });
 
         fitnessService.setup();
 
@@ -148,39 +156,33 @@ public class StepCountActivity extends AppCompatActivity {
         btnStartWalk = findViewById(R.id.btnStartWalk);
         btnEndWalk = findViewById(R.id.btnEndWalk);
         textWalkData = findViewById(R.id.textWalkData);
-        btnStartWalk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(startTimeStamp == -1) {
-                    startTimeStamp = timeStamper.now();
-                    initialSteps = currentSteps;
-                    SharedPreferences.Editor editor = getSharedPreferences("walk", MODE_PRIVATE).edit();
-                    editor.putLong("startTimeStamp", startTimeStamp)
-                            .putLong("initialSteps", initialSteps).apply();
-                    btnStartWalk.setVisibility(View.GONE);
-                    btnEndWalk.setVisibility(View.VISIBLE);
-                    currentWalk = new Walk(0, startTimeStamp);
-                    updateWalkData();
-                }
+        btnStartWalk.setOnClickListener(view -> {
+            if(startTimeStamp == -1) {
+                startTimeStamp = timeStamper.now();
+                initialSteps = currentSteps;
+                SharedPreferences.Editor editor = getSharedPreferences("walk", MODE_PRIVATE).edit();
+                editor.putLong("startTimeStamp", startTimeStamp)
+                        .putLong("initialSteps", initialSteps).apply();
+                btnStartWalk.setVisibility(View.GONE);
+                btnEndWalk.setVisibility(View.VISIBLE);
+                currentWalk = new Walk(0, startTimeStamp);
+                updateWalkData();
             }
         });
-        btnEndWalk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(startTimeStamp != -1) {
-                    // ensure that any walk will end at the end of the day - splits off by midnight
-                    if(!timeStamper.isToday(startTimeStamp)) {
-                        fitnessService.walk(startTimeStamp, timeStamper.endOfDay(startTimeStamp));
-                        startTimeStamp = timeStamper.startOfDay(timeStamper.now());
-                    }
-                    fitnessService.walk(startTimeStamp, timeStamper.now());
-                    startTimeStamp = -1;
-                    currentWalk = null;
-                    SharedPreferences.Editor editor = getSharedPreferences("walk", MODE_PRIVATE).edit();
-                    editor.putLong("startTimeStamp", -1).apply();
-                    btnStartWalk.setVisibility(View.VISIBLE);
-                    btnEndWalk.setVisibility(View.GONE);
+        btnEndWalk.setOnClickListener(view -> {
+            if(startTimeStamp != -1) {
+                // ensure that any walk will end at the end of the day - splits off by midnight
+                if(!timeStamper.isToday(startTimeStamp)) {
+                    fitnessService.walk(startTimeStamp, timeStamper.endOfDay(startTimeStamp));
+                    startTimeStamp = timeStamper.startOfDay(timeStamper.now());
                 }
+                fitnessService.walk(startTimeStamp, timeStamper.now());
+                startTimeStamp = -1;
+                currentWalk = null;
+                SharedPreferences.Editor editor = getSharedPreferences("walk", MODE_PRIVATE).edit();
+                editor.putLong("startTimeStamp", -1).apply();
+                btnStartWalk.setVisibility(View.VISIBLE);
+                btnEndWalk.setVisibility(View.GONE);
             }
         });
     }
@@ -194,7 +196,7 @@ public class StepCountActivity extends AppCompatActivity {
         }
 
         // If espresso test is not running, start async task
-        if( ESPRESSO == false ) {
+        if(!ESPRESSO) {
             updateStep = new UpdateStep();
             updateStep.execute(-1);
         }
@@ -243,7 +245,7 @@ public class StepCountActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // If authentication was required during google fit setup, this will be called after the user authenticates
-        if (resultCode == Activity.RESULT_OK && ESPRESSO == false) {
+        if (resultCode == Activity.RESULT_OK && !ESPRESSO) {
             if (requestCode == fitnessService.getRequestCode()) {
                 if(updateStep != null && !updateStep.isCancelled()) updateStep.cancel(true);
                 updateStep = new UpdateStep();
@@ -263,35 +265,15 @@ public class StepCountActivity extends AppCompatActivity {
         if(currentSteps >= goalSteps && !goalCompleted && goalSteps!= 0) {
             //do dialog box as well.
 
-            AlertDialog alertDialog = new AlertDialog.Builder(StepCountActivity.this).create();
-            alertDialog.setTitle("Suggesting Goals");
-
             int suggestedGoalNum = (int)goalSteps;
 
-            if(goalSteps+500 <= 15000){
+            if(goalSteps + 500 <= 15000){
                 suggestedGoalNum += 500;
             }
             else{
                 suggestedGoalNum = 15000;
             }
-            alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoalNum);
-            final int finalSuggestedGoalNum = suggestedGoalNum;
-            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            Settings settings = new Settings(getApplicationContext(), timeStamper);
-                            settings.saveGoal(finalSuggestedGoalNum);
-                            dialog.dismiss();
-                        }
-                    });
-            alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO",
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-            alertDialog.show();
+            createAlertDialog(suggestedGoalNum);
 
             Toast completeGoalToast = Toast.makeText(getApplicationContext(),
                     String.format(Locale.getDefault(),"Congratulations, you've completed your goal of %d steps today!", goalSteps),
@@ -360,24 +342,13 @@ public class StepCountActivity extends AppCompatActivity {
         AlertDialog alertDialog = new AlertDialog.Builder(StepCountActivity.this).create();
         alertDialog.setTitle("Suggesting Goals");
 
-
-
         alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoal);
-        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        Settings settings = new Settings(getApplicationContext(), timeStamper);
-                        settings.saveGoal(suggestedGoal);
-                        dialog.dismiss();
-                    }
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES", (dialog, which) -> {
+                    Settings settings = new Settings(getApplicationContext(), timeStamper);
+                    settings.saveGoal(suggestedGoal);
+                    dialog.dismiss();
                 });
-        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) -> dialog.dismiss());
         alertDialog.show();
     }
 
@@ -386,8 +357,7 @@ public class StepCountActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void checkNewWeek()
-    {
+    private void checkNewWeek() {
         SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
