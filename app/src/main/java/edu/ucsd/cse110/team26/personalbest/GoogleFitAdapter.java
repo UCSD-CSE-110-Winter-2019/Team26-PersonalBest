@@ -1,11 +1,9 @@
 package edu.ucsd.cse110.team26.personalbest;
 
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessActivities;
 import com.google.android.gms.fitness.FitnessOptions;
@@ -18,10 +16,7 @@ import com.google.android.gms.fitness.data.Session;
 import com.google.android.gms.fitness.request.DataReadRequest;
 import com.google.android.gms.fitness.request.SessionInsertRequest;
 import com.google.android.gms.fitness.request.SessionReadRequest;
-import com.google.android.gms.fitness.result.DataReadResponse;
 import com.google.android.gms.fitness.result.SessionReadResponse;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.List;
@@ -77,7 +72,6 @@ public class GoogleFitAdapter implements FitnessService {
     public void updateStepCount() {
         lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);
         if (lastSignedInAccount != null) {
-            Log.i(TAG, "id: " + lastSignedInAccount.getId() + " name: " + lastSignedInAccount.getDisplayName() + " email: " + lastSignedInAccount.getEmail());
             Fitness.getHistoryClient(activity, lastSignedInAccount)
                     .readDailyTotal(DataType.TYPE_STEP_COUNT_DELTA)
                     .addOnSuccessListener(dataSet -> {

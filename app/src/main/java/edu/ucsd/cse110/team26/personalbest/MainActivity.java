@@ -66,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
     }
 
     @Override
@@ -109,8 +108,6 @@ public class MainActivity extends AppCompatActivity {
         if ("true".equals(testLabSetting)) {
             DEBUG = true;
         }
-
-        Log.i(TAG, "Env checked, debug flag is " + DEBUG);
 
         try {
             Class.forName("android.support.test.espresso.Espresso");
