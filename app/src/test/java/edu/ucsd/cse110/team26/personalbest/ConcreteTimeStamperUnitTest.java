@@ -75,24 +75,25 @@ public class ConcreteTimeStamperUnitTest {
     @Test
     public void nextDayTest(){
         assertEquals(24*60*60*1000, timeStamper.nextDay(0));
-        assertEquals(48*60*60*1000, timeStamper.nextDay(1));
+        assertEquals(24*60*60*1000 + 1, timeStamper.nextDay(1));
+
+        assertEquals(48*60*60*1000, timeStamper.nextDay(24*60*60*1000));
 
 
     }
 
     @Test
     public void endOfDayTest(){
-        long pacificOffsetFromGMTTime = 8*60*60*1000;
 
-        assertEquals(23*60*60*1000 + 59*60*1000+ 59*1000 + 999 + pacificOffsetFromGMTTime, timeStamper.endOfDay(pacificOffsetFromGMTTime));
+        assertEquals(23*60*60*1000 + 59*60*1000+ 59*1000 + 999, timeStamper.endOfDay(0));
 
     }
 
     @Test
     public void startOfDayTest(){
-        long pacificOffsetFromGMTTime = 8*60*60*1000;
 
-        assertEquals(pacificOffsetFromGMTTime, timeStamper.startOfDay(pacificOffsetFromGMTTime));
+
+        assertEquals(0, timeStamper.startOfDay(0));
     }
 
 
