@@ -109,8 +109,6 @@ public class MainActivity extends AppCompatActivity {
             DEBUG = true;
         }
 
-        Log.i(TAG, "Env checked, debug flag is " + DEBUG);
-
         try {
             Class.forName("android.support.test.espresso.Espresso");
             ESPRESSO = true;

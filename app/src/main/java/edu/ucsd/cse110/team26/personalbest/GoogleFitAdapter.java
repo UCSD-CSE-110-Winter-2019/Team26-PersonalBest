@@ -72,7 +72,6 @@ public class GoogleFitAdapter implements FitnessService {
     public void updateStepCount() {
         lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);
         if (lastSignedInAccount != null) {
-            Log.i(TAG, "id: " + lastSignedInAccount.getId() + " name: " + lastSignedInAccount.getDisplayName() + " email: " + lastSignedInAccount.getEmail());
             Fitness.getHistoryClient(activity, lastSignedInAccount)
                     .readDailyTotal(DataType.TYPE_STEP_COUNT_DELTA)
                     .addOnSuccessListener(dataSet -> {

@@ -83,20 +83,19 @@ interface IDataAdapter {
      * info of the requestee. Otherwise returns an empty User List.
      * If server request failed, calls callback with null User List.
      *
-     * @param user the logged in user
      * @param friendEmail the email to make a request to
      * @param userCallback callback to handle resulting list of users
      */
-    void makeFriendRequest(User user, String friendEmail, UserCallback userCallback);
+    void makeFriendRequest(String friendEmail, UserCallback userCallback);
 
     /**
      * Accepts the friend request made by the given requester to the currently logged in user.
      * Calls given callback with true or false depending on if the server request was successful.
      *
-     * @param requesterID the UID of the requester
+     * @param requesterEmail the UID of the requester
      * @param booleanCallback callback to handle success/failure
      */
-    void acceptFriendRequest(String requesterID, BooleanCallback booleanCallback);
+    void acceptFriendRequest(String requesterEmail, BooleanCallback booleanCallback);
 
     interface DayCallback {
         void call(List<Day> days);
