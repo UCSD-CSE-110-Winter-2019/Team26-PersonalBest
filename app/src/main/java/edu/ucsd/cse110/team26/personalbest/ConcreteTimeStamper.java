@@ -36,6 +36,28 @@ public class ConcreteTimeStamper implements TimeStamper {
         return cal.getTimeInMillis();
     }
 
+    public long lastSevenDays()
+    {
+        Calendar cal = Calendar.getInstance(TimeZone.getDefault());
+        cal.add(Calendar.DATE, -6);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTimeInMillis();
+    }
+
+    public long today()
+    {
+        Calendar cal = Calendar.getInstance(TimeZone.getDefault());
+        //cal.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY);
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MILLISECOND, 999);
+        return cal.getTimeInMillis();
+    }
+
     @Override
     public long[] getPreviousDay() {
         Calendar cal = Calendar.getInstance();

@@ -24,6 +24,12 @@ public class MockTimeStamper implements TimeStamper {
     }
 
     @Override
+    public long lastSevenDays() {return 0;}
+
+    @Override
+    public long today() {return 0;}
+
+    @Override
     public long[] getPreviousDay() {
         return new long[0];
     }

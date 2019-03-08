@@ -61,7 +61,7 @@ public class StepCountActivity extends AppCompatActivity {
     TimeStamper timeStamper;
 
     // BarChart object
-    private CreateBarChart createBarChart;
+    private BarChart createBarChart;
 
 
     /* ================
@@ -84,15 +84,16 @@ public class StepCountActivity extends AppCompatActivity {
                     }
                     fitnessService.updateStepCount();
                     stepCounts.clear();
-                    fitnessService.getStepsCount(timeStamper.weekStart(), timeStamper.weekEnd(), stepCounts);
+                    fitnessService.getStepsCount(timeStamper.lastSevenDays(), timeStamper.today(), stepCounts);
 
                     walkData.clear();
-                    long ts = timeStamper.startOfDay(timeStamper.weekStart());
+                    long ts = timeStamper.startOfDay(timeStamper.lastSevenDays());
                     for(int i = 0; i < 7; i++) {
                         ArrayList<Walk> list = new ArrayList<>();
                         walkData.add(list);
                         fitnessService.getWalks(ts, timeStamper.endOfDay(ts), list);
-                        if(timeStamper.isToday(ts)) walksToday = list;
+                        if(timeStamper.isToday(ts))
+                            walksToday = list;
                         ts = timeStamper.nextDay(ts);
                     }
 
@@ -122,6 +123,16 @@ public class StepCountActivity extends AppCompatActivity {
 
         DEBUG = getIntent().getExtras().getBoolean("DEBUG");
         ESPRESSO = getIntent().getExtras().getBoolean("ESPRESSO");
+        /*if(getIntent().hasExtra("DEBUG"))
+        {
+            DEBUG = getIntent().getExtras().getBoolean("DEBUG");
+        }
+        if(getIntent().hasExtra("ESPRESSO"))
+        {
+            ESPRESSO = getIntent().getExtras().getBoolean("ESPRESSO");
+        }*/
+
+
         fitnessService = FitnessServiceFactory.create(DEBUG, this);
 
         timeStamper = new ConcreteTimeStamper();
@@ -129,7 +140,7 @@ public class StepCountActivity extends AppCompatActivity {
         fitnessService.setup();
 
         CombinedChart mChart = findViewById(R.id.chart1);
-        createBarChart = new CreateBarChart(getApplicationContext(),mChart, stepCounts, walkData);
+        createBarChart = new BarChart(getApplicationContext(),mChart, stepCounts, walkData);
         createBarChart.draw();
 
         currentDate = timeStamper.now();
