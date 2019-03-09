@@ -148,8 +148,13 @@ public class StepCountActivity extends AppCompatActivity {
 
         fitnessService.setup();
 
+        // fake goal
+        List<Integer> goalData = new ArrayList<>();
+        for (int j=0; j<7; j++) goalData.add(5000);
+
+        boolean monthlySummary = false;
         CombinedChart mChart = findViewById(R.id.chart1);
-        createBarChart = new BarChart(getApplicationContext(),mChart, stepCounts, walkData);
+        createBarChart = new BarChart(getApplicationContext(),mChart, stepCounts, walkData, goalData, monthlySummary);
         createBarChart.draw();
 
         currentDate = timeStamper.now();

@@ -30,19 +30,19 @@ public class BarChart {
     private List<ArrayList<Walk>> walkData;
     private Context context;
     private int size;
-    private String userID;
     private String[] labels;
     private List<Integer> goalData;
 
     public BarChart(Context context, CombinedChart mChart, List<Integer> stepCounts, List<ArrayList<Walk>> walkData
-            ,List<Integer> goalData, int size)
+            ,List<Integer> goalData, boolean monthlySummary)
     {
         this.context = context;
         this.mChart = mChart;
         this.stepCounts = stepCounts;
         this.walkData = walkData;
         this.goalData = goalData;
-        this.size = size;
+        if(monthlySummary) this.size = 28;
+        else this.size = 7;
     }
 
 
@@ -70,11 +70,22 @@ public class BarChart {
 
         BarDataSet dataSet = new BarDataSet(entries, "Step Count");
         dataSet.setStackLabels(new String[] {"Intentional Walks", "Unintentional Walks"});
+
         if(size == 7)
         {
             setupLabel();
+            mChart.getXAxis().setLabelCount(dataSet.getEntryCount());
+            XAxis xAxis = mChart.getXAxis();
+            xAxis.setPosition(XAxis.XAxisPosition.BOTH_SIDED);
+            xAxis.setAxisMinimum(0f);
+            xAxis.setGranularity(1f);
+            xAxis.setValueFormatter(new IAxisValueFormatter() {
+                @Override
+                public String getFormattedValue(float value, AxisBase axis) {
+                    return labels[(int) value % labels.length];
+                }
+            });
         }
-
 
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
 
@@ -83,18 +94,6 @@ public class BarChart {
         d.setBarWidth(barWidth);
         BarData data = new BarData(dataSet);
 
-        mChart.getXAxis().setLabelCount(dataSet.getEntryCount());
-
-        XAxis xAxis = mChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTH_SIDED);
-        xAxis.setAxisMinimum(0f);
-        xAxis.setGranularity(1f);
-        xAxis.setValueFormatter(new IAxisValueFormatter() {
-            @Override
-            public String getFormattedValue(float value, AxisBase axis) {
-                return labels[(int) value % labels.length];
-            }
-        });
 
         dataSet.setColors(new int[] {ContextCompat.getColor(mChart.getContext(), R.color.colorAccent),
                 ContextCompat.getColor(mChart.getContext(), R.color.colorPrimary),});
@@ -138,7 +137,8 @@ public class BarChart {
                 break;
         }
     }
-    private void getLineEntriesData(ArrayList<Entry> entries) {
+
+    /*private void getLineEntriesData(ArrayList<Entry> entries) {
         SharedPreferences sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
         int goal_sun = sharedPreferences.getInt("goal_Sun", 5000);
         int goal_mon = sharedPreferences.getInt("goal_Mon", 5000);
@@ -156,9 +156,15 @@ public class BarChart {
         entries.add(new Entry(4, goal_thu));
         entries.add(new Entry(5, goal_fri));
         entries.add(new Entry(6, goal_sat));
+    }*/
+
+    private void getLineEntriesData(ArrayList<Entry> entries) {
+        for (int i=0; i< this.size; i++) {
+            entries.add(new Entry(i, goalData.get(i)));
+        }
     }
 
-    private void updateGoal()
+    /*private void updateGoal()
     {
         SharedPreferences sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -175,6 +181,10 @@ public class BarChart {
             editor.putBoolean("new_week",false);
         }
         editor.apply();
+    }*/
+
+    private void updateGoal() {
+
     }
 
     private LineData generateLineData() {
@@ -245,7 +255,4 @@ public class BarChart {
     {
         return labels[0];
     }
-
-
-    public void set
 }
