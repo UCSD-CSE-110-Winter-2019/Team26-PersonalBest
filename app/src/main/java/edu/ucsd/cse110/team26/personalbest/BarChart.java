@@ -32,20 +32,19 @@ public class BarChart {
     private int size;
     private String userID;
     private String[] labels;
+    private List<Integer> goalData;
 
-    public BarChart(Context context, CombinedChart mChart, List<Integer> stepCounts, List<ArrayList<Walk>> walkData)
+    public BarChart(Context context, CombinedChart mChart, List<Integer> stepCounts, List<ArrayList<Walk>> walkData
+            ,List<Integer> goalData, int size)
     {
         this.context = context;
         this.mChart = mChart;
         this.stepCounts = stepCounts;
         this.walkData = walkData;
+        this.goalData = goalData;
+        this.size = size;
     }
 
-    public BarChart(String userID, int size)
-    {
-        this.size = size;
-        this.userID = userID;
-    }
 
     public void draw()
     {
@@ -71,8 +70,11 @@ public class BarChart {
 
         BarDataSet dataSet = new BarDataSet(entries, "Step Count");
         dataSet.setStackLabels(new String[] {"Intentional Walks", "Unintentional Walks"});
+        if(size == 7)
+        {
+            setupLabel();
+        }
 
-        setupLabel();
 
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
 
@@ -134,7 +136,6 @@ public class BarChart {
             case Calendar.SUNDAY:
                 labels = new String[] {"Mon", "Tue", "Wed", "Thur", "Fri", "Sat","Sun"};
                 break;
-
         }
     }
     private void getLineEntriesData(ArrayList<Entry> entries) {
@@ -244,4 +245,7 @@ public class BarChart {
     {
         return labels[0];
     }
+
+
+    public void set
 }

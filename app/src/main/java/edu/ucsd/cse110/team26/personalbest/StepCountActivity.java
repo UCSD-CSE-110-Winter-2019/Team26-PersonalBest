@@ -40,6 +40,7 @@ public class StepCountActivity extends AppCompatActivity {
     private TextView textWalkData;
     private Button btnStartWalk;
     private Button btnEndWalk;
+    private Button btnFriend;
 
     FitnessService fitnessService;
     private long currentSteps = 0;
@@ -185,6 +186,15 @@ public class StepCountActivity extends AppCompatActivity {
                 btnEndWalk.setVisibility(View.GONE);
             }
         });
+
+        btnFriend = findViewById(R.id.buttonFriend);
+        btnFriend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchFriendList();
+            }
+        });
+
     }
 
     @Override
@@ -260,7 +270,7 @@ public class StepCountActivity extends AppCompatActivity {
         Settings settings = new Settings(getApplicationContext(), timeStamper);
         currentSteps = stepCount;
         goalSteps = settings.getGoal();
-        textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", currentSteps, goalSteps));
+        textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps", currentSteps, goalSteps));
         updateWalkData();
         if(currentSteps >= goalSteps && !goalCompleted && goalSteps!= 0) {
             //do dialog box as well.
@@ -394,6 +404,12 @@ public class StepCountActivity extends AppCompatActivity {
         settings.saveGoal((int)goalSteps);
         lastEncouragingMessageSteps = 0;
 
+    }
+
+    public void launchFriendList()
+    {
+        Intent intent = new Intent(this, FriendListActivity.class);
+        startActivity(intent);
     }
 
 }

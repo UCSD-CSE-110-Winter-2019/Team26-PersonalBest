@@ -10,11 +10,11 @@
 
     <TextView
         android:id="@+id/textSteps"
-        android:layout_width="wrap_content"
+        android:layout_width="333dp"
         android:layout_height="wrap_content"
         android:padding="20dp"
-        android:textSize="30sp"
-        android:text="" />
+        android:text=""
+        android:textSize="30sp" />
 
     <Button
         android:id="@+id/btnStartWalk"
@@ -35,15 +35,29 @@
 
     <TextView
         android:id="@+id/textWalkData"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:text="@string/empty_space" />
+        android:layout_width="276dp"
+        android:layout_height="109dp"
+        android:text="@string/empty_space"
+        android:textSize="20sp" />
+
+    <Switch
+        android:id="@+id/switch1"
+        android:layout_width="99dp"
+        android:layout_height="11dp"
+        android:text="Switch" />
 
     <com.github.mikephil.charting.charts.CombinedChart
         android:id="@+id/chart1"
         android:layout_width="match_parent"
         android:layout_height="280dp"
         android:layout_margin="30dp"/>
+
+    <Button
+        android:id="@+id/buttonFriend"
+        android:layout_width="259dp"
+        android:layout_height="wrap_content"
+        android:text="@string/friend_list_button" />
+
+
 
 </LinearLayout>

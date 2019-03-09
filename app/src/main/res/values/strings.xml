@@ -105,4 +105,5 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="action_settings">Settings</string>
+    <string name="friend_list_button">Friend List</string>
 </resources>
