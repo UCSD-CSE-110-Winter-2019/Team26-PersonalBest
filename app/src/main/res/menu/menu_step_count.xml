@@ -9,7 +9,7 @@
         />
     <item
         android:id="@+id/action_friends_list"
-        android:title="@string/friends_list"
+        android:title="@string/friend_list"
         android:orderInCategory="200"
         app:showAsAction="never"
         />

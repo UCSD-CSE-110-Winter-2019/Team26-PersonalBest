@@ -28,9 +28,12 @@
     <string name="friend">Friend</string>
     <string name="accept_friend_request">accept Friend Request</string>
     <string name="reject_friend_request">Reject Friend Request</string>
-    <string name="friend_list">FRIEND LIST</string>
+    <string name="friend_list">Friend List</string>
     <string name="settings">Settings</string>
     <string name="friends_list">Friends List</string>
     <string name="send_a_message">Send a message</string>
     <string name="send">SEND</string>
+    <string name="title_activity_chat_history">ChatHistory</string>
+    <string name="hint_chat_screen">message will appear here</string>
+    <string name="chat_history">Chat History</string>
 </resources>

@@ -3,8 +3,11 @@ package edu.ucsd.cse110.team26.personalbest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -47,10 +50,26 @@ public class FriendsListActivity extends AppCompatActivity {
         listView.setOnItemClickListener((parent, view, position, id) -> {
             Log.i(getClass().getName(), "Click on friend at position" + position);
             User friend = (User) friendAdapter.getItem(position);
-            Intent intent = new Intent(FriendsListActivity.this, FriendProfile.class);
+            Intent intent = new Intent(FriendsListActivity.this, FriendProfileActivity.class);
             intent.putExtra("Friend Name", friend.name);
             startActivity(intent);
         });
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
     }
 
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return true;
+    }
 }
