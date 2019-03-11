@@ -11,8 +11,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".FriendProfile"></activity>
         <activity
-            android:name=".FriendsActivity"
+            android:name=".FriendsListActivity"
             android:label="@string/title_activity_friends"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".GetHeightActivity" />

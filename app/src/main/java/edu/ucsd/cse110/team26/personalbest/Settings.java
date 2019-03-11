@@ -19,10 +19,12 @@ public class Settings {
     private SharedPreferences sharedPreferences;
     private TimeStamper timeStamper;
     private int defGoal = 5000;
+    private IDataAdapter dataAdapter;
 
-    public Settings (Context context, TimeStamper timeStamper) {
+    public Settings (Context context, TimeStamper timeStamper, boolean DEBUG) {
         sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE );
         this.timeStamper = timeStamper;
+        this.dataAdapter = IDatabaseAdapterFactory.create(DEBUG, context);
     }
 
     public void saveHeight( int feet, int inches ) {
@@ -55,7 +57,6 @@ public class Settings {
                 default:
                     break;
         }
-        editor.apply();
     }
 
     public int getGoal() {

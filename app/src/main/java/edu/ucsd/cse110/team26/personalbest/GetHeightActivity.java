@@ -11,10 +11,13 @@ public class GetHeightActivity extends AppCompatActivity {
 
     private String fitnessServiceKey = "GOOGLE_FIT";
     private Settings settings;
+    private boolean DEBUG;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_get_height);
+
+        DEBUG = getIntent().getBooleanExtra("DEBUG", false);
 
         final TextView resultFeet = findViewById(R.id.feetText);
         final TextView resultInch = findViewById(R.id.inchText);
@@ -42,7 +45,7 @@ public class GetHeightActivity extends AppCompatActivity {
                     np1.setEnabled(false);
                     np2.setEnabled(false);
 
-                    settings = new Settings(getApplicationContext(), new ConcreteTimeStamper());
+                    settings = new Settings(getApplicationContext(), new ConcreteTimeStamper(), DEBUG);
                     settings.saveHeight(np1.getValue(), np2.getValue());
 
                     confirmButton.setText("Done");

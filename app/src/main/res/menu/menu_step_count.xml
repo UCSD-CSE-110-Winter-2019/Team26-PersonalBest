@@ -3,11 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_settings"
-        android:title="Settings"
+        android:title="@string/settings"
         android:orderInCategory="100"
         app:showAsAction="never"
-
-
-
+        />
+    <item
+        android:id="@+id/action_friends_list"
+        android:title="@string/friends_list"
+        android:orderInCategory="200"
+        app:showAsAction="never"
         />
 </menu>

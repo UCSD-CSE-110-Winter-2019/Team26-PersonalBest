@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/friendName"
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            android:text="@string/friend"
+             android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/friendEmail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/friend_email"
+           android:textSize="15sp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/pendingFriend">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/pending"
+            android:textColor="#FFCC00"/>
+
+        <ImageButton
+            android:id="@+id/acceptFriendRequest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="140dp"
+            android:src="@drawable/ic_check_circle_black_24dp"
+            android:contentDescription="@string/accept_friend_request" />
+
+        <ImageButton
+            android:id="@+id/rejectFriendRequest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_remove_circle_black_24dp"
+            android:contentDescription="@string/reject_friend_request"/>
+    </LinearLayout>
+</LinearLayout>

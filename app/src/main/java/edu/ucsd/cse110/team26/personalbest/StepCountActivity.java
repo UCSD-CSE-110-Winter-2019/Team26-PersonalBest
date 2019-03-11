@@ -2,7 +2,6 @@ package edu.ucsd.cse110.team26.personalbest;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -125,14 +124,6 @@ public class StepCountActivity extends AppCompatActivity {
 
         DEBUG = getIntent().getExtras().getBoolean("DEBUG");
         ESPRESSO = getIntent().getExtras().getBoolean("ESPRESSO");
-        /*if(getIntent().hasExtra("DEBUG"))
-        {
-            DEBUG = getIntent().getExtras().getBoolean("DEBUG");
-        }
-        if(getIntent().hasExtra("ESPRESSO"))
-        {
-            ESPRESSO = getIntent().getExtras().getBoolean("ESPRESSO");
-        }*/
 
 
         fitnessService = FitnessServiceFactory.create(DEBUG, this);
@@ -156,6 +147,7 @@ public class StepCountActivity extends AppCompatActivity {
         btnStartWalk = findViewById(R.id.btnStartWalk);
         btnEndWalk = findViewById(R.id.btnEndWalk);
         textWalkData = findViewById(R.id.textWalkData);
+
         btnStartWalk.setOnClickListener(view -> {
             if(startTimeStamp == -1) {
                 startTimeStamp = timeStamper.now();
@@ -185,6 +177,7 @@ public class StepCountActivity extends AppCompatActivity {
                 btnEndWalk.setVisibility(View.GONE);
             }
         });
+
     }
 
     @Override
@@ -201,7 +194,7 @@ public class StepCountActivity extends AppCompatActivity {
             updateStep.execute(-1);
         }
 
-        Settings settings = new Settings(getApplicationContext(), timeStamper);
+        Settings settings = new Settings(getApplicationContext(), timeStamper, DEBUG);
         SharedPreferences user = getSharedPreferences("user", MODE_PRIVATE);
         goalSteps = settings.getGoal();
         user_height = settings.getHeight();
@@ -257,7 +250,7 @@ public class StepCountActivity extends AppCompatActivity {
     }
 
     public void setStepCount(long stepCount) {
-        Settings settings = new Settings(getApplicationContext(), timeStamper);
+        Settings settings = new Settings(getApplicationContext(), timeStamper, DEBUG);
         currentSteps = stepCount;
         goalSteps = settings.getGoal();
         textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", currentSteps, goalSteps));
@@ -323,7 +316,7 @@ public class StepCountActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.menu_main, menu);
+        menuInflater.inflate(R.menu.menu_step_count, menu);
         return true;
     }
 
@@ -332,6 +325,13 @@ public class StepCountActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             Intent intent = new Intent(StepCountActivity.this, SettingsActivity.class);
+            intent.putExtra("DEBUG", DEBUG);
+            StepCountActivity.this.startActivity(intent);
+            return true;
+        }
+        if( id == R.id.action_friends_list ) {
+            Intent intent = new Intent(StepCountActivity.this, FriendsListActivity.class);
+            intent.putExtra("DEBUG", DEBUG);
             StepCountActivity.this.startActivity(intent);
             return true;
         }
@@ -344,7 +344,7 @@ public class StepCountActivity extends AppCompatActivity {
 
         alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoal);
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES", (dialog, which) -> {
-                    Settings settings = new Settings(getApplicationContext(), timeStamper);
+                    Settings settings = new Settings(getApplicationContext(), timeStamper, DEBUG);
                     settings.saveGoal(suggestedGoal);
                     dialog.dismiss();
                 });
@@ -354,6 +354,7 @@ public class StepCountActivity extends AppCompatActivity {
 
     public void launchGetHeightActivity() {
         Intent intent = new Intent(this, GetHeightActivity.class);
+        intent.putExtra("DEBUG", DEBUG);
         startActivity(intent);
     }
 
@@ -390,7 +391,7 @@ public class StepCountActivity extends AppCompatActivity {
             previousSteps.add(0);
         previousDaySteps = previousSteps.get(0);
         Log.i(TAG, String.format("New day. Setting previous day's steps to %d", previousDaySteps));
-        Settings settings = new Settings(getApplicationContext(), timeStamper);
+        Settings settings = new Settings(getApplicationContext(), timeStamper, DEBUG);
         settings.saveGoal((int)goalSteps);
         lastEncouragingMessageSteps = 0;
 
