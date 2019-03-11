@@ -13,16 +13,13 @@ import java.util.Calendar;
 
 public class SettingsActivity extends AppCompatActivity {
     private Settings settings;
-    private boolean DEBUG;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        DEBUG = getIntent().getBooleanExtra("DEBUG", false);
-
-        settings = new Settings(getApplicationContext(), new ConcreteTimeStamper(), DEBUG );
+        settings = new Settings(getApplicationContext(), new ConcreteTimeStamper() );
 
         EditText goalEdit = findViewById(R.id.goalEdit);
         NumberPicker feetNp = findViewById(R.id.feetNumberPicker);

@@ -194,7 +194,7 @@ public class StepCountActivity extends AppCompatActivity {
             updateStep.execute(-1);
         }
 
-        Settings settings = new Settings(getApplicationContext(), timeStamper, DEBUG);
+        Settings settings = new Settings(getApplicationContext(), timeStamper);
         SharedPreferences user = getSharedPreferences("user", MODE_PRIVATE);
         goalSteps = settings.getGoal();
         user_height = settings.getHeight();
@@ -250,7 +250,7 @@ public class StepCountActivity extends AppCompatActivity {
     }
 
     public void setStepCount(long stepCount) {
-        Settings settings = new Settings(getApplicationContext(), timeStamper, DEBUG);
+        Settings settings = new Settings(getApplicationContext(), timeStamper);
         currentSteps = stepCount;
         goalSteps = settings.getGoal();
         textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", currentSteps, goalSteps));
@@ -344,7 +344,7 @@ public class StepCountActivity extends AppCompatActivity {
 
         alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoal);
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES", (dialog, which) -> {
-                    Settings settings = new Settings(getApplicationContext(), timeStamper, DEBUG);
+                    Settings settings = new Settings(getApplicationContext(), timeStamper);
                     settings.saveGoal(suggestedGoal);
                     dialog.dismiss();
                 });
@@ -391,7 +391,7 @@ public class StepCountActivity extends AppCompatActivity {
             previousSteps.add(0);
         previousDaySteps = previousSteps.get(0);
         Log.i(TAG, String.format("New day. Setting previous day's steps to %d", previousDaySteps));
-        Settings settings = new Settings(getApplicationContext(), timeStamper, DEBUG);
+        Settings settings = new Settings(getApplicationContext(), timeStamper);
         settings.saveGoal((int)goalSteps);
         lastEncouragingMessageSteps = 0;
 
