@@ -2,7 +2,6 @@ package edu.ucsd.cse110.team26.personalbest;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -125,14 +124,6 @@ public class StepCountActivity extends AppCompatActivity {
 
         DEBUG = getIntent().getExtras().getBoolean("DEBUG");
         ESPRESSO = getIntent().getExtras().getBoolean("ESPRESSO");
-        /*if(getIntent().hasExtra("DEBUG"))
-        {
-            DEBUG = getIntent().getExtras().getBoolean("DEBUG");
-        }
-        if(getIntent().hasExtra("ESPRESSO"))
-        {
-            ESPRESSO = getIntent().getExtras().getBoolean("ESPRESSO");
-        }*/
 
 
         fitnessService = FitnessServiceFactory.create(DEBUG, this);
@@ -156,6 +147,7 @@ public class StepCountActivity extends AppCompatActivity {
         btnStartWalk = findViewById(R.id.btnStartWalk);
         btnEndWalk = findViewById(R.id.btnEndWalk);
         textWalkData = findViewById(R.id.textWalkData);
+
         btnStartWalk.setOnClickListener(view -> {
             if(startTimeStamp == -1) {
                 startTimeStamp = timeStamper.now();
@@ -185,6 +177,7 @@ public class StepCountActivity extends AppCompatActivity {
                 btnEndWalk.setVisibility(View.GONE);
             }
         });
+
     }
 
     @Override
@@ -323,7 +316,7 @@ public class StepCountActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.menu_main, menu);
+        menuInflater.inflate(R.menu.menu_step_count, menu);
         return true;
     }
 
@@ -332,6 +325,13 @@ public class StepCountActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             Intent intent = new Intent(StepCountActivity.this, SettingsActivity.class);
+            intent.putExtra("DEBUG", DEBUG);
+            StepCountActivity.this.startActivity(intent);
+            return true;
+        }
+        if( id == R.id.action_friends_list ) {
+            Intent intent = new Intent(StepCountActivity.this, FriendsListActivity.class);
+            intent.putExtra("DEBUG", DEBUG);
             StepCountActivity.this.startActivity(intent);
             return true;
         }
@@ -354,6 +354,7 @@ public class StepCountActivity extends AppCompatActivity {
 
     public void launchGetHeightActivity() {
         Intent intent = new Intent(this, GetHeightActivity.class);
+        intent.putExtra("DEBUG", DEBUG);
         startActivity(intent);
     }
 
