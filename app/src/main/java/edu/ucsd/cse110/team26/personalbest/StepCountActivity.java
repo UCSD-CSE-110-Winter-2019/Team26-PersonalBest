@@ -6,7 +6,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -26,6 +29,10 @@ import java.util.Locale;
 
 import static java.lang.Thread.sleep;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+
 // reference: https://www.studytutorial.in/android-combined-line-and-bar-chart-using-mpandroid-library-android-tutorial
 
 public class StepCountActivity extends AppCompatActivity {
@@ -42,7 +49,7 @@ public class StepCountActivity extends AppCompatActivity {
     private Button btnEndWalk;
 
     FitnessService fitnessService;
-    private long currentSteps = 0;
+    private long currentSteps = 5500;
     private long previousDaySteps = 0;
     private long lastEncouragingMessageSteps = 0;
     private long goalSteps = 0;
@@ -51,6 +58,10 @@ public class StepCountActivity extends AppCompatActivity {
     private List<Integer> stepCounts = new ArrayList<>();
     private List<ArrayList<Walk>> walkData = new ArrayList<>();
     List<Walk> walksToday;
+
+
+    private String channel_name = "GoalNotifcations";
+    private String channel_description = "Channel Specifically for Notifications";
 
     private long startTimeStamp = -1;
     private long initialSteps = 0;
@@ -62,6 +73,8 @@ public class StepCountActivity extends AppCompatActivity {
 
     // BarChart object
     private BarChart createBarChart;
+
+
 
 
     /* ================
@@ -138,6 +151,8 @@ public class StepCountActivity extends AppCompatActivity {
         timeStamper = new ConcreteTimeStamper();
 
         fitnessService.setup();
+
+        createNotificationChannel();
 
         CombinedChart mChart = findViewById(R.id.chart1);
         createBarChart = new BarChart(getApplicationContext(),mChart, stepCounts, walkData);
@@ -256,12 +271,34 @@ public class StepCountActivity extends AppCompatActivity {
 
     public void setStepCount(long stepCount) {
         Settings settings = new Settings(getApplicationContext(), timeStamper);
+        NotificationsClass note = new NotificationsClass();
         currentSteps = stepCount;
         goalSteps = settings.getGoal();
         textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", currentSteps, goalSteps));
         updateWalkData();
         if(currentSteps >= goalSteps && !goalCompleted && goalSteps!= 0) {
+            int notificationID = 1;
+            NotificationCompat.Builder builder = note.createNotification(this);
+            System.out.println(builder.getExtras());
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+// notificationId is a unique int for each notification that you must define
+            notificationManager.notify(notificationID, builder.build());
+            if(note.acceptedOrNO){
+                System.out.println("plzWork");
+                //Settings settings = new Settings(getApplicationContext(), timeStamper);
+                int suggestedGoalNum = (int)currentSteps+500;
+                settings.saveGoal(suggestedGoalNum);
+            }
+            else{
+                System.out.println("NOPE");
+            }
+            //notificationManager.cancelAll();
+
             //do dialog box as well.
+
+
 
             AlertDialog alertDialog = new AlertDialog.Builder(StepCountActivity.this).create();
             alertDialog.setTitle("Suggesting Goals");
@@ -293,11 +330,14 @@ public class StepCountActivity extends AppCompatActivity {
                     });
             alertDialog.show();
 
+
             Toast completeGoalToast = Toast.makeText(getApplicationContext(),
                     String.format(Locale.getDefault(),"Congratulations, you've completed your goal of %d steps today!", goalSteps),
                     Toast.LENGTH_SHORT);
 
             completeGoalToast.show();
+
+
             goalCompleted = true;
         } else {
             goalCompleted = false;
@@ -356,53 +396,40 @@ public class StepCountActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void createAlertDialog(final int suggestedGoal) {
-        AlertDialog alertDialog = new AlertDialog.Builder(StepCountActivity.this).create();
-        alertDialog.setTitle("Suggesting Goals");
-
-
-
-        alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoal);
-        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        Settings settings = new Settings(getApplicationContext(), timeStamper);
-                        settings.saveGoal(suggestedGoal);
-                        dialog.dismiss();
-                    }
-                });
-        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-        alertDialog.show();
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = channel_name;
+            String description = channel_description;
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel("GoalNotifyID", name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
+
+    private NotificationCompat.Builder createNotification(){
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "GoalNotifyID")
+
+                .setContentTitle("Goal Made!")
+                .setContentText("Would you like to increase your goal by 500?")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        return builder;
+    }
+
 
     public void launchGetHeightActivity() {
         Intent intent = new Intent(this, GetHeightActivity.class);
         startActivity(intent);
     }
 
-    private void checkNewWeek()
-    {
-        SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        //check if this is the beginning of the new week
-        //if yes => new_week is true and we set the goal of this new_week to last goal on Sat (goal_Sat)
-        Calendar calendar = Calendar.getInstance();
-        int current_day = calendar.get(Calendar.DAY_OF_WEEK);
-        ConcreteTimeStamper timeStampNow = new ConcreteTimeStamper();
-        long current_time = timeStampNow.now();
-        if(current_time == timeStampNow.weekStart() &&  current_day == Calendar.SUNDAY)
-        {
-            editor.putBoolean("new_week", true);
-        }
-        editor.apply();
-    }
 
     /**
      * Resets previousDaySteps and saves previous day's goal as new goal
