@@ -68,6 +68,7 @@ public class StepCountActivity extends AppCompatActivity {
     private User user;
 
     private AlertDialog goalDialog;
+    private NotificationManagerCompat notificationManager;
 
     IDataAdapter dataAdapter;
     TimeStamper timeStamper;
@@ -283,7 +284,7 @@ public class StepCountActivity extends AppCompatActivity {
             }
             NotificationsClass notifier = new NotificationsClass();
             NotificationCompat.Builder notify = notifier.createNotification(this);
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+            notificationManager = NotificationManagerCompat.from(this);
 
 // notificationId is a unique int for each notification that you must define
             notificationManager.notify(1, notify.build());
@@ -370,9 +371,18 @@ public class StepCountActivity extends AppCompatActivity {
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES", (dialog, which) -> {
                     Settings settings = new Settings(getApplicationContext(), timeStamper);
                     settings.saveGoal(suggestedGoal);
+                    if(notificationManager!=null){
+                        notificationManager.cancelAll();
+                    }
                     dialog.dismiss();
                 });
-        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) -> dialog.dismiss());
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) -> {
+            if(notificationManager!=null){
+                notificationManager.cancelAll();
+            }
+            dialog.dismiss();
+
+        });
         return alertDialog;
         // alertDialog.show();
     }
