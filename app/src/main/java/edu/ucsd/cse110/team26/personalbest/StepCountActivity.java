@@ -132,8 +132,8 @@ public class StepCountActivity extends AppCompatActivity {
         timeStamper = new ConcreteTimeStamper();
         Log.i(TAG, "");
         //user = new User();
-        dataAdapter.makeFriendRequest("nathanaelsee@gmail.com", (userList) -> {
-            Log.d(TAG, "userlist: " + userList);
+        dataAdapter.acceptFriendRequest("ana@selvaraj.org", (success) -> {
+            Log.d(TAG, "accepted: " + success);
         });
 
         fitnessService.setup();

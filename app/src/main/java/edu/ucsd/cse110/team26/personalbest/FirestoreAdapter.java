@@ -23,7 +23,7 @@ class FirestoreAdapter implements IDataAdapter {
 
     FirestoreAdapter(Context context) {
         db = FirebaseFirestore.getInstance();
-        funcs = FirebaseFunctions.getInstance();
+        funcs = FirebaseFunctions.getInstance("us-central1");
         GoogleSignInAccount lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(context);
         userEmail = lastSignedInAccount.getEmail();
         Log.i(TAG, "name: " + lastSignedInAccount.getDisplayName() + " email: " + userEmail);
@@ -167,6 +167,16 @@ class FirestoreAdapter implements IDataAdapter {
     }
 
     /**
+     * Gets the public data of all users who are friends with the currently logged in user.
+     *
+     * @param userCallback callback to handle the resulting friend list
+     */
+    @Override
+    public void getFriends(UserCallback userCallback) {
+
+    }
+
+    /**
      * Attempts to send a friend request from the logged in user to the user of the given email
      * address.
      * If the email is found and request successfully made, calls the given callback with the public
@@ -215,11 +225,91 @@ class FirestoreAdapter implements IDataAdapter {
      * Accepts the friend request made by the given requester to the currently logged in user.
      * calls given callback with true or false depending on if the server request was successful.
      *
-     * @param requesterID     the UID of the requester
+     * @param friendEmail the UID of the requester
      * @param booleanCallback callback to handle success/failure
      */
     @Override
-    public void acceptFriendRequest(String requesterID, BooleanCallback booleanCallback) {
+    public void acceptFriendRequest(String friendEmail, BooleanCallback booleanCallback) {
+
+        Log.d(TAG, "Accepting friend request from " + friendEmail);
+        db.collection("users").document(friendEmail).get()
+                .addOnSuccessListener(friend -> {
+                    if(friend.exists()) {
+                        Log.d(TAG, friendEmail + " is a user");
+                        Map<String, Object> data = new HashMap<>();
+                        data.put("requesterEmail", userEmail);
+                        data.put("requesteeEmail", friendEmail);
+                        data.put("reqType", "ACCEPT");
+
+                        funcs.getHttpsCallable("handleFriendRequest").call(data)
+                                .addOnSuccessListener(result -> {
+                                    Log.d(TAG, "Friend request accepted");
+                                    booleanCallback.call(true);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.d(TAG, "failed with ", e);
+                                    booleanCallback.call(false);
+                                });
+                    } else {
+                        Log.d(TAG, "Friend not found");
+                        booleanCallback.call(false);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.d(TAG, "failed with ", e);
+                    booleanCallback.call(false);
+                });
+    }
+
+    /**
+     * Rejects the friend request made by the given requester to the currently logged in user.
+     * Calls given callback with true or false depending on if the server request was successful.
+     *
+     * @param requesterEmail  the UID of the requester
+     * @param booleanCallback callback to handle success/failure
+     */
+    @Override
+    public void rejectFriendRequest(String requesterEmail, BooleanCallback booleanCallback) {
+        this.deleteFriend(requesterEmail, booleanCallback);
+    }
+
+    /**
+     * Deletes the given friend from the current user's friends
+     *
+     * @param friendEmail     email of friend to delete
+     * @param booleanCallback callback to handle success/failure of request
+     */
+    @Override
+    public void deleteFriend(String friendEmail, BooleanCallback booleanCallback) {
+
+        Log.d(TAG, "Deleting friend from " + friendEmail);
+        db.collection("users").document(friendEmail).get()
+                .addOnSuccessListener(friend -> {
+                    if(friend.exists()) {
+                        Log.d(TAG, friendEmail + " is a user");
+                        Map<String, Object> data = new HashMap<>();
+                        data.put("requesterEmail", userEmail);
+                        data.put("requesteeEmail", friendEmail);
+                        data.put("reqType", "DELETE");
+
+                        funcs.getHttpsCallable("handleFriendRequest").call(data)
+                                .addOnSuccessListener(result -> {
+                                    Log.d(TAG, "Friend removed");
+                                    booleanCallback.call(true);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.d(TAG, "failed with ", e);
+                                    booleanCallback.call(false);
+                                });
+                    } else {
+                        Log.d(TAG, "Friend not found");
+                        booleanCallback.call(false);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.d(TAG, "failed with ", e);
+                    booleanCallback.call(false);
+                });
 
     }
 }
