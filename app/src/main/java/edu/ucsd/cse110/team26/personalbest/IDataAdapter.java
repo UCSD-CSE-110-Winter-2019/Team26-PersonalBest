@@ -77,6 +77,13 @@ interface IDataAdapter {
     void getReceivedFriendRequests(UserCallback userCallback);
 
     /**
+     * Gets the public data of all users who are friends with the currently logged in user.
+     *
+     * @param userCallback callback to handle the resulting friend list
+     */
+    void getFriends(UserCallback userCallback);
+
+    /**
      * Attempts to send a friend request from the logged in user to the user of the given email
      * address.
      * If the email is found and request successfully made, calls the given callback with the public
@@ -96,6 +103,23 @@ interface IDataAdapter {
      * @param booleanCallback callback to handle success/failure
      */
     void acceptFriendRequest(String requesterEmail, BooleanCallback booleanCallback);
+
+    /**
+     * Rejects the friend request made by the given requester to the currently logged in user.
+     * Calls given callback with true or false depending on if the server request was successful.
+     *
+     * @param requesterEmail the UID of the requester
+     * @param booleanCallback callback to handle success/failure
+     */
+    void rejectFriendRequest(String requesterEmail, BooleanCallback booleanCallback);
+
+    /**
+     * Deletes the given friend from the current user's friends
+     *
+     * @param friendEmail email of friend to delete
+     * @param booleanCallback callback to handle success/failure of request
+     */
+    void deleteFriend(String friendEmail, BooleanCallback booleanCallback);
 
     interface DayCallback {
         void call(List<Day> days);
