@@ -2,12 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_settings"
-        android:title="Settings"
+        android:id="@+id/action_chat_history"
+        android:title="@string/chat_history"
         android:orderInCategory="100"
         app:showAsAction="never"
-
-
-
         />
 </menu>

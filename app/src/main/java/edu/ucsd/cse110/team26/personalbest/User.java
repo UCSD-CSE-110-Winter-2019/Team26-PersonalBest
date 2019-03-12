@@ -1,11 +1,17 @@
 package edu.ucsd.cse110.team26.personalbest;
 
-import java.util.Date;
-import java.util.List;
+class User {
+    int height; // in inches
+    String name;
+    String email;
+    String uid;
+    Friends friends;
 
-public class User {
-    public User(String name, String email, String ID,int Height, List<String> friendList,Date date)
-    {
-
+    User(int height, String name, String email, String uid) {
+        this.height = height;
+        this.name = name;
+        this.email = email;
+        this.uid = uid;
+        friends = new Friends();
     }
 }

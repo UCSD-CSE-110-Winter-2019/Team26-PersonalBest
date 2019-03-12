@@ -2,14 +2,10 @@ package edu.ucsd.cse110.team26.personalbest;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -29,10 +25,6 @@ import java.util.Locale;
 
 import static java.lang.Thread.sleep;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-
 // reference: https://www.studytutorial.in/android-combined-line-and-bar-chart-using-mpandroid-library-android-tutorial
 
 public class StepCountActivity extends AppCompatActivity {
@@ -49,7 +41,7 @@ public class StepCountActivity extends AppCompatActivity {
     private Button btnEndWalk;
 
     FitnessService fitnessService;
-    private long currentSteps = 5500;
+    private long currentSteps = 0;
     private long previousDaySteps = 0;
     private long lastEncouragingMessageSteps = 0;
     private long goalSteps = 0;
@@ -59,22 +51,18 @@ public class StepCountActivity extends AppCompatActivity {
     private List<ArrayList<Walk>> walkData = new ArrayList<>();
     List<Walk> walksToday;
 
-
-    private String channel_name = "GoalNotifcations";
-    private String channel_description = "Channel Specifically for Notifications";
-
     private long startTimeStamp = -1;
     private long initialSteps = 0;
     private long currentDate;
 
     private Walk currentWalk;
+    private User user;
 
+    IDataAdapter dataAdapter;
     TimeStamper timeStamper;
 
     // BarChart object
     private BarChart createBarChart;
-
-
 
 
     /* ================
@@ -136,23 +124,19 @@ public class StepCountActivity extends AppCompatActivity {
 
         DEBUG = getIntent().getExtras().getBoolean("DEBUG");
         ESPRESSO = getIntent().getExtras().getBoolean("ESPRESSO");
-        /*if(getIntent().hasExtra("DEBUG"))
-        {
-            DEBUG = getIntent().getExtras().getBoolean("DEBUG");
-        }
-        if(getIntent().hasExtra("ESPRESSO"))
-        {
-            ESPRESSO = getIntent().getExtras().getBoolean("ESPRESSO");
-        }*/
 
 
         fitnessService = FitnessServiceFactory.create(DEBUG, this);
+        dataAdapter = IDatabaseAdapterFactory.create(DEBUG, this.getApplicationContext());
 
         timeStamper = new ConcreteTimeStamper();
+        Log.i(TAG, "");
+        //user = new User();
+        dataAdapter.makeFriendRequest("nathanaelsee@gmail.com", (userList) -> {
+            Log.d(TAG, "userlist: " + userList);
+        });
 
         fitnessService.setup();
-
-        createNotificationChannel();
 
         CombinedChart mChart = findViewById(R.id.chart1);
         createBarChart = new BarChart(getApplicationContext(),mChart, stepCounts, walkData);
@@ -163,41 +147,37 @@ public class StepCountActivity extends AppCompatActivity {
         btnStartWalk = findViewById(R.id.btnStartWalk);
         btnEndWalk = findViewById(R.id.btnEndWalk);
         textWalkData = findViewById(R.id.textWalkData);
-        btnStartWalk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(startTimeStamp == -1) {
-                    startTimeStamp = timeStamper.now();
-                    initialSteps = currentSteps;
-                    SharedPreferences.Editor editor = getSharedPreferences("walk", MODE_PRIVATE).edit();
-                    editor.putLong("startTimeStamp", startTimeStamp)
-                            .putLong("initialSteps", initialSteps).apply();
-                    btnStartWalk.setVisibility(View.GONE);
-                    btnEndWalk.setVisibility(View.VISIBLE);
-                    currentWalk = new Walk(0, startTimeStamp);
-                    updateWalkData();
-                }
+
+        btnStartWalk.setOnClickListener(view -> {
+            if(startTimeStamp == -1) {
+                startTimeStamp = timeStamper.now();
+                initialSteps = currentSteps;
+                SharedPreferences.Editor editor = getSharedPreferences("walk", MODE_PRIVATE).edit();
+                editor.putLong("startTimeStamp", startTimeStamp)
+                        .putLong("initialSteps", initialSteps).apply();
+                btnStartWalk.setVisibility(View.GONE);
+                btnEndWalk.setVisibility(View.VISIBLE);
+                currentWalk = new Walk(0, startTimeStamp);
+                updateWalkData();
             }
         });
-        btnEndWalk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(startTimeStamp != -1) {
-                    // ensure that any walk will end at the end of the day - splits off by midnight
-                    if(!timeStamper.isToday(startTimeStamp)) {
-                        fitnessService.walk(startTimeStamp, timeStamper.endOfDay(startTimeStamp));
-                        startTimeStamp = timeStamper.startOfDay(timeStamper.now());
-                    }
-                    fitnessService.walk(startTimeStamp, timeStamper.now());
-                    startTimeStamp = -1;
-                    currentWalk = null;
-                    SharedPreferences.Editor editor = getSharedPreferences("walk", MODE_PRIVATE).edit();
-                    editor.putLong("startTimeStamp", -1).apply();
-                    btnStartWalk.setVisibility(View.VISIBLE);
-                    btnEndWalk.setVisibility(View.GONE);
+        btnEndWalk.setOnClickListener(view -> {
+            if(startTimeStamp != -1) {
+                // ensure that any walk will end at the end of the day - splits off by midnight
+                if(!timeStamper.isToday(startTimeStamp)) {
+                    fitnessService.walk(startTimeStamp, timeStamper.endOfDay(startTimeStamp));
+                    startTimeStamp = timeStamper.startOfDay(timeStamper.now());
                 }
+                fitnessService.walk(startTimeStamp, timeStamper.now());
+                startTimeStamp = -1;
+                currentWalk = null;
+                SharedPreferences.Editor editor = getSharedPreferences("walk", MODE_PRIVATE).edit();
+                editor.putLong("startTimeStamp", -1).apply();
+                btnStartWalk.setVisibility(View.VISIBLE);
+                btnEndWalk.setVisibility(View.GONE);
             }
         });
+
     }
 
     @Override
@@ -209,7 +189,7 @@ public class StepCountActivity extends AppCompatActivity {
         }
 
         // If espresso test is not running, start async task
-        if( ESPRESSO == false ) {
+        if(!ESPRESSO) {
             updateStep = new UpdateStep();
             updateStep.execute(-1);
         }
@@ -258,7 +238,7 @@ public class StepCountActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // If authentication was required during google fit setup, this will be called after the user authenticates
-        if (resultCode == Activity.RESULT_OK && ESPRESSO == false) {
+        if (resultCode == Activity.RESULT_OK && !ESPRESSO) {
             if (requestCode == fitnessService.getRequestCode()) {
                 if(updateStep != null && !updateStep.isCancelled()) updateStep.cancel(true);
                 updateStep = new UpdateStep();
@@ -271,73 +251,28 @@ public class StepCountActivity extends AppCompatActivity {
 
     public void setStepCount(long stepCount) {
         Settings settings = new Settings(getApplicationContext(), timeStamper);
-        NotificationsClass note = new NotificationsClass();
         currentSteps = stepCount;
         goalSteps = settings.getGoal();
         textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", currentSteps, goalSteps));
         updateWalkData();
         if(currentSteps >= goalSteps && !goalCompleted && goalSteps!= 0) {
-            int notificationID = 1;
-            NotificationCompat.Builder builder = note.createNotification(this);
-            System.out.println(builder.getExtras());
-
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-
-// notificationId is a unique int for each notification that you must define
-            notificationManager.notify(notificationID, builder.build());
-            if(note.acceptedOrNO){
-                System.out.println("plzWork");
-                //Settings settings = new Settings(getApplicationContext(), timeStamper);
-                int suggestedGoalNum = (int)currentSteps+500;
-                settings.saveGoal(suggestedGoalNum);
-            }
-            else{
-                System.out.println("NOPE");
-            }
-            //notificationManager.cancelAll();
-
             //do dialog box as well.
-
-
-
-            AlertDialog alertDialog = new AlertDialog.Builder(StepCountActivity.this).create();
-            alertDialog.setTitle("Suggesting Goals");
 
             int suggestedGoalNum = (int)goalSteps;
 
-            if(goalSteps+500 <= 15000){
+            if(goalSteps + 500 <= 15000){
                 suggestedGoalNum += 500;
             }
             else{
                 suggestedGoalNum = 15000;
             }
-            alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoalNum);
-            final int finalSuggestedGoalNum = suggestedGoalNum;
-            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            Settings settings = new Settings(getApplicationContext(), timeStamper);
-                            settings.saveGoal(finalSuggestedGoalNum);
-                            dialog.dismiss();
-                        }
-                    });
-            alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO",
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    });
-            alertDialog.show();
-
+            createAlertDialog(suggestedGoalNum);
 
             Toast completeGoalToast = Toast.makeText(getApplicationContext(),
                     String.format(Locale.getDefault(),"Congratulations, you've completed your goal of %d steps today!", goalSteps),
                     Toast.LENGTH_SHORT);
 
             completeGoalToast.show();
-
-
             goalCompleted = true;
         } else {
             goalCompleted = false;
@@ -381,7 +316,7 @@ public class StepCountActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.menu_main, menu);
+        menuInflater.inflate(R.menu.menu_step_count, menu);
         return true;
     }
 
@@ -390,46 +325,55 @@ public class StepCountActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             Intent intent = new Intent(StepCountActivity.this, SettingsActivity.class);
+            intent.putExtra("DEBUG", DEBUG);
+            StepCountActivity.this.startActivity(intent);
+            return true;
+        }
+        if( id == R.id.action_friends_list ) {
+            Intent intent = new Intent(StepCountActivity.this, FriendsListActivity.class);
+            intent.putExtra("DEBUG", DEBUG);
             StepCountActivity.this.startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = channel_name;
-            String description = channel_description;
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("GoalNotifyID", name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
+    public void createAlertDialog(final int suggestedGoal) {
+        AlertDialog alertDialog = new AlertDialog.Builder(StepCountActivity.this).create();
+        alertDialog.setTitle("Suggesting Goals");
+
+        alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoal);
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES", (dialog, which) -> {
+                    Settings settings = new Settings(getApplicationContext(), timeStamper);
+                    settings.saveGoal(suggestedGoal);
+                    dialog.dismiss();
+                });
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) -> dialog.dismiss());
+        alertDialog.show();
     }
-
-    private NotificationCompat.Builder createNotification(){
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "GoalNotifyID")
-
-                .setContentTitle("Goal Made!")
-                .setContentText("Would you like to increase your goal by 500?")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
-        return builder;
-    }
-
 
     public void launchGetHeightActivity() {
         Intent intent = new Intent(this, GetHeightActivity.class);
+        intent.putExtra("DEBUG", DEBUG);
         startActivity(intent);
     }
 
+    private void checkNewWeek() {
+        SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
 
+        //check if this is the beginning of the new week
+        //if yes => new_week is true and we set the goal of this new_week to last goal on Sat (goal_Sat)
+        Calendar calendar = Calendar.getInstance();
+        int current_day = calendar.get(Calendar.DAY_OF_WEEK);
+        ConcreteTimeStamper timeStampNow = new ConcreteTimeStamper();
+        long current_time = timeStampNow.now();
+        if(current_time == timeStampNow.weekStart() &&  current_day == Calendar.SUNDAY)
+        {
+            editor.putBoolean("new_week", true);
+        }
+        editor.apply();
+    }
 
     /**
      * Resets previousDaySteps and saves previous day's goal as new goal
