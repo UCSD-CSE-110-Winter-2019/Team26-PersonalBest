@@ -16,7 +16,7 @@
     <string name="start_walk">Start Walk</string>
     <string name="end_walk">End Walk</string>
     <string name="empty_space">\n\n\n\n"</string>
-    <string name="title_activity_friends">FriendListActivity</string>
+    <string name="title_activity_friends">Friend List</string>
     <string name="add_friend_dialog_title">Add Friend</string>
     <string name="add_friend_dialog_message">Enter the email id of your friend</string>
     <string name="remove_friend_dialog_title">Remove Friend</string>
@@ -31,7 +31,7 @@
     <string name="friend_list">Friend List</string>
     <string name="settings">Settings</string>
     <string name="friends_list">Friends List</string>
-    <string name="send_a_message">Send a message</string>
+    <string name="send_a_message">Type message here</string>
     <string name="send">SEND</string>
     <string name="title_activity_chat_history">ChatHistory</string>
     <string name="hint_chat_screen">message will appear here</string>

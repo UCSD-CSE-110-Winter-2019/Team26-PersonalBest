@@ -20,6 +20,7 @@ public class FriendsListActivity extends AppCompatActivity {
     IDataAdapter dataAdapter;
     ListView listView;
     public static List<User> friends;
+    public static Friends friendsList;
     public static FriendListAdapter friendAdapter;
 
     @Override
@@ -27,6 +28,8 @@ public class FriendsListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends_list);
         friends = new ArrayList<User>();
+        friendsList = new Friends();
+        friendsList.receivedRequests = null;
         DEBUG = getIntent().getBooleanExtra("DEBUG", false);
         dataAdapter = IDatabaseAdapterFactory.create(DEBUG, FriendsListActivity.this);
         listView = (ListView) findViewById(R.id.list);
@@ -44,6 +47,7 @@ public class FriendsListActivity extends AppCompatActivity {
             Log.i(getClass().getName(), "Long click on friend at position" + position);
             User requested = (User) friendAdapter.getItem(position);
             RemoveFriendDialog removeFriendDialog = new RemoveFriendDialog(requested, FriendsListActivity.this, dataAdapter);
+            removeFriendDialog.createDialog().show();
             return true;
         });
 

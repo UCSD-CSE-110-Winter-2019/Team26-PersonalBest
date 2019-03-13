@@ -35,7 +35,7 @@
             android:id="@+id/acceptFriendRequest"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="140dp"
+            android:layout_marginStart="200dp"
             android:src="@drawable/ic_check_circle_black_24dp"
             android:contentDescription="@string/accept_friend_request" />
 

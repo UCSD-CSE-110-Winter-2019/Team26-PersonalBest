@@ -42,7 +42,7 @@ public class ConcreteTimeStamperUnitTest {
     @Test
     public void weekStartTest(){
         Calendar cal  = Calendar.getInstance(TimeZone.getDefault());
-       // Calendar cal = Calendar.getInstance();
+        // Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
         cal.clear(Calendar.MINUTE);
         cal.clear(Calendar.SECOND);

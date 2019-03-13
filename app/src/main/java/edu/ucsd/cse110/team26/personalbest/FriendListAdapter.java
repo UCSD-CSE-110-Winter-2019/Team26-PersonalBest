@@ -64,11 +64,13 @@ public class FriendListAdapter extends BaseAdapter {
         }
     }));
 
-        holder.rejectRequest.setOnClickListener(v -> {
-            //reject friend's request
-            //TODO
+        holder.rejectRequest.setOnClickListener(v -> dataAdapter.rejectFriendRequest(FriendsListActivity.friends.get(position).name, (rejectRequestSuccess) -> {
 
-        });
+            if( rejectRequestSuccess ) {
+                FriendsListActivity.friends.remove(position);
+                notifyDataSetChanged();
+            }
+        }));
 
 
         return convertView;
