@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -14,17 +15,34 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.CombinedChart;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import static android.app.PendingIntent.getActivity;
 import static java.lang.Thread.sleep;
 
 // reference: https://www.studytutorial.in/android-combined-line-and-bar-chart-using-mpandroid-library-android-tutorial
@@ -51,16 +69,16 @@ public class StepCountActivity extends AppCompatActivity {
     private int user_height;
     private boolean goalCompleted;
     private List<Integer> stepCounts = new ArrayList<>();
-    private List<Integer> subGoalData;
-    private List<Integer> subStepCounts;
-    private List<ArrayList<Walk>> walkData28days = new ArrayList<>();
-    private List<ArrayList<Walk>> walkData7days = new ArrayList<>();
-    private List<Walk> walksToday;
+
+    private List<ArrayList<Walk>> walkData  = new ArrayList<>();
+    List<ArrayList<Walk>> walkData7days  = new ArrayList<>();
+    List<Integer> subStepCounts = new ArrayList<>();
+
+    List<Walk> walksToday;
 
     private long startTimeStamp = -1;
     private long initialSteps = 0;
     private long currentDate;
-    private List<Integer> goalData = new ArrayList<>();
 
     private Walk currentWalk;
     private User user;
@@ -71,8 +89,20 @@ public class StepCountActivity extends AppCompatActivity {
     // BarChart object
     private BarChart createBarChart;
     private BarChart createBarChart2;
+    CombinedChart mChart;
+    CombinedChart mChart2;
 
+    DocumentReference user_data;
+    DocumentReference user_record;
+    CollectionReference user_list;
+    GoogleSignInAccount currentUser;
+    String COLLECTION_KEY = "users";
+    String RECORD_KEY = "record";
+    String DOCUMENT_KEY;
 
+    private List<Integer> yesterdayCount;// = new ArrayList<>();
+    private ArrayList<Walk> yesterdayWalk; //= new ArrayList<>();
+    List<Day> dayInfo = new ArrayList<>();
     /* ================
     Description: keep the UI update with the current number of taken steps
     Pre:
@@ -94,29 +124,32 @@ public class StepCountActivity extends AppCompatActivity {
                     fitnessService.updateStepCount();
                     stepCounts.clear();
                     fitnessService.getStepsCount(timeStamper.lastTwentyEightDays(), timeStamper.today(), stepCounts);
-
-                    walkData28days.clear();
+                    fitnessService.getStepsCount(timeStamper.lastSevenDays(), timeStamper.today(), subStepCounts);
+                    walkData.clear();
                     long ts = timeStamper.startOfDay(timeStamper.lastTwentyEightDays());
-                    for(int i = 0; i < 28; i++) {
+                    for(int i = 0; i < 7; i++) {
                         ArrayList<Walk> list = new ArrayList<>();
-                        walkData28days.add(list);
+                        walkData.add(list);
                         fitnessService.getWalks(ts, timeStamper.endOfDay(ts), list);
                         if(timeStamper.isToday(ts))
                             walksToday = list;
                         ts = timeStamper.nextDay(ts);
                     }
-
-                    if(!stepCounts.isEmpty())
-                    {
-                        for (int j=0; j<28; j++) goalData.add(5000);
-                        subGoalData = goalData.subList(goalData.size()-7,goalData.size());
-                        walkData7days = walkData28days.subList(walkData28days.size()-7, walkData28days.size());
-                        subStepCounts = stepCounts.subList(stepCounts.size()-7, stepCounts.size());
+                    ts = timeStamper.startOfDay(timeStamper.lastSevenDays());
+                    for(int i = 0; i < 7; i++) {
+                        ArrayList<Walk> list2 = new ArrayList<>();
+                        walkData7days.add(list2);
+                        fitnessService.getWalks(ts, timeStamper.endOfDay(ts), list2);
+                        if(timeStamper.isToday(ts))
+                            walksToday = list2;
+                        ts = timeStamper.nextDay(ts);
                     }
 
-
                     Thread.sleep(10000);
-                    for(List<Walk> walklist : walkData28days) {
+                    for(List<Walk> walklist : walkData) {
+                        Log.i(TAG, walklist.toString());
+                    }
+                    for(List<Walk> walklist : walkData7days) {
                         Log.i(TAG, walklist.toString());
                     }
                 }
@@ -141,36 +174,61 @@ public class StepCountActivity extends AppCompatActivity {
 
         DEBUG = getIntent().getExtras().getBoolean("DEBUG");
         ESPRESSO = getIntent().getExtras().getBoolean("ESPRESSO");
-        /*if(getIntent().hasExtra("DEBUG"))
-        {
-            DEBUG = getIntent().getExtras().getBoolean("DEBUG");
-        }
-        if(getIntent().hasExtra("ESPRESSO"))
-        {
-            ESPRESSO = getIntent().getExtras().getBoolean("ESPRESSO");
-        }*/
-
 
         fitnessService = FitnessServiceFactory.create(DEBUG, this);
         dataAdapter = IDatabaseAdapterFactory.create(DEBUG, this.getApplicationContext());
 
         timeStamper = new ConcreteTimeStamper();
-        Log.i(TAG, "");
-        //user = new User();
+        currentUser = GoogleSignIn.getLastSignedInAccount(this);
+
+        DOCUMENT_KEY = currentUser.getEmail();
+
+        user_data = FirebaseFirestore.getInstance()
+                .collection(COLLECTION_KEY)
+                .document(DOCUMENT_KEY);
+
+        /*
+        if height of user is 0 => new user => prompt get height
+         */
+        //checkHeight();
+        //updateData();
+
+
+        /*Log.i(TAG, "");
         dataAdapter.makeFriendRequest("nathanaelsee@gmail.com", (userList) -> {
             Log.d(TAG, "userlist: " + userList);
-        });
+        });*/
 
         fitnessService.setup();
 
+        mChart = findViewById(R.id.chart1);
+        // fake goal
+        List<Integer> goalData = new ArrayList<>();
+        for (int j=0; j<28; j++) goalData.add(5000);
 
-        CombinedChart mChart = findViewById(R.id.chart1);
-        CombinedChart mChart2 = findViewById(R.id.chart2);
         boolean monthlySummary = true;
-        createBarChart = new BarChart(getApplicationContext(),mChart, subStepCounts, walkData7days, subGoalData, !monthlySummary);
-        //createBarChart.draw();
-        createBarChart2 = new BarChart(getApplicationContext(),mChart2, stepCounts, walkData28days, goalData, monthlySummary);
-        //createBarChart2.draw();
+        createBarChart = new BarChart(getApplicationContext(), mChart, stepCounts, walkData, goalData,monthlySummary);
+        createBarChart.draw();
+        mChart.setVisibility(View.GONE);
+
+        List<Integer> subGoalData = new ArrayList<>();
+        for (int j=0; j<7; j++) subGoalData.add(5000);
+        mChart2 = findViewById(R.id.chart2);
+        createBarChart2 = new BarChart(getApplicationContext(), mChart2, subStepCounts, walkData7days, subGoalData,!monthlySummary);
+        createBarChart2.draw();
+
+        Switch sw = findViewById(R.id.switch1);
+        sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (!isChecked) {
+                    mChart.setVisibility(View.GONE);
+                    mChart2.setVisibility(View.VISIBLE);
+                } else {
+                    mChart.setVisibility(View.VISIBLE);
+                    mChart2.setVisibility(View.GONE);
+                }
+            }
+        });
 
         currentDate = timeStamper.now();
 
@@ -211,16 +269,15 @@ public class StepCountActivity extends AppCompatActivity {
         btnFriend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                launchFriendList();
+                //launchFriendList();
             }
         });
-
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        createBarChart.draw();
+
         if(updateStep != null && !updateStep.isCancelled()) {
             updateStep.cancel(true);
         }
@@ -231,29 +288,16 @@ public class StepCountActivity extends AppCompatActivity {
             updateStep.execute(-1);
         }
 
+        /*if(stepCounts.isEmpty())
+        {
+            Log.d(TAG,"stepCounts is null af");
+        }*/
+
+
         Settings settings = new Settings(getApplicationContext(), timeStamper);
-        SharedPreferences user = getSharedPreferences("user", MODE_PRIVATE);
-        goalSteps = settings.getGoal();
-        user_height = settings.getHeight();
-        if(user_height == 0) {
-            launchGetHeightActivity();
-        }
+
 
         setStepCount(currentSteps);
-
-        CombinedChart mChart = findViewById(R.id.chart1);
-        CombinedChart mChart2 = findViewById(R.id.chart2);
-
-        Switch simpleSwitch = (Switch) findViewById(R.id.switch1);
-        Boolean switchState = simpleSwitch.isChecked();
-        if (switchState) {
-            mChart.setVisibility(View.GONE);
-            mChart2.setVisibility(View.VISIBLE);
-        }
-        else {
-            mChart.setVisibility(View.VISIBLE);
-            mChart2.setVisibility(View.GONE);
-        }
 
         // Check if the user started a walk and has not stopped it
         SharedPreferences walkInfo = getSharedPreferences("walk", MODE_PRIVATE );
@@ -273,6 +317,7 @@ public class StepCountActivity extends AppCompatActivity {
                 currentWalk = new Walk(currentSteps - initialSteps, startTimeStamp);
             }
         }
+
 
     }
 
@@ -387,16 +432,19 @@ public class StepCountActivity extends AppCompatActivity {
 
         alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoal);
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES", (dialog, which) -> {
-                    Settings settings = new Settings(getApplicationContext(), timeStamper);
-                    settings.saveGoal(suggestedGoal);
-                    dialog.dismiss();
-                });
+            Settings settings = new Settings(getApplicationContext(), timeStamper);
+            settings.saveGoal(suggestedGoal);
+            dialog.dismiss();
+        });
         alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) -> dialog.dismiss());
         alertDialog.show();
     }
 
-    public void launchGetHeightActivity() {
+    public void launchGetHeightActivity(String name, String email, String userID) {
         Intent intent = new Intent(this, GetHeightActivity.class);
+        intent.putExtra("EMAIL", email);
+        intent.putExtra("NAME", name );
+        intent.putExtra("UID", userID);
         startActivity(intent);
     }
 
@@ -439,12 +487,66 @@ public class StepCountActivity extends AppCompatActivity {
 
     }
 
-    public void launchFriendList()
+    /*public void updateData()
     {
-        Intent intent = new Intent(this, FriendListActivity.class);
-        startActivity(intent);
-    }
+        List<Integer> step = fitnessService.getStep(timeStamper.yesterday(), timeStamper.today());
+        List<Walk> walk = fitnessService.getWalk(timeStamper.yesterday(), timeStamper.endOfDay(timeStamper.yesterday()));
+        int yesterdayStep = 0;
+        int yesterdayWalk = 0;
+        for(Integer i: step)
+        {
+            yesterdayStep = yesterdayStep + i;
+        }
+        for(Walk i: walk)
+        {
+            yesterdayWalk = yesterdayWalk + (int)i.getSteps();
+        }
+        Log.d(TAG, "Total yesterday walk: " + walk);
+        Calendar cal = Calendar.getInstance();
+        Date date = cal.getTime();
+        String year = String.valueOf(cal.get(Calendar.YEAR));
+        String month = String.valueOf(cal.get(Calendar.MONTH))+1;
+        String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+        String dayID = month + day + year;
+        user_record = FirebaseFirestore.getInstance()
+                .collection(COLLECTION_KEY)
+                .document(DOCUMENT_KEY)
+                .collection(RECORD_KEY)
+                .document(dayID);
+        user_record.set(new Day(5000, yesterdayStep ,yesterdayWalk,date ))
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "update the yesterday info successfully");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error updating the yesterday info");
+                    }
+                });
+    }*/
 
+    /*
+    Get the user height from firebase to see if he/she is a new user
+    If yes, launch the getHeight => update the Height
+    Otherwise
+     */
+    /*public void checkHeight()
+    {
+        user_data.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                user = documentSnapshot.toObject(User.class);
+                if (user.getHeight() == 0)
+                {
+                    String name = user.getName();
+                    String email = user.getEmail();
+                    String userID = user.getUid();
+                    launchGetHeightActivity(name, email, userID);
+                }
+            }
+        });
+    }*/
 }
-
-

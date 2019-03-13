@@ -42,9 +42,10 @@
 
     <Switch
         android:id="@+id/switch1"
-        android:layout_width="99dp"
-        android:layout_height="11dp"
-        android:text="Switch" />
+        android:layout_width="181dp"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="Monthly Summary" />
 
     <com.github.mikephil.charting.charts.CombinedChart
         android:id="@+id/chart1"
@@ -56,8 +57,7 @@
         android:id="@+id/chart2"
         android:layout_width="364dp"
         android:layout_height="273dp"
-        android:layout_margin="30dp"
-        android:visibility="gone"/>
+        android:layout_margin="30dp" />
 
     <Button
         android:id="@+id/buttonFriend"
