@@ -5,7 +5,7 @@ import java.util.List;
 public interface FitnessService {
     int getRequestCode();
     void setup();
-    void updateStepCount();
+    void updateStepCount(Callback<Long> stepCountCallback);
     void walk(long startTimeStamp, long endTimeStamp);
     void getWalks(long startTimeStamp, long endTimeStamp, List<Walk> walkList);
     void getStepsCount(long startTimeStamp, long endTimeStamp, List<Integer> stepsList);

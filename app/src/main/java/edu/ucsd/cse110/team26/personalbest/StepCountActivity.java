@@ -83,7 +83,7 @@ public class StepCountActivity extends AppCompatActivity {
                         initializeNewDay();
                         currentDate = timeStamper.now();
                     }
-                    fitnessService.updateStepCount();
+                    fitnessService.updateStepCount(stepCount -> setStepCount(stepCount));
                     stepCounts.clear();
                     fitnessService.getStepsCount(timeStamper.lastSevenDays(), timeStamper.today(), stepCounts);
 

@@ -28,7 +28,6 @@ public class AddFriendDialog {
         final EditText input = new EditText(context);
         input.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
         input.setHint(R.string.friend_email);
-        IDataAdapter.UserCallback  makeRequestCallback = null;
         builder.setView(input);
         builder.setTitle("Add Friend");
         builder.setPositiveButton(R.string.confirm, (dialog, id) -> {
