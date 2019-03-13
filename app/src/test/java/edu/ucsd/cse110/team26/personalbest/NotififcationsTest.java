@@ -1,5 +1,6 @@
 package edu.ucsd.cse110.team26.personalbest;
 
+import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -15,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.shadows.ShadowAlertDialog;
 import org.robolectric.shadows.ShadowNotification;
 import org.robolectric.shadows.ShadowNotificationManager;
 
@@ -45,6 +47,7 @@ public class NotififcationsTest {
     }
 
 
+    //Test to see if notification doesn't appear when goal is not reached yet.
     @Test
     public void testNotificationBeforeCompletedGoal() {
         activity.initializeNewDay();
@@ -63,6 +66,7 @@ public class NotififcationsTest {
 
     }
 
+    //Test to see if notification appears when goal is reached.
     @Test
     public void testNotificationShowsAfterCompletedGoal() {
         activity.initializeNewDay();
@@ -79,6 +83,31 @@ public class NotififcationsTest {
 
 
         assertEquals(1, shadowNotificationManager.size());
+
+    }
+
+    //Test to see if user is on screen when goal is reached; user will interact with pop-up dialog
+    //if they interact with pop-up dialog, notification should disapper.
+    @Test
+    public void testNotificationDisappers(){
+        activity.initializeNewDay();
+        Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
+        settings.saveGoal(2000);
+
+        activity.setStepCount(2000);
+
+        ShadowAlertDialog.getLatestAlertDialog().getButton(Dialog.BUTTON_NEGATIVE).performClick();
+        NotificationManager notificationService = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
+        ShadowNotificationManager shadowNotificationManager = shadowOf(notificationService);
+
+        assertEquals(0, shadowNotificationManager.size());
+
+        activity.initializeNewDay();
+        settings.saveGoal(1500);
+
+        activity.setStepCount(1500);
+        ShadowAlertDialog.getLatestAlertDialog().getButton(Dialog.BUTTON_POSITIVE).performClick();
+        assertEquals(0, shadowNotificationManager.size());
 
     }
 
