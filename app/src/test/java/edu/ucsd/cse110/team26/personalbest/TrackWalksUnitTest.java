@@ -65,7 +65,7 @@ public class TrackWalksUnitTest {
         activity.setStepCount(100);
         assertEquals("100/5000 steps today", textSteps.getText().toString());
         assertEquals("Current walk:\nWalk duration: 0s\n100 steps taken\nDistance walked: 0.0 feet\nAverage speed: 0.0mph", textWalkData.getText().toString());
-        activity.fitnessService.updateStepCount();
+        activity.fitnessService.updateStepCount(stepCount -> activity.setStepCount(stepCount));
         btnEndWalk.performClick();
         activity.walksToday = new ArrayList<Walk>();
         activity.walksToday.add(new Walk(100, Calendar.getInstance().getTimeInMillis()-5, Calendar.getInstance().getTimeInMillis()));
