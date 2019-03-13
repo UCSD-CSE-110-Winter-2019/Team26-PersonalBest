@@ -14,4 +14,9 @@ class User {
         this.uid = uid;
         friends = new Friends();
     }
+
+    @Override
+    public String toString() {
+        return name + ": " + email;
+    }
 }
