@@ -36,7 +36,7 @@ class FirestoreAdapter implements IDataAdapter {
      * @param dayCallback callback lambda to handle the resulting Day
      */
     @Override
-    public void getToday(DayCallback dayCallback) {
+    public void getToday(Callback<Day> dayCallback) {
         
     }
 
@@ -47,7 +47,12 @@ class FirestoreAdapter implements IDataAdapter {
      * @param userCallback callback lambda to handle the user's data
      */
     @Override
-    public void getUser(UserCallback userCallback) {
+    public void getUser(Callback<User> userCallback) {
+        db.collection("users").document(userEmail).get().addOnSuccessListener(user -> {
+            if(user.exists()) {
+
+            }
+        });
 
     }
 
@@ -59,7 +64,7 @@ class FirestoreAdapter implements IDataAdapter {
      * @param booleanCallback callback lambda to handle success/failure
      */
     @Override
-    public void updateUser(User user, BooleanCallback booleanCallback) {
+    public void updateUser(User user, Callback<Boolean> booleanCallback) {
         Map<String, Object> u = new HashMap<>();
         u.put("name", user.name);
         u.put("height", user.height);
@@ -83,7 +88,7 @@ class FirestoreAdapter implements IDataAdapter {
      * @param userCallback callback lambda to handle result
      */
     @Override
-    public void getFriend(String friendEmail, UserCallback userCallback) {
+    public void getFriend(String friendEmail, Callback<List<User>> userCallback) {
         db.collection("users").document(userEmail)
                 .collection("friends").document(friendEmail).get().addOnCompleteListener((task) -> {
                     if(task.isSuccessful()) {
@@ -127,17 +132,18 @@ class FirestoreAdapter implements IDataAdapter {
      * @param dayCallback lambda to handle the resulting List of Days
      */
     @Override
-    public void getFriendDays(String friendID, int numOfDays, DayCallback dayCallback) {
+    public void getFriendDays(String friendID, int numOfDays, Callback<List<Day>> dayCallback) {
 
     }
 
     /**
      * Updates the database with the given days' data.
      *
-     * @param days List of days to update the database with.
+     * @param days            List of days to update the database with.
+     * @param booleanCallback callback to handle success/failure
      */
     @Override
-    public void updateDays(List<Day> days) {
+    public void updateDays(List<Day> days, Callback<Boolean> booleanCallback) {
 
     }
 
@@ -150,7 +156,7 @@ class FirestoreAdapter implements IDataAdapter {
      * @param userCallback callback to handle resulting list of users
      */
     @Override
-    public void getSentFriendRequests(UserCallback userCallback) {
+    public void getSentFriendRequests(Callback<List<User>> userCallback) {
 
     }
 
@@ -162,7 +168,7 @@ class FirestoreAdapter implements IDataAdapter {
      * @param userCallback callback to handle resulting list of users
      */
     @Override
-    public void getReceivedFriendRequests(UserCallback userCallback) {
+    public void getReceivedFriendRequests(Callback<List<User>> userCallback) {
 
     }
 
@@ -172,7 +178,7 @@ class FirestoreAdapter implements IDataAdapter {
      * @param userCallback callback to handle the resulting friend list
      */
     @Override
-    public void getFriends(UserCallback userCallback) {
+    public void getFriends(Callback<List<User>> userCallback) {
 
     }
 
@@ -187,7 +193,7 @@ class FirestoreAdapter implements IDataAdapter {
      * @param userCallback callback to handle resulting list of users
      */
     @Override
-    public void makeFriendRequest(String friendEmail, UserCallback userCallback) {
+    public void makeFriendRequest(String friendEmail, Callback<List<User>> userCallback) {
         Log.d(TAG, "Starting friend request to " + friendEmail);
         db.collection("users").document(friendEmail).get()
                 .addOnSuccessListener(friend -> {
@@ -229,7 +235,7 @@ class FirestoreAdapter implements IDataAdapter {
      * @param booleanCallback callback to handle success/failure
      */
     @Override
-    public void acceptFriendRequest(String friendEmail, BooleanCallback booleanCallback) {
+    public void acceptFriendRequest(String friendEmail, Callback<Boolean> booleanCallback) {
 
         Log.d(TAG, "Accepting friend request from " + friendEmail);
         db.collection("users").document(friendEmail).get()
@@ -269,7 +275,7 @@ class FirestoreAdapter implements IDataAdapter {
      * @param booleanCallback callback to handle success/failure
      */
     @Override
-    public void rejectFriendRequest(String requesterEmail, BooleanCallback booleanCallback) {
+    public void rejectFriendRequest(String requesterEmail, Callback<Boolean> booleanCallback) {
         this.deleteFriend(requesterEmail, booleanCallback);
     }
 
@@ -280,7 +286,7 @@ class FirestoreAdapter implements IDataAdapter {
      * @param booleanCallback callback to handle success/failure of request
      */
     @Override
-    public void deleteFriend(String friendEmail, BooleanCallback booleanCallback) {
+    public void deleteFriend(String friendEmail, Callback<Boolean> booleanCallback) {
 
         Log.d(TAG, "Deleting friend from " + friendEmail);
         db.collection("users").document(friendEmail).get()
