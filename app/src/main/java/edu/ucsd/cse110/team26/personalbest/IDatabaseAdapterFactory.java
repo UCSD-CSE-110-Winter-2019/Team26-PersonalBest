@@ -9,7 +9,7 @@ class IDatabaseAdapterFactory {
         if (debug) {
             return new MockDataAdapter();
         } else {
-            return new FirestoreAdapter(context);
+            return new FirestoreAdapter(context, new ConcreteTimeStamper());
         }
     }
 }
