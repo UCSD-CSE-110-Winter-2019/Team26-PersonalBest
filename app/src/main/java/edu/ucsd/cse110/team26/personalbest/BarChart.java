@@ -194,16 +194,19 @@ public class BarChart {
         ArrayList<Entry> entries = new ArrayList<>();
 
         getLineEntriesData(entries);
-
         LineDataSet set = new LineDataSet(entries, "Goal");
         set.setLineWidth(2.5f);
-        set.setCircleColor(Color.rgb(60, 79, 109));
-        set.setCircleRadius(5f);
-        set.setFillColor(Color.rgb(60, 79, 109));
-        set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-        set.setDrawValues(true);
-        set.setValueTextSize(10f);
-        set.setValueTextColor(Color.rgb(60, 79, 109));
+
+        if (this.size == 7) {
+            set.setCircleColor(Color.rgb(60, 79, 109));
+            set.setCircleRadius(5f);
+            set.setFillColor(Color.rgb(60, 79, 109));
+            set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+            set.setDrawValues(true);
+            set.setValueTextSize(10f);
+            set.setValueTextColor(Color.rgb(60, 79, 109));
+        }
+        else set.setDrawValues(false);
 
         set.setAxisDependency(YAxis.AxisDependency.LEFT);
         d.addDataSet(set);
@@ -215,7 +218,7 @@ public class BarChart {
         SharedPreferences sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        long[] totalStep = new long[7];
+        long[] totalStep = new long[this.size];
         int count = 0;
         for(Integer i: stepCounts)
         {
@@ -223,7 +226,7 @@ public class BarChart {
 
             count++;
         }
-        long[] totalIntent = new long[7];
+        long[] totalIntent = new long[this.size];
         count = 0;
         for(ArrayList<Walk> i : walkData)
         {
@@ -236,6 +239,10 @@ public class BarChart {
             count++;
         }
 
+        for (int k=0; k<this.size; k++) {
+            entries.add(new BarEntry(k, new float[] {totalIntent[k], totalStep[k]-totalIntent[k]}));
+        }
+        /*
         entries.add(new BarEntry(0f, new float[] {totalIntent[0],totalStep[0]- totalIntent[0]}));
         entries.add(new BarEntry(1f, new float[] {totalIntent[1],totalStep[1]- totalIntent[1]}));
         entries.add(new BarEntry(2f, new float[] {totalIntent[2],totalStep[2]- totalIntent[2]}));
@@ -243,7 +250,7 @@ public class BarChart {
         entries.add(new BarEntry(4f, new float[] {totalIntent[4],totalStep[4]- totalIntent[4]}));
         entries.add(new BarEntry(5f, new float[] {totalIntent[5],totalStep[5]- totalIntent[5]}));
         entries.add(new BarEntry(6f, new float[] {totalIntent[6],totalStep[6]- totalIntent[6]}));
-
+        */
         editor.apply();
     }
 
