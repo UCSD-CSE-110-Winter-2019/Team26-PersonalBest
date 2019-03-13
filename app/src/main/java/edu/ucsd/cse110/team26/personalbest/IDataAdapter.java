@@ -21,13 +21,13 @@ interface IDataAdapter {
     void getUser(Callback<User> userCallback);
 
     /**
-     * Updates the logged-in user's data stored in the database
+     * Updates the logged-in user's height stored in the database
      * Calls given callback with true or false depending on if the server request was successful.
      *
-     * @param user User's data to update
+     * @param height User's height to update
      * @param booleanCallback callback lambda to handle success/failure
      */
-    void updateUser(User user, Callback<Boolean> booleanCallback);
+    void updateUserHeight(int height, Callback<Boolean> booleanCallback);
 
     /**
      * Gets the profile information of the friend with given email.

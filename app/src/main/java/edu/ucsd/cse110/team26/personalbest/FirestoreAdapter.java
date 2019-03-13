@@ -5,8 +5,11 @@ import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.functions.FirebaseFunctions;
 
@@ -50,26 +53,31 @@ class FirestoreAdapter implements IDataAdapter {
     public void getUser(Callback<User> userCallback) {
         db.collection("users").document(userEmail).get().addOnSuccessListener(user -> {
             if(user.exists()) {
-
+                Map<String, Object> userData = user.getData();
+                userCallback.call(new User(0,
+                        userData.get("name").toString(),
+                        userData.get("email").toString(),
+                        userData.get("uid").toString()));
+            } else {
+                userCallback.call(null);
             }
         });
 
     }
 
     /**
-     * Updates the logged-in user's data stored in the database
+     * Updates the logged-in user's height stored in the database
      * Calls given callback with true or false depending on if the server request was successful.
      *
-     * @param user User's data to update
+     * @param height User's height to update
      * @param booleanCallback callback lambda to handle success/failure
      */
     @Override
-    public void updateUser(User user, Callback<Boolean> booleanCallback) {
+    public void updateUserHeight(int height, Callback<Boolean> booleanCallback) {
         Map<String, Object> u = new HashMap<>();
-        u.put("name", user.name);
-        u.put("height", user.height);
+        u.put("height", height);
 
-        db.collection("users").document(user.email)
+        db.collection("users").document(userEmail)
                 .set(u, SetOptions.merge())
                 .addOnSuccessListener(a -> booleanCallback.call(true))
                 .addOnFailureListener(e -> {
@@ -157,7 +165,8 @@ class FirestoreAdapter implements IDataAdapter {
      */
     @Override
     public void getSentFriendRequests(Callback<List<User>> userCallback) {
-
+        Log.d(TAG, "Getting sent requests...");
+        getFriends("requested", userCallback);
     }
 
     /**
@@ -169,7 +178,8 @@ class FirestoreAdapter implements IDataAdapter {
      */
     @Override
     public void getReceivedFriendRequests(Callback<List<User>> userCallback) {
-
+        Log.d(TAG, "Getting received requests...");
+        getFriends("received", userCallback);
     }
 
     /**
@@ -179,7 +189,30 @@ class FirestoreAdapter implements IDataAdapter {
      */
     @Override
     public void getFriends(Callback<List<User>> userCallback) {
+        Log.d(TAG, "Getting friends...");
+        getFriends("friends", userCallback);
+    }
 
+    private void getFriends(String status, Callback<List<User>> userCallback) {
+        db.collection("users").document(userEmail).collection("friends")
+                .whereEqualTo("status", status)
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    ArrayList<User> userList = new ArrayList<>();
+                    for(QueryDocumentSnapshot doc : snapshots) {
+                        //Log.d(TAG, doc.getId() + " => " + doc.getData());
+                        Map<String, Object> friendData = doc.getData();
+                        String friendName = (friendData.get("name") != null) ? friendData.get("name").toString() : "";
+                        String friendEmail = doc.getId();
+                        userList.add(new User(0, friendName, friendEmail, ""));
+                    }
+                    userCallback.call(userList);
+                })
+
+                .addOnFailureListener(e -> {
+                    Log.d(TAG, "failed with ", e);
+                    userCallback.call(null);
+                });
     }
 
     /**
@@ -209,7 +242,10 @@ class FirestoreAdapter implements IDataAdapter {
                                     Log.d(TAG, "Friend request successful");
                                     Map<String, Object> friendData = friend.getData();
                                     ArrayList<User> friendList = new ArrayList<>();
-                                    friendList.add(new User(0, friendData.get("name").toString(), friendData.get("email").toString(), ""));
+                                    friendList.add(new User(0,
+                                            friendData.get("name").toString(),
+                                            friendData.get("email").toString(),
+                                            ""));
                                     userCallback.call(friendList);
                                 })
                                 .addOnFailureListener(e -> {
