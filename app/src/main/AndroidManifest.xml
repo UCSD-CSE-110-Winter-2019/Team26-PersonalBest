@@ -13,7 +13,6 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
 
-        <receiver android:name=".NotificationsClass" />
 
         <activity
             android:name=".ChatHistoryActivity"
