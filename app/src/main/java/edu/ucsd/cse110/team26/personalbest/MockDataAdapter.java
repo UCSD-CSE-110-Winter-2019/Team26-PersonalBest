@@ -27,15 +27,15 @@ class MockDataAdapter implements IDataAdapter {
     }
 
     /**
-     * Updates the logged-in user's data stored in the database
+     * Updates the logged-in user's height stored in the database
      * Calls given callback with true or false depending on if the server request was successful.
      *
-     * @param user            User's data to update
+     * @param height User's height to update
      * @param booleanCallback callback lambda to handle success/failure
      */
     @Override
-    public void updateUser(User user, Callback<Boolean> booleanCallback) {
-
+    public void updateUserHeight(int height, Callback<Boolean> booleanCallback) {
+        booleanCallback.call(true);
     }
 
     /**
@@ -73,7 +73,7 @@ class MockDataAdapter implements IDataAdapter {
      */
     @Override
     public void updateDays(List<Day> days, Callback<Boolean> booleanCallback) {
-
+        booleanCallback.call(true);
     }
 
     /**
