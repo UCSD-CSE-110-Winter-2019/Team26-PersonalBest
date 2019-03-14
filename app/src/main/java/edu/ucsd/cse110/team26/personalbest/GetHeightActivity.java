@@ -1,23 +1,41 @@
 package edu.ucsd.cse110.team26.personalbest;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
-public class GetHeightActivity extends AppCompatActivity {
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+public class GetHeightActivity extends AppCompatActivity {
+    private static final String TAG = "GetHeightActivity";
     private String fitnessServiceKey = "GOOGLE_FIT";
     private Settings settings;
-    private boolean DEBUG;
+    DocumentReference user_data;
+    String COLLECTION_KEY = "users";
+    String NAME;
+    String UID;
+    String DOCUMENT_KEY;
+    User user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_get_height);
 
-        DEBUG = getIntent().getBooleanExtra("DEBUG", false);
+        DOCUMENT_KEY = getIntent().getExtras().getString("EMAIL");
+        NAME = getIntent().getExtras().getString("NAME");
+        UID = getIntent().getExtras().getString("UID");
+        user_data = FirebaseFirestore.getInstance()
+                .collection(COLLECTION_KEY)
+                .document(DOCUMENT_KEY);
 
         final TextView resultFeet = findViewById(R.id.feetText);
         final TextView resultInch = findViewById(R.id.inchText);
@@ -45,9 +63,11 @@ public class GetHeightActivity extends AppCompatActivity {
                     np1.setEnabled(false);
                     np2.setEnabled(false);
 
-                    settings = new Settings(getApplicationContext(), new ConcreteTimeStamper(),
-                            getIntent().getExtras().getString("EMAIL"));
+                    settings = new Settings(getApplicationContext(), new ConcreteTimeStamper());
                     settings.saveHeight(np1.getValue(), np2.getValue());
+                    int height = np1.getValue() * 12 + np2.getValue();
+
+                    getInitialHeight(height);
 
                     confirmButton.setText("Done");
                     v.setTag(0);
@@ -62,5 +82,20 @@ public class GetHeightActivity extends AppCompatActivity {
 
     public void launchStepCountActivity() {
         finish();
+    }
+    public void getInitialHeight(int height)
+    {
+        user = new User(height, NAME, DOCUMENT_KEY, UID);
+        user_data.set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "successfully written");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.w(TAG, "Error writing");
+            }
+        });
     }
 }

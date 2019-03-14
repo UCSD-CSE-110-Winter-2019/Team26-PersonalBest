@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+        mAuth = FirebaseAuth.getInstance();
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this,  (result) -> {
                         if (result.isSuccessful()) {
@@ -117,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
         }
         Log.i(TAG, "Env checked, debug flag is " + DEBUG);
         Log.i(TAG, "Env checked, espresso flag is " + ESPRESSO);
-
     }
 
     public void launchStepCountActivity() {

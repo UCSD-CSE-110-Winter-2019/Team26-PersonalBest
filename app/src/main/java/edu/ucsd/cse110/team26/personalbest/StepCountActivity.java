@@ -70,6 +70,7 @@ public class StepCountActivity extends AppCompatActivity {
 
     IDataAdapter dataAdapter;
     TimeStamper timeStamper;
+    Settings settings;
 
     // BarChart object
     CombinedChart mChart;
@@ -101,17 +102,17 @@ public class StepCountActivity extends AppCompatActivity {
             try {
                 resp = params[0];
                 while(run) {
-                    if( !timeStamper.isToday(currentDate) ) {
+                    /*if( !timeStamper.isToday(currentDate) ) {
                         initializeNewDay();
                         currentDate = timeStamper.now();
-                    }
+                    }*/
                     fitnessService.updateStepCount(StepCountActivity.this::setStepCount);
                     stepCounts.clear();
-                    fitnessService.getStepsCount(timeStamper.lastSevenDays(), timeStamper.today(), stepCounts);
+                    fitnessService.getStepsCount(timeStamper.lastTwentyEightDays(), timeStamper.today(), stepCounts);
 
                     walkData.clear();
-                    long ts = timeStamper.startOfDay(timeStamper.lastSevenDays());
-                    for(int i = 0; i < 7; i++) {
+                    long ts = timeStamper.startOfDay(timeStamper.lastTwentyEightDays());
+                    for(int i = 0; i < 28; i++) {
                         ArrayList<Walk> list = new ArrayList<>();
                         walkData.add(list);
                         fitnessService.getWalks(ts, timeStamper.endOfDay(ts), list);
@@ -119,11 +120,12 @@ public class StepCountActivity extends AppCompatActivity {
                             walksToday = list;
                         ts = timeStamper.nextDay(ts);
                     }
+
                     if(!stepCounts.isEmpty() )
                     {
                         updateDataToFirebase();
-                        Settings  settings = new Settings(getApplicationContext(), DOCUMENT_KEY);
                     }
+
                     Thread.sleep(10000);
                     for(List<Walk> walklist : walkData) {
                         Log.i(TAG, walklist.toString());
@@ -150,14 +152,16 @@ public class StepCountActivity extends AppCompatActivity {
             DEBUG = getIntent().getExtras().getBoolean("DEBUG");
             ESPRESSO = getIntent().getExtras().getBoolean("ESPRESSO");
         }
+        currentUser = GoogleSignIn.getLastSignedInAccount(this);
+        DOCUMENT_KEY = currentUser.getEmail();
+
 
         fitnessService = FitnessServiceFactory.create(DEBUG, this);
         dataAdapter = IDatabaseAdapterFactory.create(DEBUG, this.getApplicationContext());
         timeStamper = new ConcreteTimeStamper();
         currentDate = timeStamper.now();
 
-        currentUser = GoogleSignIn.getLastSignedInAccount(this);
-        DOCUMENT_KEY = currentUser.getEmail();
+
         user_data = FirebaseFirestore.getInstance()
                 .collection(COLLECTION_KEY)
                 .document(DOCUMENT_KEY);
@@ -172,7 +176,6 @@ public class StepCountActivity extends AppCompatActivity {
     {
         mChart = findViewById(R.id.chart1);
         mChart2 = findViewById(R.id.chart2);
-
 
         createBarChart = new BarChart(getApplicationContext(),mChart);
         createBarChart.setDOCUMENT_KEY(DOCUMENT_KEY);
@@ -241,7 +244,6 @@ public class StepCountActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        createBarChart.draw();
 
         if(updateStep != null && !updateStep.isCancelled()) {
             updateStep.cancel(true);
@@ -266,13 +268,18 @@ public class StepCountActivity extends AppCompatActivity {
             mChart2.setVisibility(View.GONE);
         }
 
-        Settings settings = new Settings(getApplicationContext(), timeStamper, DOCUMENT_KEY);
+        Settings settings = new Settings(getApplicationContext(), timeStamper);
         today.goal = settings.getGoal();
         user.height = settings.getHeight();
         setStepCount(today.totalSteps);
 
         // Check if the user started a walk and has not stopped it
-        /*SharedPreferences walkInfo = getSharedPreferences("walk", MODE_PRIVATE );
+        checkStartWalk();
+    }
+
+    public void checkStartWalk()
+    {
+        SharedPreferences walkInfo = getSharedPreferences("walk", MODE_PRIVATE );
         startTimeStamp = walkInfo.getLong("startTimeStamp", -1);
         initialSteps = walkInfo.getLong("initialSteps", 0);
         if(startTimeStamp != -1) {
@@ -288,9 +295,7 @@ public class StepCountActivity extends AppCompatActivity {
                 btnEndWalk.setVisibility(View.VISIBLE);
                 currentWalk = new Walk(today.totalSteps - initialSteps, startTimeStamp);
             }
-        }*/
-
-
+        }
     }
 
     public void checkHeight()
@@ -333,10 +338,10 @@ public class StepCountActivity extends AppCompatActivity {
     }
 
     public void setStepCount(long stepCount) {
-        Settings settings = new Settings(getApplicationContext(), timeStamper, DOCUMENT_KEY);
+        Settings settings = new Settings(getApplicationContext(), timeStamper);
         today.totalSteps = stepCount;
         today.goal = settings.getGoal();
-        textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", today.totalSteps, today.goal));
+        textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps", today.totalSteps, today.goal));
         updateWalkData();
         if(today.totalSteps >= today.goal && !goalCompleted && today.goal != 0) {
             //do dialog box as well.
@@ -428,8 +433,8 @@ public class StepCountActivity extends AppCompatActivity {
 
         alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoal);
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES", (dialog, which) -> {
-                    Settings settings = new Settings(getApplicationContext(), timeStamper, DOCUMENT_KEY);
-                    settings.saveGoal(suggestedGoal);
+                    Settings settings = new Settings(getApplicationContext(), timeStamper);
+                    settings.saveTodayGoal(suggestedGoal);
                     dialog.dismiss();
                 });
         alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) -> dialog.dismiss());
@@ -461,8 +466,8 @@ public class StepCountActivity extends AppCompatActivity {
             previousSteps.add(0);
         previousDaySteps = previousSteps.get(0);
         Log.i(TAG, String.format("New day. Setting previous day's steps to %d", previousDaySteps));
-        Settings settings = new Settings(getApplicationContext(), timeStamper, DOCUMENT_KEY);
-        settings.saveGoal((int) today.goal);
+        Settings settings = new Settings(getApplicationContext(), timeStamper);
+        //settings.saveTodayGoal((int) today.goal);
         lastEncouragingMessageSteps = 0;
     }
 

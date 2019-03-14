@@ -22,7 +22,7 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        settings = new Settings(getApplicationContext(), new ConcreteTimeStamper(), getIntent().getExtras().getString("DOCUMENT_KEY") );
+        settings = new Settings(getApplicationContext(), new ConcreteTimeStamper() );
 
         EditText goalEdit = findViewById(R.id.goalEdit);
         NumberPicker feetNp = findViewById(R.id.feetNumberPicker);
@@ -62,7 +62,7 @@ public class SettingsActivity extends AppCompatActivity {
             return;
         }
 
-        settings.saveGoal(newGoal);
+        settings.saveTodayGoal(newGoal);
         settings.saveHeight(feetNp.getValue(), inchesNp.getValue());
 
         SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);

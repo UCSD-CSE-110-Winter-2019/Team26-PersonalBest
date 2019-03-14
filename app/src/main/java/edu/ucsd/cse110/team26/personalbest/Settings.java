@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.text.format.Time;
 import android.util.Log;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
@@ -52,9 +53,10 @@ public class Settings {
     private Date date;
     DocumentReference user_data;
 
-    public Settings (Context context, TimeStamper timeStamper, String DOCUMENT_KEY) {
+    public Settings (Context context, TimeStamper timeStamper) {
         sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE );
         this.timeStamper = timeStamper;
+        this.DOCUMENT_KEY = GoogleSignIn.getLastSignedInAccount(context).getEmail();
     }
 
     public Settings(Context context, String dayID, String DOCUMENT_KEY)
@@ -70,7 +72,12 @@ public class Settings {
         this.DOCUMENT_KEY = DOCUMENT_KEY;
         user_data = FirebaseFirestore.getInstance()
                 .collection(COLLECTION_KEY)
-                .document(DOCUMENT_KEY);
+                .document(GoogleSignIn.getLastSignedInAccount(context).getEmail());
+    }
+
+    public void setDOCUMENT_KEY(String DOCUMENT_KEY)
+    {
+        this.DOCUMENT_KEY = DOCUMENT_KEY;
     }
 
     public void setDayID(String dayID)
@@ -143,6 +150,7 @@ public class Settings {
                 Log.w(TAG, "Error updating new goal",e);
             }
         });
+
         SharedPreferences.Editor editor = sharedPreferences.edit();
         switch( timeStamper.getDayOfWeek() ) {
             case SUNDAY:
@@ -307,4 +315,21 @@ public class Settings {
         String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
         return  (month + day + year);
     }
+
+    /*public int getGoal() {
+        DocumentReference user_record = FirebaseFirestore.getInstance()
+                .collection(COLLECTION_KEY)
+                .document(DOCUMENT_KEY)
+                .collection(RECORD_KEY)
+                .document(getTodayID());
+
+        user_record.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                dayInfo = documentSnapshot.toObject(Day.class);
+                setGoal((int)dayInfo.getGoal());
+            }
+        });
+        return goal;
+    }*/
 }
