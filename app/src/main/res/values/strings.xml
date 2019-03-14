@@ -36,4 +36,5 @@
     <string name="title_activity_chat_history">ChatHistory</string>
     <string name="hint_chat_screen">message will appear here</string>
     <string name="chat_history">Chat History</string>
+    <string name="friend_list_button">Friend List</string>
 </resources>

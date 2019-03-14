@@ -13,6 +13,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +48,8 @@ public class StepCountActivity extends AppCompatActivity {
     private boolean goalCompleted;
     private List<Integer> stepCounts = new ArrayList<>();
     private List<ArrayList<Walk>> walkData = new ArrayList<>();
+    private List<ArrayList<Walk>> walkData7days = new ArrayList<>();
+    List<Integer> subStepCounts = new ArrayList<>();
     List<Walk> walksToday;
 
     private long startTimeStamp = -1;
@@ -61,7 +65,9 @@ public class StepCountActivity extends AppCompatActivity {
 
     // BarChart object
     private BarChart createBarChart;
-
+    private BarChart createBarChart2;
+    CombinedChart mChart;
+    CombinedChart mChart2;
 
     /* ================
     Description: keep the UI update with the current number of taken steps
@@ -83,10 +89,10 @@ public class StepCountActivity extends AppCompatActivity {
                     }
                     fitnessService.updateStepCount(StepCountActivity.this::setStepCount);
                     stepCounts.clear();
-                    fitnessService.getStepsCount(timeStamper.lastSevenDays(), timeStamper.today(), stepCounts);
-
+                    fitnessService.getStepsCount(timeStamper.lastTwentyEightDays(), timeStamper.today(), stepCounts);
+                    fitnessService.getStepsCount(timeStamper.lastSevenDays(), timeStamper.today(), subStepCounts);
                     walkData.clear();
-                    long ts = timeStamper.startOfDay(timeStamper.lastSevenDays());
+                    long ts = timeStamper.startOfDay(timeStamper.lastTwentyEightDays());
                     for(int i = 0; i < 7; i++) {
                         ArrayList<Walk> list = new ArrayList<>();
                         walkData.add(list);
@@ -95,9 +101,21 @@ public class StepCountActivity extends AppCompatActivity {
                             walksToday = list;
                         ts = timeStamper.nextDay(ts);
                     }
+                    ts = timeStamper.startOfDay(timeStamper.lastSevenDays());
+                    for(int i = 0; i < 7; i++) {
+                        ArrayList<Walk> list2 = new ArrayList<>();
+                        walkData7days.add(list2);
+                        fitnessService.getWalks(ts, timeStamper.endOfDay(ts), list2);
+                        if(timeStamper.isToday(ts))
+                            walksToday = list2;
+                        ts = timeStamper.nextDay(ts);
+                    }
 
                     Thread.sleep(10000);
                     for(List<Walk> walklist : walkData) {
+                        Log.i(TAG, walklist.toString());
+                    }
+                    for(List<Walk> walklist : walkData7days) {
                         Log.i(TAG, walklist.toString());
                     }
                 }
@@ -134,9 +152,35 @@ public class StepCountActivity extends AppCompatActivity {
         timeStamper = new ConcreteTimeStamper();
 
         fitnessService.setup();
+        mChart = findViewById(R.id.chart1);
+        // fake goal
+        List<Integer> goalData = new ArrayList<>();
+        for (int j=0; j<28; j++) goalData.add(5000);
 
-        createBarChart = new BarChart(getApplicationContext(), mChart, stepCounts, walkData);
+        boolean monthlySummary = true;
+        createBarChart = new BarChart(getApplicationContext(), mChart, stepCounts, walkData, goalData,monthlySummary);
         createBarChart.draw();
+        mChart.setVisibility(View.GONE);
+
+        List<Integer> subGoalData = new ArrayList<>();
+        for (int j=0; j<7; j++) subGoalData.add(5000);
+        mChart2 = findViewById(R.id.chart2);
+        createBarChart2 = new BarChart(getApplicationContext(), mChart2, subStepCounts, walkData7days, subGoalData,!monthlySummary);
+        createBarChart2.draw();
+
+        Switch sw = findViewById(R.id.switch1);
+        CombinedChart finalMChart = mChart;
+        sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (!isChecked) {
+                    finalMChart.setVisibility(View.GONE);
+                    mChart2.setVisibility(View.VISIBLE);
+                } else {
+                    finalMChart.setVisibility(View.VISIBLE);
+                    mChart2.setVisibility(View.GONE);
+                }
+            }
+        });
 
         currentDate = timeStamper.now();
 
@@ -214,8 +258,6 @@ public class StepCountActivity extends AppCompatActivity {
                 currentWalk = new Walk(today.totalSteps - initialSteps, startTimeStamp);
             }
         }
-
-
     }
 
     @Override

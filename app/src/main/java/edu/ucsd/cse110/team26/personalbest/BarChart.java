@@ -138,50 +138,12 @@ public class BarChart {
         }
     }
 
-    /*private void getLineEntriesData(ArrayList<Entry> entries) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
-        int goal_sun = sharedPreferences.getInt("goal_Sun", 5000);
-        int goal_mon = sharedPreferences.getInt("goal_Mon", 5000);
-        int goal_tue = sharedPreferences.getInt("goal_Tue", 5000);
-        int goal_wed = sharedPreferences.getInt("goal_Wed", 5000);
-        int goal_thu = sharedPreferences.getInt("goal_Thu", 5000);
-        int goal_fri = sharedPreferences.getInt("goal_Fri", 5000);
-        int goal_sat = sharedPreferences.getInt("goal_Sat", 5000);
-
-
-        entries.add(new Entry(0, goal_sun));
-        entries.add(new Entry(1, goal_mon));
-        entries.add(new Entry(2, goal_tue));
-        entries.add(new Entry(3, goal_wed));
-        entries.add(new Entry(4, goal_thu));
-        entries.add(new Entry(5, goal_fri));
-        entries.add(new Entry(6, goal_sat));
-    }*/
 
     private void getLineEntriesData(ArrayList<Entry> entries) {
         for (int i=0; i< this.size; i++) {
             entries.add(new Entry(i, goalData.get(i)));
         }
     }
-
-    /*private void updateGoal()
-    {
-        SharedPreferences sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        if(sharedPreferences.getBoolean("new_week",false) )
-        {
-            int previous_goal = sharedPreferences.getInt("goal_Sat", 5000);
-            editor.putInt("goal_Sun", previous_goal);
-            editor.putInt("goal_Mon", previous_goal);
-            editor.putInt("goal_Tue", previous_goal);
-            editor.putInt("goal_Wed", previous_goal);
-            editor.putInt("goal_Thu", previous_goal);
-            editor.putInt("goal_Fri", previous_goal);
-            editor.putInt("goal_Sat", previous_goal);
-            editor.putBoolean("new_week",false);
-        }
-        editor.apply();
-    }*/
 
     private void updateGoal() {
 
@@ -242,15 +204,6 @@ public class BarChart {
         for (int k=0; k<this.size; k++) {
             entries.add(new BarEntry(k, new float[] {totalIntent[k], totalStep[k]-totalIntent[k]}));
         }
-        /*
-        entries.add(new BarEntry(0f, new float[] {totalIntent[0],totalStep[0]- totalIntent[0]}));
-        entries.add(new BarEntry(1f, new float[] {totalIntent[1],totalStep[1]- totalIntent[1]}));
-        entries.add(new BarEntry(2f, new float[] {totalIntent[2],totalStep[2]- totalIntent[2]}));
-        entries.add(new BarEntry(3f, new float[] {totalIntent[3],totalStep[3]- totalIntent[3]}));
-        entries.add(new BarEntry(4f, new float[] {totalIntent[4],totalStep[4]- totalIntent[4]}));
-        entries.add(new BarEntry(5f, new float[] {totalIntent[5],totalStep[5]- totalIntent[5]}));
-        entries.add(new BarEntry(6f, new float[] {totalIntent[6],totalStep[6]- totalIntent[6]}));
-        */
         editor.apply();
     }
 
