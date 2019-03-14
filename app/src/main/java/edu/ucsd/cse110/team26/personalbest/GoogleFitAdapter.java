@@ -193,6 +193,10 @@ public class GoogleFitAdapter implements FitnessService {
         }
     }
 
+    public void getDays(long startTimestamp, long endTimestamp, Callback<List<Day>> dayCallback) {
+
+    }
+
     @Override
     public int getRequestCode() {
         return GOOGLE_FIT_PERMISSIONS_REQUEST_CODE;

@@ -5,12 +5,13 @@ import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.functions.FirebaseFunctions;
 
 import java.util.ArrayList;
@@ -23,12 +24,14 @@ class FirestoreAdapter implements IDataAdapter {
     private FirebaseFirestore db;
     private FirebaseFunctions funcs;
     private String userEmail;
+    private TimeStamper timeStamper;
 
-    FirestoreAdapter(Context context) {
+    FirestoreAdapter(Context context, TimeStamper timeStamper) {
         db = FirebaseFirestore.getInstance();
         funcs = FirebaseFunctions.getInstance("us-central1");
         GoogleSignInAccount lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(context);
         userEmail = lastSignedInAccount.getEmail();
+        this.timeStamper = timeStamper;
         Log.i(TAG, "name: " + lastSignedInAccount.getDisplayName() + " email: " + userEmail);
     }
 
@@ -54,7 +57,7 @@ class FirestoreAdapter implements IDataAdapter {
         db.collection("users").document(userEmail).get().addOnSuccessListener(user -> {
             if(user.exists()) {
                 Map<String, Object> userData = user.getData();
-                userCallback.call(new User(0,
+                userCallback.call(new User((int) userData.get("height"),
                         userData.get("name").toString(),
                         userData.get("email").toString(),
                         userData.get("uid").toString()));
@@ -135,13 +138,49 @@ class FirestoreAdapter implements IDataAdapter {
      * calling the passed in callback with the resulting List of Day, or null if
      * the server request failed.
      *
-     * @param friendID    the uid of the friend to fetch
+     * @param friendEmail the email of the friend to fetch
      * @param numOfDays   the number of days to fetch before today, today inclusive
      * @param dayCallback lambda to handle the resulting List of Days
      */
     @Override
-    public void getFriendDays(String friendID, int numOfDays, Callback<List<Day>> dayCallback) {
+    public void getFriendDays(String friendEmail, int numOfDays, Callback<List<Day>> dayCallback) {
 
+        // check if friends
+        db.collection("users").document(userEmail).collection("friends").document(friendEmail).get()
+                .addOnSuccessListener(snapshot -> {
+                    if(snapshot.exists() && snapshot.getData().get("status") == "friends") {
+                        // pull friend's day data
+                        long startTimestamp = timeStamper.now();
+                        for (int i = 0; i < numOfDays; i++) startTimestamp = timeStamper.previousDay(startTimestamp);
+                        String startDayId = timeStamper.timestampToDayId(startTimestamp);
+
+                        db.collection("users").document(friendEmail).collection("days")
+                                .orderBy("dayId", Query.Direction.DESCENDING)
+                                .whereGreaterThanOrEqualTo("dayId", startDayId)
+                                .get()
+                                .addOnSuccessListener(snapshots -> {
+                                    ArrayList<Day> dayList = new ArrayList<>();
+                                    for(QueryDocumentSnapshot doc : snapshots) {
+                                        Day day = doc.toObject(Day.class);
+                                        Log.d(TAG, doc.getId() + " => " + day);
+                                        dayList.add(day);
+                                    }
+                                    dayCallback.call(dayList);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e(TAG, "Failed to fetch friend data");
+                                    dayCallback.call(null);
+                                });
+
+                    } else {
+                        Log.e(TAG, "Failed to find friend");
+                        dayCallback.call(null);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error getting friend relation, " + e);
+                    dayCallback.call(null);
+                });
     }
 
     /**
@@ -152,7 +191,17 @@ class FirestoreAdapter implements IDataAdapter {
      */
     @Override
     public void updateDays(List<Day> days, Callback<Boolean> booleanCallback) {
-
+        CollectionReference daysRef = db.collection("users").document(userEmail).collection("days");
+        WriteBatch batch = db.batch();
+        for(Day day : days) {
+            batch.set(daysRef.document(day.dayId), day);
+        }
+        batch.commit()
+                .addOnSuccessListener(r -> booleanCallback.call(true))
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Update failed with error " + e);
+                    booleanCallback.call(false);
+                });
     }
 
     /**
@@ -227,40 +276,10 @@ class FirestoreAdapter implements IDataAdapter {
      */
     @Override
     public void makeFriendRequest(String friendEmail, Callback<List<User>> userCallback) {
-        Log.d(TAG, "Starting friend request to " + friendEmail);
-        db.collection("users").document(friendEmail).get()
-                .addOnSuccessListener(friend -> {
-                    if(friend.exists()) {
-                        Log.d(TAG, friendEmail + " is a user");
-                        Map<String, Object> data = new HashMap<>();
-                        data.put("requesterEmail", userEmail);
-                        data.put("requesteeEmail", friendEmail);
-                        data.put("reqType", "REQUEST");
-
-                        funcs.getHttpsCallable("handleFriendRequest").call(data)
-                                .addOnSuccessListener(result -> {
-                                    Log.d(TAG, "Friend request successful");
-                                    Map<String, Object> friendData = friend.getData();
-                                    ArrayList<User> friendList = new ArrayList<>();
-                                    friendList.add(new User(0,
-                                            friendData.get("name").toString(),
-                                            friendData.get("email").toString(),
-                                            ""));
-                                    userCallback.call(friendList);
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.d(TAG, "failed with ", e);
-                                    userCallback.call(null);
-                                });
-                    } else {
-                        Log.d(TAG, "Friend not found");
-                        userCallback.call(new ArrayList<>());
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.d(TAG, "failed with ", e);
-                    userCallback.call(null);
-                });
+        handleFriendRequest("REQUEST", friendEmail, (success) -> {
+            if(success) getFriend(friendEmail, userCallback);
+            else userCallback.call(null);
+        });
     }
 
     /**
@@ -272,35 +291,7 @@ class FirestoreAdapter implements IDataAdapter {
      */
     @Override
     public void acceptFriendRequest(String friendEmail, Callback<Boolean> booleanCallback) {
-
-        Log.d(TAG, "Accepting friend request from " + friendEmail);
-        db.collection("users").document(friendEmail).get()
-                .addOnSuccessListener(friend -> {
-                    if(friend.exists()) {
-                        Log.d(TAG, friendEmail + " is a user");
-                        Map<String, Object> data = new HashMap<>();
-                        data.put("requesterEmail", userEmail);
-                        data.put("requesteeEmail", friendEmail);
-                        data.put("reqType", "ACCEPT");
-
-                        funcs.getHttpsCallable("handleFriendRequest").call(data)
-                                .addOnSuccessListener(result -> {
-                                    Log.d(TAG, "Friend request accepted");
-                                    booleanCallback.call(true);
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.d(TAG, "failed with ", e);
-                                    booleanCallback.call(false);
-                                });
-                    } else {
-                        Log.d(TAG, "Friend not found");
-                        booleanCallback.call(false);
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.d(TAG, "failed with ", e);
-                    booleanCallback.call(false);
-                });
+        handleFriendRequest("ACCEPT", friendEmail, booleanCallback);
     }
 
     /**
@@ -312,7 +303,7 @@ class FirestoreAdapter implements IDataAdapter {
      */
     @Override
     public void rejectFriendRequest(String requesterEmail, Callback<Boolean> booleanCallback) {
-        this.deleteFriend(requesterEmail, booleanCallback);
+        handleFriendRequest("REJECT", requesterEmail, booleanCallback);
     }
 
     /**
@@ -323,8 +314,11 @@ class FirestoreAdapter implements IDataAdapter {
      */
     @Override
     public void deleteFriend(String friendEmail, Callback<Boolean> booleanCallback) {
+        handleFriendRequest("DELETE", friendEmail, booleanCallback);
+    }
 
-        Log.d(TAG, "Deleting friend from " + friendEmail);
+    private void handleFriendRequest(String reqType, String friendEmail, Callback<Boolean> booleanCallback) {
+        Log.d(TAG, "Handling request " + reqType + " with user " + friendEmail);
         db.collection("users").document(friendEmail).get()
                 .addOnSuccessListener(friend -> {
                     if(friend.exists()) {
@@ -332,11 +326,11 @@ class FirestoreAdapter implements IDataAdapter {
                         Map<String, Object> data = new HashMap<>();
                         data.put("requesterEmail", userEmail);
                         data.put("requesteeEmail", friendEmail);
-                        data.put("reqType", "DELETE");
+                        data.put("reqType", reqType);
 
                         funcs.getHttpsCallable("handleFriendRequest").call(data)
                                 .addOnSuccessListener(result -> {
-                                    Log.d(TAG, "Friend removed");
+                                    Log.d(TAG, "Request " + reqType + " successful");
                                     booleanCallback.call(true);
                                 })
                                 .addOnFailureListener(e -> {
@@ -352,6 +346,5 @@ class FirestoreAdapter implements IDataAdapter {
                     Log.d(TAG, "failed with ", e);
                     booleanCallback.call(false);
                 });
-
     }
 }
