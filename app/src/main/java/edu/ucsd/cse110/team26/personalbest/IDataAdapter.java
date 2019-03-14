@@ -40,6 +40,16 @@ interface IDataAdapter {
     void getFriend(String friendEmail, Callback<List<User>> userCallback);
 
     /**
+     * Gets the last numOfDays Days of data of the currently logged in user,
+     * calling the passed in callback with the resulting List of Day, or null if
+     * the server request failed.
+     *
+     * @param numOfDays the number of days to fetch before today, today inclusive
+     * @param dayCallback lambda to handle the resulting List of Days
+     */
+    void getDays(int numOfDays, Callback<List<Day>> dayCallback);
+
+    /**
      * Gets the last numOfDays Days of data of the friend with the specified ID,
      * calling the passed in callback with the resulting List of Day, or null if
      * the server request failed.

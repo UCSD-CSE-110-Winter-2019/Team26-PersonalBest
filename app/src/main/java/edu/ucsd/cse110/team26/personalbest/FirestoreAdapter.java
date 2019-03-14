@@ -163,6 +163,19 @@ class FirestoreAdapter implements IDataAdapter {
     }
 
     /**
+     * Gets the last numOfDays Days of data of the currently logged in user,
+     * calling the passed in callback with the resulting List of Day, or null if
+     * the server request failed.
+     *
+     * @param numOfDays the number of days to fetch before today, today inclusive
+     * @param dayCallback lambda to handle the resulting List of Days
+     */
+    @Override
+    public void getDays(int numOfDays, Callback<List<Day>> dayCallback) {
+        getDays(userEmail, numOfDays, dayCallback);
+    }
+
+    /**
      * Gets the last numOfDays Days of data of the friend with the specified ID,
      * calling the passed in callback with the resulting List of Day, or null if
      * the server request failed.
@@ -179,28 +192,7 @@ class FirestoreAdapter implements IDataAdapter {
                 .addOnSuccessListener(snapshot -> {
                     if(snapshot.exists() && snapshot.getData().get("status") == "friends") {
                         // pull friend's day data
-                        long startTimestamp = timeStamper.now();
-                        for (int i = 0; i < numOfDays; i++) startTimestamp = timeStamper.previousDay(startTimestamp);
-                        String startDayId = timeStamper.timestampToDayId(startTimestamp);
-
-                        db.collection("users").document(friendEmail).collection("days")
-                                .orderBy("dayId", Query.Direction.DESCENDING)
-                                .whereGreaterThanOrEqualTo("dayId", startDayId)
-                                .get()
-                                .addOnSuccessListener(snapshots -> {
-                                    ArrayList<Day> dayList = new ArrayList<>();
-                                    for(QueryDocumentSnapshot doc : snapshots) {
-                                        Day day = doc.toObject(Day.class);
-                                        Log.d(TAG, doc.getId() + " => " + day);
-                                        dayList.add(day);
-                                    }
-                                    dayCallback.call(dayList);
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.e(TAG, "Failed to fetch friend data");
-                                    dayCallback.call(null);
-                                });
-
+                        getDays(friendEmail, numOfDays, dayCallback);
                     } else {
                         Log.e(TAG, "Failed to find friend");
                         dayCallback.call(null);
