@@ -33,6 +33,8 @@ public class StepCountActivity extends AppCompatActivity {
     private static boolean DEBUG;
     private static boolean ESPRESSO;
 
+    static boolean toggleEncouragementMessage = true;
+
     private UpdateStep updateStep;
 
     private TextView textSteps;
@@ -177,6 +179,10 @@ public class StepCountActivity extends AppCompatActivity {
         super.onStart();
         createBarChart.draw();
 
+        dataAdapter.getFriends( (friendsList) -> {
+            toggleEncouragementMessage = !friendsList.isEmpty();
+        });
+
         if(updateStep != null && !updateStep.isCancelled()) {
             updateStep.cancel(true);
         }
@@ -268,16 +274,14 @@ public class StepCountActivity extends AppCompatActivity {
             goalCompleted = true;
         } else {
             goalCompleted = false;
-            if(previousDaySteps != 0 && today.totalSteps < today.goal ) {
-                int improvementPercentage = (int) ((today.totalSteps - previousDaySteps) / previousDaySteps)*100;
-                if (lastEncouragingMessageSteps == 0 && previousDaySteps + 500 <= today.totalSteps) {
-                    lastEncouragingMessageSteps = today.totalSteps - (today.totalSteps - previousDaySteps) % 500;
-                    String message = String.format(Locale.US, "Good job! You've improved by %d%% from yesterday", improvementPercentage);
-                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-                } else if (lastEncouragingMessageSteps + 500 <= today.totalSteps && lastEncouragingMessageSteps != 0 ) {
-                    lastEncouragingMessageSteps = today.totalSteps - (today.totalSteps - previousDaySteps) % 500;
-                    String message = String.format(Locale.US, "Good job! You've improved by %d%% from yesterday", improvementPercentage);
-                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+            if( toggleEncouragementMessage ) {
+                if (previousDaySteps != 0 && today.totalSteps < today.goal) {
+                    int improvementPercentage = (int) ((today.totalSteps - previousDaySteps) / previousDaySteps) * 100;
+                    if ((lastEncouragingMessageSteps == 0 && previousDaySteps + 500 <= today.totalSteps)
+                            || (lastEncouragingMessageSteps + 500 <= today.totalSteps && lastEncouragingMessageSteps != 0)) {
+                        lastEncouragingMessageSteps = today.totalSteps - (today.totalSteps - previousDaySteps) % 500;
+                        EncouragementMessage.makeEncouragementMessage(getApplicationContext(), improvementPercentage);
+                    }
                 }
             }
 
