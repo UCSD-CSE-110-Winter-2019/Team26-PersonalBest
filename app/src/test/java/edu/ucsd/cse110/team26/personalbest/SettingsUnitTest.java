@@ -1,6 +1,7 @@
 package edu.ucsd.cse110.team26.personalbest;
 
 import android.content.Context;
+import android.content.Intent;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.NumberPicker;
@@ -10,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.shadows.ShadowToast;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -25,15 +27,18 @@ public class SettingsUnitTest {
     private Button saveBtn;
     private Context context;
     private Settings settings;
-
+    SettingsActivity activity;
     @Before
     public void setup() {
         context = InstrumentationRegistry.getInstrumentation().getContext();
-        SettingsActivity settingsActivity = Robolectric.setupActivity(SettingsActivity.class);
-        goalEdit = settingsActivity.findViewById(R.id.goalEdit);
-        feetNp = settingsActivity.findViewById(R.id.feetNumberPicker);
-        inchesNp = settingsActivity.findViewById(R.id.inchesNumberPicker);
-        saveBtn = settingsActivity.findViewById(R.id.btnSettingsSave);
+        Intent intent = new Intent(RuntimeEnvironment.application, StepCountActivity.class);
+        intent.putExtra("DEBUG", true);
+        intent.putExtra("DOCUMENT_KEY", " ");
+        activity = Robolectric.buildActivity(SettingsActivity.class, intent).create().get();
+        goalEdit = activity.findViewById(R.id.goalEdit);
+        feetNp = activity.findViewById(R.id.feetNumberPicker);
+        inchesNp = activity.findViewById(R.id.inchesNumberPicker);
+        saveBtn = activity.findViewById(R.id.btnSettingsSave);
         settings = new Settings(context, new ConcreteTimeStamper());
     }
 

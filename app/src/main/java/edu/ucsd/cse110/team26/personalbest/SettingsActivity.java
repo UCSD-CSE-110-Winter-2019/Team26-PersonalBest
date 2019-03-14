@@ -22,7 +22,7 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        settings = new Settings(getApplicationContext(), new ConcreteTimeStamper() );
+        settings = new Settings(getApplicationContext(), new ConcreteTimeStamper());
 
         EditText goalEdit = findViewById(R.id.goalEdit);
         NumberPicker feetNp = findViewById(R.id.feetNumberPicker);
@@ -61,9 +61,14 @@ public class SettingsActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Error: Goal should be less than 15000", Toast.LENGTH_SHORT).show();
             return;
         }
+        settings.saveGoal(newGoal);
+        settings.saveHeight(feetNp.getValue(), inchesNp.getValue());
+        if(!getIntent().getExtras().getBoolean("DEBUG") )
+        {
+            settings.saveTodayGoal(newGoal);
+            settings.saveUserHeight(feetNp.getValue(), inchesNp.getValue());
+        }
 
-        settings.saveTodayGoal(newGoal);
-        settings.saveUserHeight(feetNp.getValue(), inchesNp.getValue());
 
         SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();

@@ -51,6 +51,11 @@ class MockDataAdapter implements IDataAdapter {
 
     }
 
+    @Override
+    public void getDays(int numOfDays, Callback<List<Day>> dayCallback) {
+
+    }
+
     /**
      * Gets the last numOfDays Days of data of the friend with the specified ID,
      * calling the passed in callback with the resulting List of Day, or null if

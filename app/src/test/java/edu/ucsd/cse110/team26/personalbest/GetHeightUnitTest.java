@@ -1,6 +1,7 @@
 package edu.ucsd.cse110.team26.personalbest;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.widget.Button;
 import android.widget.NumberPicker;
@@ -10,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -26,14 +28,22 @@ public class GetHeightUnitTest {
     private Button confirm;
     private Context context;
     private SharedPreferences sharedPreferences;
+    GetHeightActivity activity;
 
     @Before
     public void setup() {
+
+        Intent intent = new Intent(RuntimeEnvironment.application, StepCountActivity.class);
+        intent.putExtra("DEBUG", true);
+        intent.putExtra("EMAIL", " ");
+        intent.putExtra("NAME", " " );
+        intent.putExtra("UID", " ");
+        activity = Robolectric.buildActivity(GetHeightActivity.class, intent).create().get();
         context = InstrumentationRegistry.getInstrumentation().getContext();
-        GetHeightActivity getHeightActivity = Robolectric.setupActivity(GetHeightActivity.class);
-        inch = getHeightActivity.findViewById(R.id.inch);
-        feet = getHeightActivity.findViewById(R.id.feet);
-        confirm = getHeightActivity.findViewById(R.id.confirm);
+
+        inch = activity.findViewById(R.id.inch);
+        feet = activity.findViewById(R.id.feet);
+        confirm = activity.findViewById(R.id.confirm);
         sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
     }
 

@@ -41,7 +41,7 @@ public class CompleteGoalUnitTest {
     @Test
     public void testCompleteGoal() {
         activity.setStepCount(5000);
-        assertEquals("5000/5000 steps today", textSteps.getText().toString());
+        assertEquals("5000/5000 steps", textSteps.getText().toString());
 
         assertEquals("Congratulations, you've completed your goal of 5000 steps today!", ShadowToast.getTextOfLatestToast());
         assertEquals(Toast.LENGTH_SHORT, ShadowToast.getLatestToast().getDuration());

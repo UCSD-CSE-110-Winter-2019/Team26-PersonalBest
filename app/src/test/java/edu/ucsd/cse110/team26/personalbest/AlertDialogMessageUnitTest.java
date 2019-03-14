@@ -1,8 +1,11 @@
 package edu.ucsd.cse110.team26.personalbest;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.widget.TextView;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,16 +28,11 @@ public class AlertDialogMessageUnitTest {
 
     private StepCountActivity activity;
     private TextView textSteps;
-
+    private Context context;
 
     @Before
     public void setUp() throws Exception {
-        Intent intent = new Intent(RuntimeEnvironment.application, StepCountActivity.class);
-        intent.putExtra("DEBUG", true);
-        activity = Robolectric.buildActivity(StepCountActivity.class, intent).create().get();
-
-
-        textSteps = activity.findViewById(R.id.textSteps);
+        context = InstrumentationRegistry.getInstrumentation().getContext();
     }
 
     /**
@@ -42,6 +40,11 @@ public class AlertDialogMessageUnitTest {
      */
     @Test
     public void testAlertDialogBeforeCompletedGoal() {
+        Intent intent = new Intent(RuntimeEnvironment.application, StepCountActivity.class);
+        intent.putExtra("DEBUG", true);
+        //intent.putExtra("DOCUMENT_KEY", " ");
+        StepCountActivity activity = Robolectric.buildActivity(StepCountActivity.class, intent).create().get();
+        TextView textSteps = activity.findViewById(R.id.textSteps);
         activity.initializeNewDay();
         Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
         settings.saveGoal(2000);
@@ -55,6 +58,11 @@ public class AlertDialogMessageUnitTest {
      */
     @Test
     public void testAlertDialogAfterCompletedGoal() {
+        Intent intent = new Intent(RuntimeEnvironment.application, StepCountActivity.class);
+        intent.putExtra("DEBUG", true);
+        //intent.putExtra("DOCUMENT_KEY", " ");
+        StepCountActivity activity = Robolectric.buildActivity(StepCountActivity.class, intent).create().get();
+        TextView textSteps = activity.findViewById(R.id.textSteps);
         activity.initializeNewDay();
         Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
         settings.saveGoal(2000);
@@ -72,6 +80,11 @@ public class AlertDialogMessageUnitTest {
      */
     @Test
     public void testAlertDialogAcceptNewGoal() {
+        Intent intent = new Intent(RuntimeEnvironment.application, StepCountActivity.class);
+        intent.putExtra("DEBUG", true);
+        //intent.putExtra("DOCUMENT_KEY", " ");
+        StepCountActivity activity = Robolectric.buildActivity(StepCountActivity.class, intent).create().get();
+        TextView textSteps = activity.findViewById(R.id.textSteps);
         activity.initializeNewDay();
         Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
         settings.saveGoal(2000);
@@ -87,6 +100,11 @@ public class AlertDialogMessageUnitTest {
      */
     @Test
     public void testAlertDialogDeclineNewGoal() {
+        Intent intent = new Intent(RuntimeEnvironment.application, StepCountActivity.class);
+        intent.putExtra("DEBUG", true);
+        //intent.putExtra("DOCUMENT_KEY", " ");
+        StepCountActivity activity = Robolectric.buildActivity(StepCountActivity.class, intent).create().get();
+        TextView textSteps = activity.findViewById(R.id.textSteps);
         activity.initializeNewDay();
         Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
         settings.saveGoal(2000);

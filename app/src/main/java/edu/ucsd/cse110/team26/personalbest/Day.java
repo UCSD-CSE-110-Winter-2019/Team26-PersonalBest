@@ -31,6 +31,13 @@ class Day {
         this.date = date;
     }
 
+    public Day(int goal, int totalSteps, int walkSteps)
+    {
+        this.goal = goal;
+        this.totalSteps = totalSteps;
+        this.walkSteps = walkSteps;
+    }
+
     public Day(int goal, int totalSteps, int walkSteps, String dayId) {
         this.goal = goal;
         this.totalSteps = totalSteps;

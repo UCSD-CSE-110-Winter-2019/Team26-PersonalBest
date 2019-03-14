@@ -43,17 +43,17 @@ public class StepCountActivityUnitTest {
     @Test
     public void testUpdateSteps() {
         activity.setStepCount(nextStepCount);
-        assertEquals("1337/5000 steps today", textSteps.getText().toString());
+        assertEquals("1337/5000 steps", textSteps.getText().toString());
 
         activity.setStepCount(nextStepCount+100);
-        assertEquals("1437/5000 steps today", textSteps.getText().toString());
+        assertEquals("1437/5000 steps", textSteps.getText().toString());
 
         Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
 
         settings.saveGoal(10000);
 
         activity.setStepCount(nextStepCount+1000);
-        assertEquals("2337/10000 steps today", textSteps.getText().toString());
+        assertEquals("2337/10000 steps", textSteps.getText().toString());
     }
 
 }

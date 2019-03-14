@@ -18,4 +18,6 @@ public interface TimeStamper {
     String durationToString(long duration);
     String timestampToDayId(long timestamp);
     long dayIdToTimestamp(String dayID);
+    String[] listDay(int size);
+    String getTargetID(int size);
 }

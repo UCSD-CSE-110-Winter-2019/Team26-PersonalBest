@@ -24,6 +24,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -64,17 +65,19 @@ public class StepCountActivity extends AppCompatActivity {
     private long initialSteps = 0;
     private long currentDate;
 
+    //
     private Walk currentWalk;
     private Day today = new Day();
     private User user = new User();
+    private int height;
 
     IDataAdapter dataAdapter;
     TimeStamper timeStamper;
     Settings settings;
 
     // BarChart object
-    CombinedChart mChart;
-    CombinedChart mChart2;
+    CombinedChart sevenDayBarchart;
+    CombinedChart twentyEightDayBarchart;
     private BarChart createBarChart;
     private BarChart createBarChart2;
     boolean month;
@@ -82,7 +85,6 @@ public class StepCountActivity extends AppCompatActivity {
     //firebase object
     DocumentReference user_data;
     CollectionReference user_list;
-    GoogleSignInAccount currentUser;
     String COLLECTION_KEY = "users";
     String RECORD_KEY = "record";
     String DOCUMENT_KEY;
@@ -121,9 +123,9 @@ public class StepCountActivity extends AppCompatActivity {
                         ts = timeStamper.nextDay(ts);
                     }
 
-                    if(!stepCounts.isEmpty() )
+                    if(!stepCounts.isEmpty() && !DEBUG )
                     {
-                        updateDataToFirebase();
+                        //updateDataToFirebase();
                     }
 
                     Thread.sleep(10000);
@@ -152,21 +154,32 @@ public class StepCountActivity extends AppCompatActivity {
             DEBUG = getIntent().getExtras().getBoolean("DEBUG");
             ESPRESSO = getIntent().getExtras().getBoolean("ESPRESSO");
         }
-        currentUser = GoogleSignIn.getLastSignedInAccount(this);
-        DOCUMENT_KEY = currentUser.getEmail();
+
+        DOCUMENT_KEY = getIntent().getExtras().getString("DOCUMENT_KEY");
 
 
         fitnessService = FitnessServiceFactory.create(DEBUG, this);
         dataAdapter = IDatabaseAdapterFactory.create(DEBUG, this.getApplicationContext());
+
         timeStamper = new ConcreteTimeStamper();
         currentDate = timeStamper.now();
 
-
+        FirebaseApp.initializeApp(getApplicationContext());
         user_data = FirebaseFirestore.getInstance()
                 .collection(COLLECTION_KEY)
                 .document(DOCUMENT_KEY);
+        //dataAdapter.getUser(x -> checkHeight(x));
+        if(!DEBUG)
+        {
+            user_data = FirebaseFirestore.getInstance()
+                    .collection(COLLECTION_KEY)
+                    .document(DOCUMENT_KEY);
+            dataAdapter.getUser(x -> checkHeight(x));
+            //checkHeight();
+        }
 
-        checkHeight();
+
+
         fitnessService.setup();
         setupBarChart();
         buttonWalk();
@@ -174,30 +187,40 @@ public class StepCountActivity extends AppCompatActivity {
 
     public void setupBarChart()
     {
-        mChart = findViewById(R.id.chart1);
-        mChart2 = findViewById(R.id.chart2);
+        sevenDayBarchart = findViewById(R.id.chart1);
+        twentyEightDayBarchart = findViewById(R.id.chart2);
 
-        createBarChart = new BarChart(getApplicationContext(),mChart);
-        createBarChart.setDOCUMENT_KEY(DOCUMENT_KEY);
-        createBarChart.setSize(7);
-        //createBarChart.draw();
 
-        createBarChart2 = new BarChart(getApplicationContext(),mChart2);
-        createBarChart2.setDOCUMENT_KEY(DOCUMENT_KEY);
-        createBarChart2.setSize(28);
+
+
+
+        //createBarChart.setDOCUMENT_KEY(DOCUMENT_KEY);
+        //createBarChart.setSize(7);
         //createBarChart.draw();
+        if(!DEBUG)
+        {
+            //updateDataToFirebase();
+        }
+
+        createBarChart = new BarChart(getApplicationContext(),sevenDayBarchart);
+        dataAdapter.getDays(7,listInfo -> createBarChart.draw(listInfo) );
+        sevenDayBarchart.setVisibility(View.VISIBLE);
+
+        createBarChart2 = new BarChart(getApplicationContext(),twentyEightDayBarchart);
+        dataAdapter.getDays(28,listInfo-> createBarChart2.draw(listInfo));
+        twentyEightDayBarchart.setVisibility(View.GONE);
 
         Switch sw = findViewById(R.id.switch1);
         sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (!isChecked) {
+                if (isChecked) {
                     month = true;
-                    mChart.setVisibility(View.GONE);
-                    mChart2.setVisibility(View.VISIBLE);
+                    sevenDayBarchart.setVisibility(View.GONE);
+                    twentyEightDayBarchart.setVisibility(View.VISIBLE);
                 } else {
                     month = false;
-                    mChart.setVisibility(View.VISIBLE);
-                    mChart2.setVisibility(View.GONE);
+                    sevenDayBarchart.setVisibility(View.VISIBLE);
+                    twentyEightDayBarchart.setVisibility(View.GONE);
                 }
             }
         });
@@ -242,7 +265,8 @@ public class StepCountActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
+        //
+        // createBarChart.draw();
         if(updateStep != null && !updateStep.isCancelled()) {
             updateStep.cancel(true);
         }
@@ -253,25 +277,34 @@ public class StepCountActivity extends AppCompatActivity {
             updateStep.execute(-1);
         }
 
-        if(!stepCounts.isEmpty() )
+        if(!stepCounts.isEmpty() && !DEBUG)
         {
-            updateDataToFirebase();
+            //updateDataToFirebase();
+            //dcreateBarChart.draw();
+            //createBarChart2.draw();
         }
-
-        createBarChart.draw();
-        createBarChart2.draw();
+        /*dataAdapter.getDays(7,weekInfo -> {
+            Log.d(TAG, weekInfo.toString());
+            createBarChart.draw(weekInfo);
+        });*/
+        //dataAdapter.getDays(7,weekInfo -> createBarChart.draw(weekInfo));
+        //createBarChart.draw();
+        //createBarChart2.draw();
+        /*sevenDayBarchart.setVisibility(View.VISIBLE);
+        twentyEightDayBarchart.setVisibility(View.GONE);
         if(!month)
         {
-            mChart.setVisibility(View.GONE);
-            mChart2.setVisibility(View.VISIBLE);
+            twentyEightDayBarchart.setVisibility(View.GONE);
+            sevenDayBarchart.setVisibility(View.VISIBLE);
         }
         else
         {
-            mChart.setVisibility(View.VISIBLE);
-            mChart2.setVisibility(View.GONE);
-        }
+            twentyEightDayBarchart.setVisibility(View.VISIBLE);
+            sevenDayBarchart.setVisibility(View.GONE);
+        }*/
 
         Settings settings = new Settings(getApplicationContext(), timeStamper);
+        settings.setDOCUMENT_KEY(DOCUMENT_KEY);
         today.goal = settings.getGoal();
         user.height = settings.getUserHeight();
         setStepCount(today.totalSteps);
@@ -301,8 +334,9 @@ public class StepCountActivity extends AppCompatActivity {
         }
     }
 
-    public void checkHeight()
+    /*public void checkHeight()
     {
+        //dataAdapter.getUser(x -> getHeight(x));
         user_data.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -316,7 +350,20 @@ public class StepCountActivity extends AppCompatActivity {
                 }
             }
         });
+    }*/
+
+    public void checkHeight(User user)
+    {
+        this.height = user.getHeight();
+        if(height == 0)
+        {
+            String name = user.getName();
+            String email = user.getEmail();
+            String userID = user.getUid();
+            launchGetHeightActivity(name, email, userID);
+        }
     }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -437,7 +484,12 @@ public class StepCountActivity extends AppCompatActivity {
         alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoal);
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES", (dialog, which) -> {
                     Settings settings = new Settings(getApplicationContext(), timeStamper);
-                    settings.saveTodayGoal(suggestedGoal);
+                    settings.saveGoal(suggestedGoal);
+                    if(!DEBUG)
+                    {
+                        settings.setDOCUMENT_KEY(DOCUMENT_KEY);
+                        settings.saveTodayGoal(suggestedGoal);
+                    }
                     dialog.dismiss();
                 });
         alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) -> dialog.dismiss());
@@ -470,7 +522,12 @@ public class StepCountActivity extends AppCompatActivity {
         previousDaySteps = previousSteps.get(0);
         Log.i(TAG, String.format("New day. Setting previous day's steps to %d", previousDaySteps));
         Settings settings = new Settings(getApplicationContext(), timeStamper);
-        //settings.saveTodayGoal((int) today.goal);
+        settings.saveGoal((int) today.goal);
+        if(!DEBUG)
+        {
+            settings.setDOCUMENT_KEY(DOCUMENT_KEY);
+            settings.saveTodayGoal((int)today.goal);
+        }
         lastEncouragingMessageSteps = 0;
     }
 

@@ -158,6 +158,51 @@ public class ConcreteTimeStamper implements TimeStamper {
     }
 
     @Override
+    public String[] listDay(int size) {
+        String[] listID = new String[size];
+        int count = 0;
+        for(int i = 0 - size + 1 ; i < 1; i++)
+        {
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DATE, i);
+            String year = String.valueOf(cal.get(Calendar.YEAR));
+            String month = String.valueOf(cal.get(Calendar.MONTH));
+            if(month.length() == 1)
+            {
+                month = "0" + month;
+            }
+            String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+            if(day.length() == 1)
+            {
+                day = "0" + day;
+            }
+            String dayID = year + month + day;
+            listID[count] = dayID;
+            count++;
+        }
+        return listID;
+    }
+
+    @Override
+    public String getTargetID(int size) {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, 0-size+1);
+        String year = String.valueOf(cal.get(Calendar.YEAR));
+        String month = String.valueOf(cal.get(Calendar.MONTH));
+        if(month.length() == 1)
+        {
+            month = "0" + month;
+        }
+        String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+        if(day.length() == 1)
+        {
+            day = "0" + day;
+        }
+        String dayID = year + month + day;
+        return dayID;
+    }
+
+    @Override
     public String timestampToDayId(long timestamp) {
         return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(timestamp));
     }

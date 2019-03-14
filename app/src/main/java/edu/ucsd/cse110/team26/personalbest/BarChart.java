@@ -45,13 +45,14 @@ public class BarChart {
     private String userID;
     private String[] labels;
 
-    DocumentReference user_data;
+    /*DocumentReference user_data;
     CollectionReference user_list;
     GoogleSignInAccount currentUser;
     String COLLECTION_KEY = "users";
     String RECORD_KEY = "record";
     String DOCUMENT_KEY;
-    Day day;
+    Day day;*/
+    List<Day> info;
 
     private int[] weekGoal;
     private int[] weekStep;
@@ -71,8 +72,13 @@ public class BarChart {
         weekWalk = new int[size];
     }
 
-    public void draw()
+    public void draw(List<Day> info)
     {
+        this.info = info;
+        this.size = info.size();
+        weekGoal = new int[size];
+        weekStep = new int[size];
+        weekWalk = new int[size];
         mChart.setDrawGridBackground(false);
         mChart.getDescription().setText("");
         mChart.setHighlightFullBarEnabled(false);
@@ -88,7 +94,7 @@ public class BarChart {
         mChart.getAxisLeft().setAxisMinimum(0.0f); // this replaces setStartAtZero(true)
         mChart.getAxisRight().setAxisMinimum(0.0f);
 
-        getData();
+        //getData();
         ArrayList<BarEntry> entries = new ArrayList<>();
         getBarEntries(entries);
 
@@ -129,6 +135,7 @@ public class BarChart {
         mChart.setData(dataCombined);
     }
 
+
     public void setupLabel()
     {
         Calendar date = Calendar.getInstance();
@@ -161,7 +168,7 @@ public class BarChart {
     private void getLineEntriesData(ArrayList<Entry> entries) {
         for(int i = 0; i < size; i++)
         {
-            entries.add(new Entry(i, weekGoal[i]));
+            entries.add(new Entry(i, info.get(i).getGoal()));
         }
     }
 
@@ -193,7 +200,8 @@ public class BarChart {
     {
         for(int i = 0; i < size; i++)
         {
-            entries.add(new BarEntry(i, new float[] {weekWalk[i], weekStep[i] - weekWalk[i] }));
+            entries.add(new BarEntry(i, new float[] {info.get(i).getWalkSteps(),
+                    info.get(i).getTotalSteps() - info.get(i).getWalkSteps() }));
         }
     }
 
@@ -206,7 +214,7 @@ public class BarChart {
         return labels[0];
     }
 
-    public void getData()
+    /*public void getData()
     {
         String [] listDayID;
         if(size == 7)
@@ -237,9 +245,9 @@ public class BarChart {
                 }
             });
         }
-    }
+    }*/
 
-    public String[] get7DaysID()
+    /*public String[] get7DaysID()
     {
         String[] weekID = new String[7];
         int count = 0;
@@ -294,5 +302,5 @@ public class BarChart {
     public void setDOCUMENT_KEY(String DOCUMENT_KEY)
     {
         this.DOCUMENT_KEY = DOCUMENT_KEY;
-    }
+    }*/
 }

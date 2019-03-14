@@ -73,6 +73,16 @@ public class MockTimeStamper implements TimeStamper {
     }
 
     @Override
+    public String[] listDay(int size) {
+        return new String[0];
+    }
+
+    @Override
+    public String getTargetID(int size) {
+        return null;
+    }
+
+    @Override
     public String timestampToDayId(long timestamp) {
         return null;
     }

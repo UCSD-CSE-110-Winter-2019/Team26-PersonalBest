@@ -124,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, StepCountActivity.class);
         intent.putExtra("DEBUG", DEBUG);
         intent.putExtra("ESPRESSO", ESPRESSO);
+        intent.putExtra("DOCUMENT_KEY", GoogleSignIn.getLastSignedInAccount(this).getEmail());
         startActivity(intent);
     }
 

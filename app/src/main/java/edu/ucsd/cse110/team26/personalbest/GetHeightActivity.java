@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -25,17 +26,26 @@ public class GetHeightActivity extends AppCompatActivity {
     String UID;
     String DOCUMENT_KEY;
     User user;
+    IDataAdapter dataAdapter;
+    boolean DEBUG;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_get_height);
 
-        DOCUMENT_KEY = getIntent().getExtras().getString("EMAIL");
-        NAME = getIntent().getExtras().getString("NAME");
-        UID = getIntent().getExtras().getString("UID");
-        user_data = FirebaseFirestore.getInstance()
-                .collection(COLLECTION_KEY)
-                .document(DOCUMENT_KEY);
+        DOCUMENT_KEY = getIntent().getStringExtra("EMAIL");
+        NAME = getIntent().getStringExtra("NAME");
+        UID = getIntent().getStringExtra("UID");
+        DEBUG = getIntent().getBooleanExtra("DEBUG", false);
+
+        if(!DEBUG)
+        {
+            FirebaseApp.initializeApp(getApplicationContext());
+            user_data = FirebaseFirestore.getInstance()
+                    .collection(COLLECTION_KEY)
+                    .document(DOCUMENT_KEY);
+        }
+
 
         final TextView resultFeet = findViewById(R.id.feetText);
         final TextView resultInch = findViewById(R.id.inchText);
@@ -64,10 +74,15 @@ public class GetHeightActivity extends AppCompatActivity {
                     np2.setEnabled(false);
 
                     settings = new Settings(getApplicationContext(), new ConcreteTimeStamper());
+                    settings.setDOCUMENT_KEY(DOCUMENT_KEY);
                     settings.saveHeight(np1.getValue(), np2.getValue());
                     int height = np1.getValue() * 12 + np2.getValue();
 
-                    getInitialHeight(height);
+                    if(!getIntent().getExtras().getBoolean("DEBUG"))
+                    {
+                        getInitialHeight(height);
+                    }
+
 
                     confirmButton.setText("Done");
                     v.setTag(0);
@@ -83,6 +98,7 @@ public class GetHeightActivity extends AppCompatActivity {
     public void launchStepCountActivity() {
         finish();
     }
+
     public void getInitialHeight(int height)
     {
         user = new User(height, NAME, DOCUMENT_KEY, UID);
@@ -98,4 +114,5 @@ public class GetHeightActivity extends AppCompatActivity {
             }
         });
     }
+
 }

@@ -56,19 +56,19 @@ public class Settings {
     public Settings (Context context, TimeStamper timeStamper) {
         sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE );
         this.timeStamper = timeStamper;
-        this.DOCUMENT_KEY = GoogleSignIn.getLastSignedInAccount(context).getEmail();
-        user_data = FirebaseFirestore.getInstance()
+        /*user_data = FirebaseFirestore.getInstance()
                 .collection(COLLECTION_KEY)
-                .document(DOCUMENT_KEY);
+                .document(DOCUMENT_KEY);*/
     }
 
-    public Settings(Context context, String dayID, String DOCUMENT_KEY)
+    /*public Settings(Context context, String dayID, String DOCUMENT_KEY)
     {
         sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE );
         this.dayID = dayID;
         this.DOCUMENT_KEY = DOCUMENT_KEY;
         userHeight = 0;
     }
+
     public Settings(Context context, String DOCUMENT_KEY)
     {
         sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE );
@@ -76,7 +76,7 @@ public class Settings {
         user_data = FirebaseFirestore.getInstance()
                 .collection(COLLECTION_KEY)
                 .document(GoogleSignIn.getLastSignedInAccount(context).getEmail());
-    }
+    }*/
 
     public void setDOCUMENT_KEY(String DOCUMENT_KEY)
     {
@@ -101,6 +101,9 @@ public class Settings {
     public void saveUserHeight(int feet, int inches)
     {
         int new_height = feet*12 + inches;
+        DocumentReference user_data = FirebaseFirestore.getInstance()
+                .collection(COLLECTION_KEY)
+                .document(DOCUMENT_KEY);
         user_data.update("height", new_height).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
@@ -117,6 +120,9 @@ public class Settings {
 
     public int getUserHeight()
     {
+        DocumentReference user_data = FirebaseFirestore.getInstance()
+                .collection(COLLECTION_KEY)
+                .document(DOCUMENT_KEY);
         user_data.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -165,9 +171,8 @@ public class Settings {
                 break;
         }
         editor.apply();
-        saveGoal(new_goal);
 
-        setupTmrGoal(new_goal);
+        //setupTmrGoal(new_goal);
     }
 
     public int getHeight(){
@@ -195,6 +200,7 @@ public class Settings {
                 break;
         }
         editor.apply();
+
     }
 
     public int getGoal() {
@@ -265,7 +271,15 @@ public class Settings {
         Date date = cal.getTime();
         String year = String.valueOf(cal.get(Calendar.YEAR));
         String month = String.valueOf(cal.get(Calendar.MONTH));
+        if(month.length() == 1)
+        {
+            month = "0" + month;
+        }
         String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+        if(day.length() == 1)
+        {
+            day = "0" + day;
+        }
         String dayID = year + month + day;
         return dayID;
     }
@@ -278,7 +292,7 @@ public class Settings {
         return date;
     }
 
-    public void setupTmrGoal(int new_goal)
+    /*public void setupTmrGoal(int new_goal)
     {
         DocumentReference user_record = FirebaseFirestore.getInstance()
                 .collection(COLLECTION_KEY)
@@ -299,7 +313,7 @@ public class Settings {
                         Log.w(TAG, "Error updating the yesterday info");
                     }
                 });
-    }
+    }*/
 
     public String getTodayID()
     {
