@@ -66,8 +66,8 @@ public class StepCountActivity extends AppCompatActivity {
     // BarChart object
     private BarChart createBarChart;
     private BarChart createBarChart2;
-    CombinedChart mChart;
-    CombinedChart mChart2;
+    CombinedChart sevenDayChart;
+    CombinedChart twentyEightDayChart;
 
     /* ================
     Description: keep the UI update with the current number of taken steps
@@ -93,7 +93,7 @@ public class StepCountActivity extends AppCompatActivity {
                     fitnessService.getStepsCount(timeStamper.lastSevenDays(), timeStamper.today(), subStepCounts);
                     walkData.clear();
                     long ts = timeStamper.startOfDay(timeStamper.lastTwentyEightDays());
-                    for(int i = 0; i < 7; i++) {
+                    for(int i = 0; i < 28; i++) {
                         ArrayList<Walk> list = new ArrayList<>();
                         walkData.add(list);
                         fitnessService.getWalks(ts, timeStamper.endOfDay(ts), list);
@@ -145,39 +145,38 @@ public class StepCountActivity extends AppCompatActivity {
         btnStartWalk = findViewById(R.id.btnStartWalk);
         btnEndWalk = findViewById(R.id.btnEndWalk);
         textWalkData = findViewById(R.id.textWalkData);
-        CombinedChart mChart = findViewById(R.id.chart1);
+        twentyEightDayChart = findViewById(R.id.chart2);
+        sevenDayChart = findViewById(R.id.chart1);
 
         fitnessService = FitnessServiceFactory.create(DEBUG, this);
         dataAdapter = IDatabaseAdapterFactory.create(DEBUG, this.getApplicationContext());
         timeStamper = new ConcreteTimeStamper();
 
         fitnessService.setup();
-        mChart = findViewById(R.id.chart1);
         // fake goal
         List<Integer> goalData = new ArrayList<>();
         for (int j=0; j<28; j++) goalData.add(5000);
 
         boolean monthlySummary = true;
-        createBarChart = new BarChart(getApplicationContext(), mChart, stepCounts, walkData, goalData,monthlySummary);
+        createBarChart = new BarChart(getApplicationContext(), twentyEightDayChart, stepCounts, walkData, goalData,monthlySummary);
         createBarChart.draw();
-        mChart.setVisibility(View.GONE);
+        twentyEightDayChart.setVisibility(View.GONE);
 
         List<Integer> subGoalData = new ArrayList<>();
         for (int j=0; j<7; j++) subGoalData.add(5000);
-        mChart2 = findViewById(R.id.chart2);
-        createBarChart2 = new BarChart(getApplicationContext(), mChart2, subStepCounts, walkData7days, subGoalData,!monthlySummary);
+        createBarChart2 = new BarChart(getApplicationContext(), sevenDayChart, subStepCounts, walkData7days, subGoalData,!monthlySummary);
         createBarChart2.draw();
+        sevenDayChart.setVisibility(View.VISIBLE);
 
         Switch sw = findViewById(R.id.switch1);
-        CombinedChart finalMChart = mChart;
         sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (!isChecked) {
-                    finalMChart.setVisibility(View.GONE);
-                    mChart2.setVisibility(View.VISIBLE);
+                if (isChecked) {
+                    sevenDayChart.setVisibility(View.GONE);
+                    twentyEightDayChart.setVisibility(View.VISIBLE);
                 } else {
-                    finalMChart.setVisibility(View.VISIBLE);
-                    mChart2.setVisibility(View.GONE);
+                    sevenDayChart.setVisibility(View.VISIBLE);
+                    twentyEightDayChart.setVisibility(View.GONE);
                 }
             }
         });

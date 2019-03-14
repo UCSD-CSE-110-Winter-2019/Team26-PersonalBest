@@ -37,4 +37,5 @@
     <string name="hint_chat_screen">message will appear here</string>
     <string name="chat_history">Chat History</string>
     <string name="friend_list_button">Friend List</string>
+    <string name="monthly_summary">Monthly Summary</string>
 </resources>

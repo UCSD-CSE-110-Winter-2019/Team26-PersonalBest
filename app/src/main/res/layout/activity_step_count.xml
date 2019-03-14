@@ -35,17 +35,18 @@
 
     <TextView
         android:id="@+id/textWalkData"
-        android:layout_width="276dp"
-        android:layout_height="109dp"
+        android:layout_width="277dp"
+        android:layout_height="wrap_content"
         android:text="@string/empty_space"
         android:textSize="20sp" />
 
     <Switch
         android:id="@+id/switch1"
+        android:layout_marginTop="10dp"
         android:layout_width="181dp"
         android:layout_height="wrap_content"
         android:checked="false"
-        android:text="Monthly Summary" />
+        android:text="@string/monthly_summary" />
 
     <com.github.mikephil.charting.charts.CombinedChart
         android:id="@+id/chart1"

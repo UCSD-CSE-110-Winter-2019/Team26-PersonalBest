@@ -44,8 +44,8 @@ public class LastSevenDaysBarChartUnitTest
         Walk walk = new Walk(0,0);
         fakeWalk.add(walk);
         walkData.add(fakeWalk);
-
-        createBarChart = new BarChart(context, mChart, stepCounts, walkData);
+        List<Integer> goal = new ArrayList<>();
+        createBarChart = new BarChart(context, mChart, stepCounts, walkData, goal, false);
         createBarChart.setupLabel();
     }
 
