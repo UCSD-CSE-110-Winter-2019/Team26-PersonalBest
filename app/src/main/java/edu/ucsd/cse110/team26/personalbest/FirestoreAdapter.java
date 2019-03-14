@@ -21,6 +21,11 @@ import java.util.Map;
 
 class FirestoreAdapter implements IDataAdapter {
     private final static String TAG = "FirestoreAdapter";
+    private final static String CHATS = "chats";
+    private final static String USERS = "users";
+    private final static String DAYS = "days";
+    private final static String FRIENDS = "friends";
+
     private FirebaseFirestore db;
     private FirebaseFunctions funcs;
     private String userEmail;
@@ -43,7 +48,7 @@ class FirestoreAdapter implements IDataAdapter {
      */
     @Override
     public void getToday(Callback<Day> dayCallback) {
-        db.collection("users").document(userEmail).collection("days")
+        db.collection(USERS).document(userEmail).collection(DAYS)
                 .document(timeStamper.timestampToDayId(timeStamper.now()))
                 .get()
                 .addOnSuccessListener(snapshot -> {
@@ -65,7 +70,7 @@ class FirestoreAdapter implements IDataAdapter {
      */
     @Override
     public void getUser(Callback<User> userCallback) {
-        db.collection("users").document(userEmail).get().addOnSuccessListener(user -> {
+        db.collection(USERS).document(userEmail).get().addOnSuccessListener(user -> {
             if(user.exists()) {
                 Map<String, Object> userData = user.getData();
                 userCallback.call(new User((int) userData.get("height"),
@@ -91,7 +96,7 @@ class FirestoreAdapter implements IDataAdapter {
         Map<String, Object> u = new HashMap<>();
         u.put("height", height);
 
-        db.collection("users").document(userEmail)
+        db.collection(USERS).document(userEmail)
                 .set(u, SetOptions.merge())
                 .addOnSuccessListener(a -> booleanCallback.call(true))
                 .addOnFailureListener(e -> {
@@ -111,12 +116,12 @@ class FirestoreAdapter implements IDataAdapter {
      */
     @Override
     public void getFriend(String friendEmail, Callback<List<User>> userCallback) {
-        db.collection("users").document(userEmail)
-                .collection("friends").document(friendEmail).get().addOnCompleteListener((task) -> {
+        db.collection(USERS).document(userEmail)
+                .collection(FRIENDS).document(friendEmail).get().addOnCompleteListener((task) -> {
                     if(task.isSuccessful()) {
                         DocumentSnapshot doc = task.getResult();
                         if(doc.exists()) {
-                            db.collection("users").document(friendEmail).get().addOnCompleteListener((t) -> {
+                            db.collection(USERS).document(friendEmail).get().addOnCompleteListener((t) -> {
                                 if(t.isSuccessful()) {
                                     DocumentSnapshot friend = t.getResult();
                                     if(friend.exists()) {
@@ -145,6 +150,19 @@ class FirestoreAdapter implements IDataAdapter {
     }
 
     /**
+     * Gets the last numOfDays Days of data of the currently logged in user,
+     * calling the passed in callback with the resulting List of Day, or null if
+     * the server request failed.
+     *
+     * @param numOfDays the number of days to fetch before today, today inclusive
+     * @param dayCallback lambda to handle the resulting List of Days
+     */
+    @Override
+    public void getDays(int numOfDays, Callback<List<Day>> dayCallback) {
+        getDays(userEmail, numOfDays, dayCallback);
+    }
+
+    /**
      * Gets the last numOfDays Days of data of the friend with the specified ID,
      * calling the passed in callback with the resulting List of Day, or null if
      * the server request failed.
@@ -157,32 +175,11 @@ class FirestoreAdapter implements IDataAdapter {
     public void getFriendDays(String friendEmail, int numOfDays, Callback<List<Day>> dayCallback) {
 
         // check if friends
-        db.collection("users").document(userEmail).collection("friends").document(friendEmail).get()
+        db.collection(USERS).document(userEmail).collection(FRIENDS).document(friendEmail).get()
                 .addOnSuccessListener(snapshot -> {
                     if(snapshot.exists() && snapshot.getData().get("status") == "friends") {
                         // pull friend's day data
-                        long startTimestamp = timeStamper.now();
-                        for (int i = 0; i < numOfDays; i++) startTimestamp = timeStamper.previousDay(startTimestamp);
-                        String startDayId = timeStamper.timestampToDayId(startTimestamp);
-
-                        db.collection("users").document(friendEmail).collection("days")
-                                .orderBy("dayId", Query.Direction.DESCENDING)
-                                .whereGreaterThanOrEqualTo("dayId", startDayId)
-                                .get()
-                                .addOnSuccessListener(snapshots -> {
-                                    ArrayList<Day> dayList = new ArrayList<>();
-                                    for(QueryDocumentSnapshot doc : snapshots) {
-                                        Day day = doc.toObject(Day.class);
-                                        Log.d(TAG, doc.getId() + " => " + day);
-                                        dayList.add(day);
-                                    }
-                                    dayCallback.call(dayList);
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.e(TAG, "Failed to fetch friend data");
-                                    dayCallback.call(null);
-                                });
-
+                        getDays(friendEmail, numOfDays, dayCallback);
                     } else {
                         Log.e(TAG, "Failed to find friend");
                         dayCallback.call(null);
@@ -194,6 +191,31 @@ class FirestoreAdapter implements IDataAdapter {
                 });
     }
 
+    private void getDays(String email, int numOfDays, Callback<List<Day>> dayCallback) {
+        long startTimestamp = timeStamper.now();
+        for (int i = 0; i < numOfDays; i++) startTimestamp = timeStamper.previousDay(startTimestamp);
+        String startDayId = timeStamper.timestampToDayId(startTimestamp);
+
+        db.collection(USERS).document(email).collection(DAYS)
+                .orderBy("dayId", Query.Direction.DESCENDING)
+                .whereGreaterThanOrEqualTo("dayId", startDayId)
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    ArrayList<Day> dayList = new ArrayList<>();
+                    for(QueryDocumentSnapshot doc : snapshots) {
+                        Day day = doc.toObject(Day.class);
+                        Log.d(TAG, doc.getId() + " => " + day);
+                        dayList.add(day);
+                    }
+                    dayCallback.call(dayList);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Failed to fetch day data");
+                    dayCallback.call(null);
+                });
+    }
+
+
     /**
      * Updates the database with the given days' data.
      *
@@ -202,7 +224,7 @@ class FirestoreAdapter implements IDataAdapter {
      */
     @Override
     public void updateDays(List<Day> days, Callback<Boolean> booleanCallback) {
-        CollectionReference daysRef = db.collection("users").document(userEmail).collection("days");
+        CollectionReference daysRef = db.collection(USERS).document(userEmail).collection(DAYS);
         WriteBatch batch = db.batch();
         for(Day day : days) {
             batch.set(daysRef.document(day.dayId), day);
@@ -254,7 +276,7 @@ class FirestoreAdapter implements IDataAdapter {
     }
 
     private void getFriends(String status, Callback<List<User>> userCallback) {
-        db.collection("users").document(userEmail).collection("friends")
+        db.collection(USERS).document(userEmail).collection(FRIENDS)
                 .whereEqualTo("status", status)
                 .get()
                 .addOnSuccessListener(snapshots -> {
@@ -330,7 +352,7 @@ class FirestoreAdapter implements IDataAdapter {
 
     private void handleFriendRequest(String reqType, String friendEmail, Callback<Boolean> booleanCallback) {
         Log.d(TAG, "Handling request " + reqType + " with user " + friendEmail);
-        db.collection("users").document(friendEmail).get()
+        db.collection(USERS).document(friendEmail).get()
                 .addOnSuccessListener(friend -> {
                     if(friend.exists()) {
                         Log.d(TAG, friendEmail + " is a user");
