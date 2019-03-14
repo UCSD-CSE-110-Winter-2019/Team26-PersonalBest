@@ -43,7 +43,18 @@ class FirestoreAdapter implements IDataAdapter {
      */
     @Override
     public void getToday(Callback<Day> dayCallback) {
-        
+        db.collection("users").document(userEmail).collection("days")
+                .document(timeStamper.timestampToDayId(timeStamper.now()))
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if(snapshot.exists()) {
+                        dayCallback.call(snapshot.toObject(Day.class));
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Failed to read day with error: " + e);
+                    dayCallback.call(null);
+                });
     }
 
     /**

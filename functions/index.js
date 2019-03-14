@@ -45,7 +45,7 @@ exports.handleFriendRequest = functions.https.onCall((data, context) => {
             console.log("Requester not found: " + requesterEmail);
             throw new functions.https.HttpsError('not-found', 'Invalid user email ' + requesterEmail);
         } else {
-            console.log("Requester found: " + requesterEmail);
+            console.log("Requester found: " + JSON.stringify(doc.data()));
             return doc.data();
         }
     })
@@ -60,7 +60,7 @@ exports.handleFriendRequest = functions.https.onCall((data, context) => {
             console.log("Requestee not found: " + requesteeEmail);
             throw new functions.https.HttpsError('not-found', 'Invalid user email ' + requesteeEmail);
         } else {
-            console.log("Requestee found: " + requesterEmail);
+            console.log("Requestee found: " + JSON.stringify(doc.data()));
             return doc.data();
         }
     })
@@ -74,13 +74,13 @@ exports.handleFriendRequest = functions.https.onCall((data, context) => {
     switch(reqType) {
         case "REQUEST":
             console.log("Attempting to send REQUEST from " + requesterEmail + " to " + requesteeEmail);
-            userChecks.then(requesterRef.create({ status: "requested" }))
+            userChecks.then((requesterData, requesteeData) => requesterRef.create({ status: "requested", name: requesteeData.name, email: requesteeData.email }))
             .then(() => console.log("Set requested " + requesteeEmail + " from " + requesterEmail))
             .catch(error => {
                 console.error("Error setting document: ", error);
                 throw new functions.https.HttpsError('internal', 'could not access firestore');
             });
-            userChecks.then(requesteeRef.create({ status: "received" }))
+            userChecks.then((requesterData, requesteeData) => requesteeRef.create({ status: "received", name: requesterData.name, email: requesteeData.email }))
             .then(() => console.log("Set received " + requesteeEmail + " from " + requesterEmail))
             .catch(error => {
                 console.error("Error setting document: ", error);
@@ -115,14 +115,14 @@ exports.handleFriendRequest = functions.https.onCall((data, context) => {
 
             // update friend relationships with status and chat document id
             var requesterUpdate = Promise.all([checkStatus, createChatPromise])
-            .then((data, chatid) => requesterRef.update({ status: "friends", chat: chatid, name: data.requestee }))
+            .then((data, chatid) => requesterRef.update({ status: "friends", chat: chatid }))
             .catch(error => {
                 console.error("Error setting document: ", error);
                 throw new functions.https.HttpsError('internal', 'could not access firestore');
             });
 
             var requesteeUpdate = Promise.all([checkStatus, createChatPromise])
-            .then((data, chatid) => requesteeRef.update({ status: "friends", chat: chatid, name: data.requester }))
+            .then((data, chatid) => requesteeRef.update({ status: "friends", chat: chatid }))
             .catch(error => {
                 console.error("Error setting document: ", error);
                 throw new functions.https.HttpsError('internal', 'could not access firestore');
