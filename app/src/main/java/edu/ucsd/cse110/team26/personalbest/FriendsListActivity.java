@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,6 @@ public class FriendsListActivity extends AppCompatActivity {
     private String newFriendEmail = null;
     IDataAdapter dataAdapter;
     ListView listView;
-    public static List<User> friends;
     public static Friends friendsList;
     public static FriendListAdapter friendAdapter;
 
@@ -27,14 +27,38 @@ public class FriendsListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends_list);
-        friends = new ArrayList<User>();
+
         friendsList = new Friends();
-        friendsList.receivedRequests = null;
-        DEBUG = getIntent().getBooleanExtra("DEBUG", false);
+
+        Log.i(getClass().getName(), "Retrieving friends and requests from database to display");
+        friendsList.receivedRequests = new ArrayList<User>();
+        friendsList.sentRequests = new ArrayList<User>();
+        friendsList.friends = new ArrayList<User>();
+
+        DEBUG = getIntent().getExtras().getBoolean("DEBUG", false);
         dataAdapter = IDatabaseAdapterFactory.create(DEBUG, FriendsListActivity.this);
         listView = (ListView) findViewById(R.id.list);
         friendAdapter = new FriendListAdapter(getApplicationContext(), dataAdapter);
         listView.setAdapter(friendAdapter);
+
+        dataAdapter.getReceivedFriendRequests( (List<User> receive) -> {
+            friendsList.receivedRequests.addAll(receive);
+            Log.i(getClass().getName(), "Count of received requests:" + receive.size());
+            friendAdapter.notifyDataSetChanged();
+        });
+
+        dataAdapter.getSentFriendRequests( (List<User> send) -> {
+            friendsList.sentRequests.addAll(send);
+            Log.i(getClass().getName(), "Count of sent requests:" + send.size());
+            friendAdapter.notifyDataSetChanged();
+        });
+
+        dataAdapter.getFriends( (List<User> friends) -> {
+            friendsList.friends.addAll(friends);
+            Log.i(getClass().getName(), "Count of friends:" + friends.size());
+            friendAdapter.notifyDataSetChanged();
+        });
+
         Log.i(getClass().getName(), "Attaching friendAdapter to FriendsListActivity");
 
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -46,18 +70,31 @@ public class FriendsListActivity extends AppCompatActivity {
         listView.setOnItemLongClickListener((parent, view, position, id) -> {
             Log.i(getClass().getName(), "Long click on friend at position" + position);
             User requested = (User) friendAdapter.getItem(position);
-            RemoveFriendDialog removeFriendDialog = new RemoveFriendDialog(requested, FriendsListActivity.this, dataAdapter);
-            removeFriendDialog.createDialog().show();
+            if( friendsList.friends.contains(requested) ) {
+                RemoveFriendDialog removeFriendDialog = new RemoveFriendDialog(requested, FriendsListActivity.this, dataAdapter);
+                removeFriendDialog.createDialog().show();
+            } else {
+                Toast invToast = Toast.makeText(getApplicationContext(),"Selected item is not a friend", Toast.LENGTH_SHORT);
+                invToast.show();
+            }
             return true;
         });
 
         listView.setOnItemClickListener((parent, view, position, id) -> {
             Log.i(getClass().getName(), "Click on friend at position" + position);
             User friend = (User) friendAdapter.getItem(position);
-            Intent intent = new Intent(FriendsListActivity.this, FriendProfileActivity.class);
-            intent.putExtra("Friend Name", friend.name);
-            startActivity(intent);
+            if( friendsList.friends.contains(friend) ) {
+                Intent intent = new Intent(FriendsListActivity.this, FriendProfileActivity.class);
+                intent.putExtra("Friend Email", friend.email);
+                intent.putExtra("DEBUG", DEBUG);
+                startActivity(intent);
+            } else {
+                Toast invToast = Toast.makeText(getApplicationContext(),"Selected item is not a friend", Toast.LENGTH_SHORT);
+                invToast.show();
+            }
+
         });
+
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);

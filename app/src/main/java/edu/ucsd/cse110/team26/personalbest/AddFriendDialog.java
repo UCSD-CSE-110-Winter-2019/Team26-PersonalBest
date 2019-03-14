@@ -45,7 +45,9 @@ public class AddFriendDialog {
                             invToast.show();
                         } else {
                             Log.i(getClass().getName(), "Dismissing dialog because of successful friend request");
-                            FriendsListActivity.friends.add(friendsList.get(0));
+                            if( !FriendsListActivity.friendsList.sentRequests.contains(friendsList)) {
+                                FriendsListActivity.friendsList.sentRequests.add(friendsList.get(0));
+                            }
                             FriendsListActivity.friendAdapter.notifyDataSetChanged();
                             dialog.dismiss();
                         }

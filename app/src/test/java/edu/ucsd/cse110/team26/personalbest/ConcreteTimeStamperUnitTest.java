@@ -73,21 +73,4 @@ public class ConcreteTimeStamperUnitTest {
 
 
     }
-
-    @Test
-    public void endOfDayTest(){
-
-        assertEquals(23*60*60*1000 + 59*60*1000+ 59*1000 + 999, timeStamper.endOfDay(0));
-
-    }
-
-    @Test
-    public void startOfDayTest(){
-
-
-        assertEquals(0, timeStamper.startOfDay(0));
-    }
-
-
-
 }
