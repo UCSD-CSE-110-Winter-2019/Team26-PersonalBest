@@ -119,10 +119,10 @@ class MockDataAdapter implements IDataAdapter {
      * If server request failed, calls callback with null User List.
      *
      * @param friendEmail  the email to make a request to
-     * @param booleanCallback callback to handle resulting list of users
+     * @param userCallback callback to handle resulting list of users
      */
     @Override
-    public void makeFriendRequest(String friendEmail, Callback<Boolean> booleanCallback) {
+    public void makeFriendRequest(String friendEmail, Callback<List<User>> userCallback) {
 
     }
 

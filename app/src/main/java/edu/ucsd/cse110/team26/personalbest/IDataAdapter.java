@@ -92,9 +92,9 @@ interface IDataAdapter {
      * If server request failed, calls callback with null User List.
      *
      * @param friendEmail the email to make a request to
-     * @param booleanCallback callback to handle resulting list of users
+     * @param userCallback callback to handle resulting list of users
      */
-    void makeFriendRequest(String friendEmail, Callback<Boolean> booleanCallback);
+    void makeFriendRequest(String friendEmail, Callback<List<User>> userCallback);
 
     /**
      * Accepts the friend request made by the given requester to the currently logged in user.
