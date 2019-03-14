@@ -44,11 +44,11 @@ interface IDataAdapter {
      * calling the passed in callback with the resulting List of Day, or null if
      * the server request failed.
      *
-     * @param friendID the uid of the friend to fetch
+     * @param friendEmail the email of the friend to fetch
      * @param numOfDays the number of days to fetch before today, today inclusive
      * @param dayCallback lambda to handle the resulting List of Days
      */
-    void getFriendDays(String friendID, int numOfDays, Callback<List<Day>> dayCallback);
+    void getFriendDays(String friendEmail, int numOfDays, Callback<List<Day>> dayCallback);
 
     /**
      * Updates the database with the given days' data.

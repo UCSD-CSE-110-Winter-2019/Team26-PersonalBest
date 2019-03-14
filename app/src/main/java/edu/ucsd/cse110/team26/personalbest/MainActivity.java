@@ -36,15 +36,13 @@ public class MainActivity extends AppCompatActivity {
 
         if(!DEBUG) {
             FirebaseApp.initializeApp(this);
-            mAuth = FirebaseAuth.getInstance();
-            FirebaseUser user = mAuth.getCurrentUser();
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user != null) {
                 launchStepCountActivity();
             }
 
             GoogleSignInOptions signInOptions = new GoogleSignInOptions
                     .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestIdToken(getString(R.string.default_web_client_id))
                     .requestIdToken(getString(R.string.default_web_client_id))
                     .requestProfile()
                     .requestEmail()
