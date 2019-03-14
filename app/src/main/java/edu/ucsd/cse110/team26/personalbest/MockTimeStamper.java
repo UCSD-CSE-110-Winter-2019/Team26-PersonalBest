@@ -27,6 +27,9 @@ public class MockTimeStamper implements TimeStamper {
     public long lastSevenDays() {return 0;}
 
     @Override
+    public long lastTwentyEightDays() {return 0;}
+
+    @Override
     public long today() {return 0;}
 
     @Override

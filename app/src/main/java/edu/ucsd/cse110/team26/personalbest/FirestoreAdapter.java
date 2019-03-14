@@ -194,7 +194,7 @@ class FirestoreAdapter implements IDataAdapter {
         CollectionReference daysRef = db.collection("users").document(userEmail).collection("days");
         WriteBatch batch = db.batch();
         for(Day day : days) {
-            batch.set(daysRef.document(day.dayId), day);
+            batch.set(daysRef.document(day.dayID), day);
         }
         batch.commit()
                 .addOnSuccessListener(r -> booleanCallback.call(true))

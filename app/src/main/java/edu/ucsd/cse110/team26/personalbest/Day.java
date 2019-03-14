@@ -1,18 +1,18 @@
 package edu.ucsd.cse110.team26.personalbest;
 
+import java.util.Date;
+
 class Day {
     long goal;
     long totalSteps;
     long walkSteps;
     long timeStamp;
-    String dayId;
+    String dayID;
+    Date date;
 
-    public Day() {
-        goal = 0;
-        totalSteps = 0;
-        walkSteps = 0;
-        timeStamp = 0;
-        dayId = "";
+    public Day()
+    {
+
     }
 
     public Day(int goal, int totalStep, int walkSteps, long timeStamp) {
@@ -20,14 +20,22 @@ class Day {
         this.totalSteps = totalStep;
         this.walkSteps = walkSteps;
         this.timeStamp = timeStamp;
-        this.dayId = new ConcreteTimeStamper().timestampToDayId(timeStamp);
+        this.dayID = new ConcreteTimeStamper().timestampToDayId(timeStamp);
+    }
+    public Day(int goal, int totalSteps, int walkSteps, String dayID, Date date)
+    {
+        this.goal = goal;
+        this.totalSteps = totalSteps;
+        this.walkSteps = walkSteps;
+        this.dayID = dayID;
+        this.date = date;
     }
 
     public Day(int goal, int totalSteps, int walkSteps, String dayId) {
         this.goal = goal;
         this.totalSteps = totalSteps;
         this.walkSteps = walkSteps;
-        this.dayId = dayId;
+        this.dayID = dayId;
         this.timeStamp = new ConcreteTimeStamper().dayIdToTimestamp(dayId);
     }
 
@@ -47,12 +55,12 @@ class Day {
         return timeStamp;
     }
 
-    public String getDayId() {
-        return dayId;
+    public String getDayID() {
+        return dayID;
     }
 
     @Override
     public String toString() {
-        return dayId + ": " + totalSteps + "/" + goal + " (walked: " + walkSteps + ")";
+        return dayID + ": " + totalSteps + "/" + goal + " (walked: " + walkSteps + ")";
     }
 }

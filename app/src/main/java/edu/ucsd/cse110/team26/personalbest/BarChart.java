@@ -17,10 +17,21 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -33,18 +44,31 @@ public class BarChart {
     private String userID;
     private String[] labels;
 
-    public BarChart(Context context, CombinedChart mChart, List<Integer> stepCounts, List<ArrayList<Walk>> walkData)
+    DocumentReference user_data;
+    //DocumentReference user_record;
+    CollectionReference user_list;
+    GoogleSignInAccount currentUser;
+    String COLLECTION_KEY = "users";
+    String RECORD_KEY = "record";
+    String DOCUMENT_KEY;
+    Day day;
+
+    private int[] weekGoal;
+    private int[] weekStep;
+    private int[] weekWalk;
+
+    public BarChart(Context context, CombinedChart mChart)
     {
         this.context = context;
         this.mChart = mChart;
-        this.stepCounts = stepCounts;
-        this.walkData = walkData;
     }
 
-    public BarChart(String userID, int size)
+    public void setSize(int size)
     {
         this.size = size;
-        this.userID = userID;
+        weekGoal = new int[size];
+        weekStep = new int[size];
+        weekWalk = new int[size];
     }
 
     public void draw()
@@ -64,8 +88,7 @@ public class BarChart {
         mChart.getAxisLeft().setAxisMinimum(0.0f); // this replaces setStartAtZero(true)
         mChart.getAxisRight().setAxisMinimum(0.0f);
 
-        updateGoal();
-
+        getData();
         ArrayList<BarEntry> entries = new ArrayList<>();
         getBarEntries(entries);
 
@@ -104,7 +127,6 @@ public class BarChart {
         mChart.getXAxis().setAxisMaximum(data.getXMax() + 0.25f);
         mChart.getXAxis().setAxisMinimum(data.getXMin() - 0.25f);
         mChart.setData(dataCombined);
-
     }
 
     public void setupLabel()
@@ -134,46 +156,13 @@ public class BarChart {
             case Calendar.SUNDAY:
                 labels = new String[] {"Mon", "Tue", "Wed", "Thur", "Fri", "Sat","Sun"};
                 break;
-
         }
     }
     private void getLineEntriesData(ArrayList<Entry> entries) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
-        int goal_sun = sharedPreferences.getInt("goal_Sun", 5000);
-        int goal_mon = sharedPreferences.getInt("goal_Mon", 5000);
-        int goal_tue = sharedPreferences.getInt("goal_Tue", 5000);
-        int goal_wed = sharedPreferences.getInt("goal_Wed", 5000);
-        int goal_thu = sharedPreferences.getInt("goal_Thu", 5000);
-        int goal_fri = sharedPreferences.getInt("goal_Fri", 5000);
-        int goal_sat = sharedPreferences.getInt("goal_Sat", 5000);
-
-
-        entries.add(new Entry(0, goal_sun));
-        entries.add(new Entry(1, goal_mon));
-        entries.add(new Entry(2, goal_tue));
-        entries.add(new Entry(3, goal_wed));
-        entries.add(new Entry(4, goal_thu));
-        entries.add(new Entry(5, goal_fri));
-        entries.add(new Entry(6, goal_sat));
-    }
-
-    private void updateGoal()
-    {
-        SharedPreferences sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        if(sharedPreferences.getBoolean("new_week",false) )
+        for(int i = 0; i < size; i++)
         {
-            int previous_goal = sharedPreferences.getInt("goal_Sat", 5000);
-            editor.putInt("goal_Sun", previous_goal);
-            editor.putInt("goal_Mon", previous_goal);
-            editor.putInt("goal_Tue", previous_goal);
-            editor.putInt("goal_Wed", previous_goal);
-            editor.putInt("goal_Thu", previous_goal);
-            editor.putInt("goal_Fri", previous_goal);
-            editor.putInt("goal_Sat", previous_goal);
-            editor.putBoolean("new_week",false);
+            entries.add(new Entry(i, weekGoal[i]));
         }
-        editor.apply();
     }
 
     private LineData generateLineData() {
@@ -200,40 +189,12 @@ public class BarChart {
         return d;
     }
 
-    private void getBarEntries(ArrayList<BarEntry> entries){
-        SharedPreferences sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        long[] totalStep = new long[7];
-        int count = 0;
-        for(Integer i: stepCounts)
+    private void getBarEntries(ArrayList<BarEntry> entries)
+    {
+        for(int i = 0; i < size; i++)
         {
-            totalStep[count] = totalStep[count] + i;
-
-            count++;
+            entries.add(new BarEntry(i, new float[] {weekWalk[i], weekStep[i] - weekWalk[i] }));
         }
-        long[] totalIntent = new long[7];
-        count = 0;
-        for(ArrayList<Walk> i : walkData)
-        {
-            totalIntent[count] = 0;
-            for(Walk j: i)
-            {
-                totalIntent[count] = totalIntent[count] + j.getSteps();
-            }
-
-            count++;
-        }
-
-        entries.add(new BarEntry(0f, new float[] {totalIntent[0],totalStep[0]- totalIntent[0]}));
-        entries.add(new BarEntry(1f, new float[] {totalIntent[1],totalStep[1]- totalIntent[1]}));
-        entries.add(new BarEntry(2f, new float[] {totalIntent[2],totalStep[2]- totalIntent[2]}));
-        entries.add(new BarEntry(3f, new float[] {totalIntent[3],totalStep[3]- totalIntent[3]}));
-        entries.add(new BarEntry(4f, new float[] {totalIntent[4],totalStep[4]- totalIntent[4]}));
-        entries.add(new BarEntry(5f, new float[] {totalIntent[5],totalStep[5]- totalIntent[5]}));
-        entries.add(new BarEntry(6f, new float[] {totalIntent[6],totalStep[6]- totalIntent[6]}));
-
-        editor.apply();
     }
 
     public String getLastDayOfLabel()
@@ -243,5 +204,78 @@ public class BarChart {
     public String getFirstDayOfLabel()
     {
         return labels[0];
+    }
+    public void getData()
+    {
+        String [] listDayID;
+        if(size == 7)
+        {
+            listDayID = get7DaysID();
+        }
+        else
+        {
+            listDayID = get28DaysID();
+        }
+
+        for( int i = 0; i < size; i++)
+        {
+            final int count = i;
+            DocumentReference user_record = FirebaseFirestore.getInstance()
+                    .collection(COLLECTION_KEY)
+                    .document(DOCUMENT_KEY)
+                    .collection(RECORD_KEY)
+                    .document(listDayID[count]);
+
+            user_record.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                @Override
+                public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                    day = documentSnapshot.toObject(Day.class);
+                    weekStep[count] = (int)day.getTotalSteps();
+                    weekGoal[count] = (int)day.getGoal();
+                    weekWalk[count] = (int)day.getWalkSteps();
+                }
+            });
+        }
+    }
+
+    public String[] get7DaysID()
+    {
+        String[] weekID = new String[7];
+        int count = 0;
+        for(int i = -6 ; i < 1; i++)
+        {
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DATE, i);
+            String year = String.valueOf(cal.get(Calendar.YEAR));
+            String month = String.valueOf(cal.get(Calendar.MONTH));
+            String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+            String dayID = month + day + year;
+            weekID[count] = dayID;
+            count++;
+        }
+        return weekID;
+    }
+
+    public String[] get28DaysID()
+    {
+        String[] last28ID = new String[28];
+        int count = 0;
+        for(int i = -27 ; i < 1; i++)
+        {
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DATE, i);
+            String year = String.valueOf(cal.get(Calendar.YEAR));
+            String month = String.valueOf(cal.get(Calendar.MONTH));
+            String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+            String dayID = month + day + year;
+            last28ID[count] = dayID;
+            count++;
+        }
+        return last28ID;
+    }
+
+    public void setDOCUMENT_KEY(String DOCUMENT_KEY)
+    {
+        this.DOCUMENT_KEY = DOCUMENT_KEY;
     }
 }

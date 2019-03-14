@@ -5,6 +5,7 @@ public interface TimeStamper {
     long now();
     long weekStart();
     long lastSevenDays();
+    long lastTwentyEightDays();
     long today();
     long weekEnd();
     long[] getPreviousDay();

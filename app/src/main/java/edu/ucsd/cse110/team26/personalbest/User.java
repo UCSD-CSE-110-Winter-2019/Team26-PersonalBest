@@ -5,26 +5,40 @@ class User {
     String name;
     String email;
     String uid;
-    Friends friends;
-
-    User() {
-        height = 0;
-        name = "";
-        email = "";
-        uid = "";
-        friends = new Friends();
-    }
+    //Friends friends;
 
     User(int height, String name, String email, String uid) {
         this.height = height;
         this.name = name;
         this.email = email;
         this.uid = uid;
-        friends = new Friends();
+        //friends = new Friends();
+    }
+    User()
+    {
+
+    }
+    public int getHeight()
+    {
+        return height;
     }
 
-    @Override
-    public String toString() {
-        return name + ": " + email;
+    public String getEmail()
+    {
+        return email;
+    }
+    public void setHeight(int height)
+    {
+        this.height = height;
+    }
+
+    public String getName()
+    {
+        return this.name;
+    }
+
+    public String getUid()
+    {
+        return this.uid;
     }
 }
