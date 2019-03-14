@@ -7,6 +7,14 @@ class User {
     String uid;
     Friends friends;
 
+    User() {
+        height = 0;
+        name = "";
+        email = "";
+        uid = "";
+        friends = new Friends();
+    }
+
     User(int height, String name, String email, String uid) {
         this.height = height;
         this.name = name;
