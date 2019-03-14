@@ -12,6 +12,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthCredential;
@@ -36,11 +37,11 @@ public class MainActivity extends AppCompatActivity {
 
         if(!DEBUG) {
             FirebaseApp.initializeApp(this);
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            if (user != null) {
-                launchStepCountActivity();
-            }
-
+            mAuth = FirebaseAuth.getInstance();
+            mAuth.addAuthStateListener(auth -> {
+                FirebaseUser user = auth.getCurrentUser();
+                if (user != null) launchStepCountActivity();
+            });
             GoogleSignInOptions signInOptions = new GoogleSignInOptions
                     .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestIdToken(getString(R.string.default_web_client_id))
@@ -72,14 +73,11 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == SIGN_IN_REQUEST_CODE) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                firebaseAuthWithGoogle(account);
-            } catch (ApiException e) {
-                Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
-            }
-
+            GoogleSignIn.getSignedInAccountFromIntent(data)
+                    .addOnSuccessListener(this::firebaseAuthWithGoogle)
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to authenticate with error: " + e);
+                    });
         }
     }
 

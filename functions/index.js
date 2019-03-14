@@ -9,7 +9,7 @@ exports.setUpNewUser = functions.auth.user().onCreate((user) => {
         uid: user.uid,
         height: 0
     };
-    admin.firestore().collection("users").doc(user.email).set(userData)
+    return admin.firestore().collection("users").doc(user.email).set(userData)
     .then(admin.firestore().collection("users").doc(user.email).collection("friends").add({}))
     .then(console.log("Created new user " + userData.name + " with id " + userData.uid))
     .catch(err => console.log(err));
@@ -32,7 +32,6 @@ exports.handleFriendRequest = functions.https.onCall((data, context) => {
     }
 
     console.log("Request: " + reqType + " " + requesterEmail + " " + requesteeEmail);
-    console.log(context);
 
     const userRef = admin.firestore().collection("users");
     const requesterRef = userRef.doc(requesterEmail).collection("friends").doc(requesteeEmail);
@@ -45,8 +44,8 @@ exports.handleFriendRequest = functions.https.onCall((data, context) => {
             console.log("Requester not found: " + requesterEmail);
             throw new functions.https.HttpsError('not-found', 'Invalid user email ' + requesterEmail);
         } else {
-            console.log("Requester found: " + requesterEmail);
-            return doc.data();
+            console.log("Requester found: " + JSON.stringify(doc.data()));
+            return { name: doc.get("name"), email: doc.get("email") };
         }
     })
     .catch(error => {
@@ -60,8 +59,8 @@ exports.handleFriendRequest = functions.https.onCall((data, context) => {
             console.log("Requestee not found: " + requesteeEmail);
             throw new functions.https.HttpsError('not-found', 'Invalid user email ' + requesteeEmail);
         } else {
-            console.log("Requestee found: " + requesterEmail);
-            return doc.data();
+            console.log("Requestee found: " + JSON.stringify(doc.data()));
+            return { name: doc.get("name"), email: doc.get("email") };
         }
     })
     .catch(error => {
@@ -74,39 +73,42 @@ exports.handleFriendRequest = functions.https.onCall((data, context) => {
     switch(reqType) {
         case "REQUEST":
             console.log("Attempting to send REQUEST from " + requesterEmail + " to " + requesteeEmail);
-            userChecks.then(requesterRef.create({ status: "requested" }))
+            var updateRequester = userChecks.then(data => requesterRef.create({ status: "requested", name: data[1].name, email: data[1].email }))
             .then(() => console.log("Set requested " + requesteeEmail + " from " + requesterEmail))
             .catch(error => {
                 console.error("Error setting document: ", error);
                 throw new functions.https.HttpsError('internal', 'could not access firestore');
             });
-            userChecks.then(requesteeRef.create({ status: "received" }))
+            var updateRequestee = userChecks.then(data => requesteeRef.create({ status: "received", name: data[0].name, email: data[0].email }))
             .then(() => console.log("Set received " + requesteeEmail + " from " + requesterEmail))
             .catch(error => {
                 console.error("Error setting document: ", error);
                 throw new functions.https.HttpsError('internal', 'could not access firestore');
             });
-            break;
+            return Promise.all([updateRequester, updateRequestee])
+            .then(console.log("Set request from " + requesterEmail + " to " + requesteeEmail));
         case "ACCEPT":
 
             // check if already friends
-            var checkStatus = userChecks.then((requesterData, requesteeData) => {
-                if(requesterData.status === "friends") {
+            var checkStatus = userChecks.then(requesterRef.get())
+            .then(doc => {
+                if(doc.exists && doc.get("status") === "friends") {
                     throw new functions.https.HttpsError('invalid-argument', 'Users already friends');
                 }
-                console.log("Attempting to ACCEPT request from " + requesteeEmail + " to " + requesterEmail);
-                return { requester: requesterData.name, requestee: requesteeData.name };
+                else return userChecks;
             })
             .catch(error => {
+                console.log(error);
                 throw new functions.https.HttpsError('internal', 'could not access firestore');
             });
 
             // generate new chat document for the 2 users
             var chatdata = { users: [requesterEmail, requesteeEmail] };
-            var createChatPromise = checkStatus.then(admin.firestore().collection("chats").doc().create(chatdata))
+            var newChatDocRef = admin.firestore().collection("chats").doc()
+            var createChatPromise = checkStatus.then(newChatDocRef.create(chatdata))
             .then(docRef => {
-                console.log("Created new chat collection " + docRef.id + " with users " + chatdata.users);
-                return docRef.id;
+                console.log("Created new chat collection " + newChatDocRef.id + " with users " + chatdata.users);
+                return newChatDocRef.id;
             })
             .catch(error => {
                 console.error("Error setting document: ", error);
@@ -115,51 +117,51 @@ exports.handleFriendRequest = functions.https.onCall((data, context) => {
 
             // update friend relationships with status and chat document id
             var requesterUpdate = Promise.all([checkStatus, createChatPromise])
-            .then((data, chatid) => requesterRef.update({ status: "friends", chat: chatid, name: data.requestee }))
+            .then((data) => requesterRef.update({ status: "friends", chat: data[1] }))
             .catch(error => {
                 console.error("Error setting document: ", error);
                 throw new functions.https.HttpsError('internal', 'could not access firestore');
             });
 
             var requesteeUpdate = Promise.all([checkStatus, createChatPromise])
-            .then((data, chatid) => requesteeRef.update({ status: "friends", chat: chatid, name: data.requester }))
+            .then((data, chatid) => requesteeRef.update({ status: "friends", chat: data[1] }))
             .catch(error => {
                 console.error("Error setting document: ", error);
                 throw new functions.https.HttpsError('internal', 'could not access firestore');
             });
 
-            Promise.all([requesterUpdate, requesteeUpdate])
-            .then(console.log("Accepted friend request from " + requesterEmail + " to " + requesteeEmail))
-            .catch(error => console.error(error));
-            break;
+            return Promise.all([requesterUpdate, requesteeUpdate])
+            .then(console.log("Accepted friend request from " + requesterEmail + " to " + requesteeEmail));
         case "REJECT":
         case "DELETE":
             console.log("Attempting to DELETE from " + requesterEmail + " to " + requesteeEmail);
 
-            // check if friends - delete chat if friends
-            var checkFriends = userChecks.then((requesterData, requesteeData) => {
-                if(requesterData.status === "friends") {
-                    admin.firestore().collection("chats").doc(requesterData.chat).delete();
-                }
-                return;
+            var deleteChat = userChecks.then(requesterRef.get())
+            .then(snapshot => {
+                console.log(snapshot.data());
+                var chatid = snapshot.get("chat");
+                console.log("deleting chat at " + chatid);
+                return admin.firestore().collection("chats").doc(chatid).delete();
+            })
+            .then(console.log("deleted chat"))
+            .catch(error => {
+                throw new functions.https.HttpsError('internal', 'could not access firestore');
             });
 
-            var requesterDelete = checkFriends.then(requesterRef.delete())
-            .then(() => console.log("Deleted friend " + requesteeEmail + " from " + requesterEmail))
+            var requesterDelete = userChecks.then(requesterRef.delete())
             .catch(error => {
                 console.error("Error removing document: ", error);
                 throw new functions.https.HttpsError('internal', 'could not access firestore');
             });
-            var requesteeDelete = checkFriends.then(requesteeRef.delete())
-            .then(() => console.log("Deleted friend " + requesterEmail + " from " + requesteeEmail))
+            var requesteeDelete = userChecks.then(requesteeRef.delete())
             .catch(error => {
                 console.error("Error removing document: ", error);
                 throw new functions.https.HttpsError('internal', 'could not access firestore');
             });
-            Promise.all([requesterDelete, requesteeDelete])
-            .then(console.log("Deleted friend relationship"))
+
+            return Promise.all([requesterDelete, requesteeDelete, deleteChat])
+            .finally(console.log("Deleted friend relationship"))
             .catch(error => console.error(error));
-            break;
         default:
             console.log("Unrecognized friend request type " + reqType);
             throw new functions.https.HttpsError('invalid-argument', 'Request type not recognized');
