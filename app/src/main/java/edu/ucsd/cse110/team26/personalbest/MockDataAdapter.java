@@ -1,8 +1,19 @@
 package edu.ucsd.cse110.team26.personalbest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 class MockDataAdapter implements IDataAdapter {
+
+    List<User> friendsList;
+    List<User> receivedFriendRequests;
+    List<User> sentFriendRequests;
+
+    MockDataAdapter() {
+        friendsList = new ArrayList<User>();
+        receivedFriendRequests = new ArrayList<User>();
+        sentFriendRequests = new ArrayList<User>();
+    }
 
     /**
      * Get today's data currently stored in the database.
@@ -48,6 +59,10 @@ class MockDataAdapter implements IDataAdapter {
      */
     @Override
     public void getFriend(String friendEmail, Callback<List<User>> userCallback) {
+    }
+
+    @Override
+    public void getDays(int numOfDays, Callback<List<Day>> dayCallback) {
 
     }
 
@@ -86,7 +101,7 @@ class MockDataAdapter implements IDataAdapter {
      */
     @Override
     public void getSentFriendRequests(Callback<List<User>> userCallback) {
-
+        userCallback.call(sentFriendRequests);
     }
 
     /**
@@ -98,7 +113,7 @@ class MockDataAdapter implements IDataAdapter {
      */
     @Override
     public void getReceivedFriendRequests(Callback<List<User>> userCallback) {
-
+        userCallback.call(receivedFriendRequests);
     }
 
     /**
@@ -118,12 +133,19 @@ class MockDataAdapter implements IDataAdapter {
      * info of the requestee. Otherwise returns an empty User List.
      * If server request failed, calls callback with null User List.
      *
+     * If called twice with same email, makes friend request to current user from user of the
+     * given email address
+     *
      * @param friendEmail  the email to make a request to
      * @param userCallback callback to handle resulting list of users
      */
     @Override
     public void makeFriendRequest(String friendEmail, Callback<List<User>> userCallback) {
-
+        User user = new User(0, "name", friendEmail, "1");
+        if( sentFriendRequests.contains(user) )
+            receivedFriendRequests.add(new User(0, "name", friendEmail, "1"));
+        else
+            sentFriendRequests.add(new User(0, "name", friendEmail, "1"));
     }
 
     /**
@@ -135,7 +157,12 @@ class MockDataAdapter implements IDataAdapter {
      */
     @Override
     public void acceptFriendRequest(String requesterEmail, Callback<Boolean> booleanCallback) {
-
+        if( receivedFriendRequests.contains(new User(0, "name", requesterEmail, "1"))) {
+            friendsList.add(new User(0, "name", requesterEmail, "1"));
+            booleanCallback.call(true);
+        } else {
+            booleanCallback.call(false);
+        }
     }
 
     /**
@@ -147,7 +174,7 @@ class MockDataAdapter implements IDataAdapter {
      */
     @Override
     public void rejectFriendRequest(String requesterEmail, Callback<Boolean> booleanCallback) {
-
+        friendsList.remove(new User(0, "name", requesterEmail, "1"));
     }
 
     /**

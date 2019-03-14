@@ -10,20 +10,26 @@ public class RemoveFriendDialog {
     private Resources resources;
     IDataAdapter dataAdapter;
 
-    public RemoveFriendDialog( User toRemove, Context context, IDataAdapter dataAdapter) {
+    RemoveFriendDialog(User toRemove, Context context, IDataAdapter dataAdapter) {
         this.requested = toRemove;
         this.resources = context.getResources();
         this.context = context;
         this.dataAdapter = dataAdapter;
     }
-    public AlertDialog createDialog() {
+
+    AlertDialog createDialog() {
         AlertDialog.Builder builder;
         builder = new AlertDialog.Builder(context);
         resources = context.getResources();
-        builder.setMessage(String.format(resources.getResourceEntryName(R.string.remove_friend_dialog_message), requested.name));
-        builder.setTitle(resources.getResourceEntryName(R.string.remove_friend_dialog_title));
+        builder.setMessage(String.format(resources.getString(R.string.remove_friend_dialog_message), requested.name));
+        builder.setTitle(resources.getString(R.string.remove_friend_dialog_title));
         builder.setPositiveButton(R.string.dialog_yes, (dialog, id) -> {
-            //TODO
+            dataAdapter.rejectFriendRequest(requested.email, (removeSuccess) -> {
+                if( removeSuccess ) {
+                    FriendsListActivity.friendsList.friends.remove(requested);
+                    FriendsListActivity.friendAdapter.notifyDataSetChanged();
+                }
+            });
             dialog.dismiss();
         });
         builder.setNegativeButton(R.string.dialog_no, (dialog, id) -> {
