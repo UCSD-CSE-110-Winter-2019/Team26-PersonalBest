@@ -102,10 +102,10 @@ public class StepCountActivity extends AppCompatActivity {
             try {
                 resp = params[0];
                 while(run) {
-                    /*if( !timeStamper.isToday(currentDate) ) {
+                    if( !timeStamper.isToday(currentDate) ) {
                         initializeNewDay();
                         currentDate = timeStamper.now();
-                    }*/
+                    }
                     fitnessService.updateStepCount(StepCountActivity.this::setStepCount);
                     stepCounts.clear();
                     fitnessService.getStepsCount(timeStamper.lastTwentyEightDays(), timeStamper.today(), stepCounts);
@@ -180,14 +180,12 @@ public class StepCountActivity extends AppCompatActivity {
         createBarChart = new BarChart(getApplicationContext(),mChart);
         createBarChart.setDOCUMENT_KEY(DOCUMENT_KEY);
         createBarChart.setSize(7);
-        createBarChart.getData();
-        createBarChart.draw();
+        //createBarChart.draw();
 
         createBarChart2 = new BarChart(getApplicationContext(),mChart2);
         createBarChart2.setDOCUMENT_KEY(DOCUMENT_KEY);
         createBarChart2.setSize(28);
-        createBarChart2.getData();
-        createBarChart.draw();
+        //createBarChart.draw();
 
         Switch sw = findViewById(R.id.switch1);
         sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -255,6 +253,11 @@ public class StepCountActivity extends AppCompatActivity {
             updateStep.execute(-1);
         }
 
+        if(!stepCounts.isEmpty() )
+        {
+            updateDataToFirebase();
+        }
+
         createBarChart.draw();
         createBarChart2.draw();
         if(!month)
@@ -270,7 +273,7 @@ public class StepCountActivity extends AppCompatActivity {
 
         Settings settings = new Settings(getApplicationContext(), timeStamper);
         today.goal = settings.getGoal();
-        user.height = settings.getHeight();
+        user.height = settings.getUserHeight();
         setStepCount(today.totalSteps);
 
         // Check if the user started a walk and has not stopped it
@@ -531,8 +534,16 @@ public class StepCountActivity extends AppCompatActivity {
             cal.add(Calendar.DATE, i);
             String year = String.valueOf(cal.get(Calendar.YEAR));
             String month = String.valueOf(cal.get(Calendar.MONTH));
+            if(month.length() == 1)
+            {
+                month = "0" + month;
+            }
             String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
-            String dayID = month + day + year;
+            if(day.length() == 1)
+            {
+                day = "0" + day;
+            }
+            String dayID = year + month + day;
             weekID[count] = dayID;
             count++;
         }

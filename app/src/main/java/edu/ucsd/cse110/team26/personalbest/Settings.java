@@ -57,6 +57,9 @@ public class Settings {
         sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE );
         this.timeStamper = timeStamper;
         this.DOCUMENT_KEY = GoogleSignIn.getLastSignedInAccount(context).getEmail();
+        user_data = FirebaseFirestore.getInstance()
+                .collection(COLLECTION_KEY)
+                .document(DOCUMENT_KEY);
     }
 
     public Settings(Context context, String dayID, String DOCUMENT_KEY)
@@ -97,9 +100,6 @@ public class Settings {
 
     public void saveUserHeight(int feet, int inches)
     {
-        DocumentReference user_data = FirebaseFirestore.getInstance()
-                .collection(COLLECTION_KEY)
-                .document(DOCUMENT_KEY);
         int new_height = feet*12 + inches;
         user_data.update("height", new_height).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -117,10 +117,6 @@ public class Settings {
 
     public int getUserHeight()
     {
-        DocumentReference user_data = FirebaseFirestore.getInstance()
-                .collection(COLLECTION_KEY)
-                .document(DOCUMENT_KEY);
-
         user_data.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -133,9 +129,7 @@ public class Settings {
 
     public void saveTodayGoal(int new_goal)
     {
-        DocumentReference user_record = FirebaseFirestore.getInstance()
-                .collection(COLLECTION_KEY)
-                .document(DOCUMENT_KEY)
+        DocumentReference user_record = user_data
                 .collection(RECORD_KEY)
                 .document(getTodayID());
 
@@ -272,7 +266,7 @@ public class Settings {
         String year = String.valueOf(cal.get(Calendar.YEAR));
         String month = String.valueOf(cal.get(Calendar.MONTH));
         String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
-        String dayID = month + day + year;
+        String dayID = year + month + day;
         return dayID;
     }
 
@@ -312,24 +306,16 @@ public class Settings {
         Calendar cal = Calendar.getInstance();
         String year = String.valueOf(cal.get(Calendar.YEAR));
         String month = String.valueOf(cal.get(Calendar.MONTH));
+        if(month.length() == 1)
+        {
+            month = "0" + month;
+        }
         String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
-        return  (month + day + year);
+        if(day.length() == 1)
+        {
+            day = "0" + day;
+        }
+        return  (year + month + day);
     }
 
-    /*public int getGoal() {
-        DocumentReference user_record = FirebaseFirestore.getInstance()
-                .collection(COLLECTION_KEY)
-                .document(DOCUMENT_KEY)
-                .collection(RECORD_KEY)
-                .document(getTodayID());
-
-        user_record.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                dayInfo = documentSnapshot.toObject(Day.class);
-                setGoal((int)dayInfo.getGoal());
-            }
-        });
-        return goal;
-    }*/
 }

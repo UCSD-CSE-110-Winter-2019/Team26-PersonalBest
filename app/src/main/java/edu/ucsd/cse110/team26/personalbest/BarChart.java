@@ -17,6 +17,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
@@ -45,7 +46,6 @@ public class BarChart {
     private String[] labels;
 
     DocumentReference user_data;
-    //DocumentReference user_record;
     CollectionReference user_list;
     GoogleSignInAccount currentUser;
     String COLLECTION_KEY = "users";
@@ -205,6 +205,7 @@ public class BarChart {
     {
         return labels[0];
     }
+
     public void getData()
     {
         String [] listDayID;
@@ -222,7 +223,7 @@ public class BarChart {
             final int count = i;
             DocumentReference user_record = FirebaseFirestore.getInstance()
                     .collection(COLLECTION_KEY)
-                    .document(DOCUMENT_KEY)
+                    .document(GoogleSignIn.getLastSignedInAccount(context).getEmail())
                     .collection(RECORD_KEY)
                     .document(listDayID[count]);
 
@@ -248,8 +249,16 @@ public class BarChart {
             cal.add(Calendar.DATE, i);
             String year = String.valueOf(cal.get(Calendar.YEAR));
             String month = String.valueOf(cal.get(Calendar.MONTH));
+            if(month.length() == 1)
+            {
+                month = "0" + month;
+            }
             String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
-            String dayID = month + day + year;
+            if(day.length() == 1)
+            {
+                day = "0" + day;
+            }
+            String dayID = year + month + day;
             weekID[count] = dayID;
             count++;
         }
@@ -266,8 +275,16 @@ public class BarChart {
             cal.add(Calendar.DATE, i);
             String year = String.valueOf(cal.get(Calendar.YEAR));
             String month = String.valueOf(cal.get(Calendar.MONTH));
+            if(month.length() == 1)
+            {
+                month = "0" + month;
+            }
             String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
-            String dayID = month + day + year;
+            if(day.length() == 1)
+            {
+                day = "0" + day;
+            }
+            String dayID = year + month + day;
             last28ID[count] = dayID;
             count++;
         }

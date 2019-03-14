@@ -63,7 +63,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         settings.saveTodayGoal(newGoal);
-        settings.saveHeight(feetNp.getValue(), inchesNp.getValue());
+        settings.saveUserHeight(feetNp.getValue(), inchesNp.getValue());
 
         SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
