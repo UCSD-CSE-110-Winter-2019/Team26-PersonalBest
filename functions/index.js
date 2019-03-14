@@ -172,7 +172,7 @@ exports.addMessageTimestamps = functions.firestore
     .document('chats/{chatId}/messages/{messageId}')
     .onCreate((snap, context) =>
         snap.ref.update({
-            timestamp: admin.firestore.FieldValue.serverTimestamp()
+            timestamp: Date.now()
         })
     );
 

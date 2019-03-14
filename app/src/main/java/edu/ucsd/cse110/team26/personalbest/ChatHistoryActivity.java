@@ -3,10 +3,18 @@ package edu.ucsd.cse110.team26.personalbest;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 
 public class ChatHistoryActivity extends AppCompatActivity {
+
+    private IDataAdapter dataAdapter;
+    private boolean DEBUG;
+    private String chatID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,6 +24,31 @@ public class ChatHistoryActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+
+
+        if(getIntent().getExtras() != null) {
+            DEBUG = getIntent().getExtras().getBoolean("DEBUG", false);
+            chatID = getIntent().getExtras().getString("Chat");
+        }
+        dataAdapter = IDatabaseAdapterFactory.create(DEBUG, getApplicationContext());
+        Log.d(getClass().getSimpleName(), "Chat ID: " + chatID);
+
+        EditText message = findViewById(R.id.text_message);
+        Button btnSend = findViewById(R.id.btn_send);
+        btnSend.setOnClickListener(view -> {
+            dataAdapter.sendMessage(chatID, message.getText().toString(), (success) -> {
+                if(success) {
+                    Log.d(getClass().getSimpleName(), "Sent message");
+                    message.setText("");
+                }
+                else Log.d(getClass().getSimpleName(), "Failed to send message");
+            });
+        });
+
+        TextView chat = findViewById(R.id.chat);
+        dataAdapter.startChatListener(chatID, (msg) -> {
+            chat.append(msg.toString());
+        });
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
