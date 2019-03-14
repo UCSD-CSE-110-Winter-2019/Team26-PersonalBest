@@ -43,7 +43,18 @@ class FirestoreAdapter implements IDataAdapter {
      */
     @Override
     public void getToday(Callback<Day> dayCallback) {
-        
+        db.collection("users").document(userEmail).collection("days")
+                .document(timeStamper.timestampToDayId(timeStamper.now()))
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    if(snapshot.exists()) {
+                        dayCallback.call(snapshot.toObject(Day.class));
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.w(TAG, "Failed to read day with error: " + e);
+                    dayCallback.call(null);
+                });
     }
 
     /**
@@ -104,7 +115,7 @@ class FirestoreAdapter implements IDataAdapter {
                 .collection("friends").document(friendEmail).get().addOnCompleteListener((task) -> {
                     if(task.isSuccessful()) {
                         DocumentSnapshot doc = task.getResult();
-                        if(doc.exists() && doc.getData().get("status").toString().equals("friends")) {
+                        if(doc.exists()) {
                             db.collection("users").document(friendEmail).get().addOnCompleteListener((t) -> {
                                 if(t.isSuccessful()) {
                                     DocumentSnapshot friend = t.getResult();
