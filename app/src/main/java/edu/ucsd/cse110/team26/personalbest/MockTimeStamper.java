@@ -65,6 +65,11 @@ public class MockTimeStamper implements TimeStamper {
     }
 
     @Override
+    public String timestampToString(long timestamp) {
+        return null;
+    }
+
+    @Override
     public long dayIdToTimestamp(String dayID) {
         return 0;
     }

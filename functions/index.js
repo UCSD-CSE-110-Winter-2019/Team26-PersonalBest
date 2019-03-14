@@ -160,10 +160,49 @@ exports.handleFriendRequest = functions.https.onCall((data, context) => {
             });
 
             return Promise.all([requesterDelete, requesteeDelete, deleteChat])
-            .finally(console.log("Deleted friend relationship"))
+            .then(console.log("Deleted friend relationship"))
             .catch(error => console.error(error));
         default:
             console.log("Unrecognized friend request type " + reqType);
             throw new functions.https.HttpsError('invalid-argument', 'Request type not recognized');
     }
+});
+
+exports.addMessageTimestamps = functions.firestore
+    .document('chats/{chatId}/messages/{messageId}')
+    .onCreate((snap, context) =>
+        snap.ref.update({
+            timestamp: Date.now()
+        })
+    );
+
+exports.sendChatNotifications = functions.firestore
+   .document('chats/{chatId}/messages/{messageId}')
+   .onCreate((snap, context) => {
+    // Get an object with the current document value.
+    // If the document does not exist, it has been deleted.
+    const document = snap.exists ? snap.data() : null;
+
+    if (document) {
+        var message = {
+            notification: {
+                title: document.from + ' sent you a message',
+                body: document.text
+            },
+            topic: context.params.chatId
+        };
+
+        return admin.messaging().send(message)
+        .then((response) => {
+            // Response is a message ID string.
+            console.log('Successfully sent message: ', response);
+            return response;
+        })
+        .catch((error) => {
+            console.log('Error sending message: ', error);
+            return error;
+        });
+    }
+
+    return "document was null or empty";
 });
