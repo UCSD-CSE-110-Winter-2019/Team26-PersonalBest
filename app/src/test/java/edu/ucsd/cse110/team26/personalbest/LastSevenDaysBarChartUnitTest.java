@@ -34,7 +34,7 @@ public class LastSevenDaysBarChartUnitTest
 
         Intent intent = new Intent(RuntimeEnvironment.application, StepCountActivity.class);
         intent.putExtra("DEBUG", true);
-        activity = Robolectric.buildActivity(StepCountActivity.class, intent).create().get();
+        //activity = Robolectric.buildActivity(StepCountActivity.class, intent).create().get();
 
         List<Integer> stepCounts =  new ArrayList<>();
         List<ArrayList<Walk>> walkData = new ArrayList<>();
@@ -45,7 +45,7 @@ public class LastSevenDaysBarChartUnitTest
         fakeWalk.add(walk);
         walkData.add(fakeWalk);
 
-        createBarChart = new BarChart(context, mChart, stepCounts, walkData);
+        createBarChart = new BarChart(context, mChart);
         createBarChart.setupLabel();
     }
 
