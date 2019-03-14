@@ -220,7 +220,6 @@ public class StepCountActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        createBarChart.draw();
 
         dataAdapter.getFriends( (friendsList) -> {
             toggleEncouragementMessage = !friendsList.isEmpty();

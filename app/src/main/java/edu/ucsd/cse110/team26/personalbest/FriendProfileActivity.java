@@ -10,9 +10,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.github.mikephil.charting.charts.CombinedChart;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class FriendProfileActivity extends AppCompatActivity {
     private TextView friendName;
     private TextView friendEmail;
+    private BarChart barChart;
     private boolean DEBUG;
     private IDataAdapter dataAdapter;
     private String email;
@@ -30,6 +36,9 @@ public class FriendProfileActivity extends AppCompatActivity {
 
         friendName = findViewById(R.id.friendName);
         friendEmail = findViewById(R.id.friendEmail);
+        CombinedChart chart = findViewById(R.id.chart);
+        List<Day> friendsData = getFriendsData();
+        barChart = new BarChart(getApplicationContext(), friendsData ,true);
 
         email = getIntent().getExtras().getString("Friend Email");
 
@@ -70,5 +79,10 @@ public class FriendProfileActivity extends AppCompatActivity {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.menu_friend_profile, menu);
         return true;
+    }
+
+    public List<Day> getFriendsData() {
+        List<Day> data = new ArrayList<>();
+        return data;
     }
 }

@@ -45,6 +45,18 @@ public class BarChart {
         else this.size = 7;
     }
 
+    public BarChart(Context context, CombinedChart mChart, List<Day> days, boolean monthlySummary)
+    {
+        this.context = context;
+        this.mChart = mChart;
+        if(monthlySummary) this.size = 28;
+        else this.size = 7;
+        for (Day d: days) {
+            this.stepCounts.add((int)d.totalSteps);
+            this.walkData.add((int)d.walkSteps);
+            this.goalData.add((int)d.goal);
+        }
+    }
 
     public void draw()
     {
