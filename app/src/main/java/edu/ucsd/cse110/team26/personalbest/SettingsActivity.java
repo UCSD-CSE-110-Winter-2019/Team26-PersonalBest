@@ -22,7 +22,7 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        settings = new Settings(getApplicationContext(), new ConcreteTimeStamper() );
+        settings = new Settings(getApplicationContext(), new ConcreteTimeStamper(), getIntent().getExtras().getString("DOCUMENT_KEY") );
 
         EditText goalEdit = findViewById(R.id.goalEdit);
         NumberPicker feetNp = findViewById(R.id.feetNumberPicker);

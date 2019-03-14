@@ -45,7 +45,8 @@ public class GetHeightActivity extends AppCompatActivity {
                     np1.setEnabled(false);
                     np2.setEnabled(false);
 
-                    settings = new Settings(getApplicationContext(), new ConcreteTimeStamper());
+                    settings = new Settings(getApplicationContext(), new ConcreteTimeStamper(),
+                            getIntent().getExtras().getString("EMAIL"));
                     settings.saveHeight(np1.getValue(), np2.getValue());
 
                     confirmButton.setText("Done");

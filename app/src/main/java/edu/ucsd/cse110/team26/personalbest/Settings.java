@@ -50,8 +50,9 @@ public class Settings {
     private int totalSteps;
     private int walkSteps;
     private Date date;
+    DocumentReference user_data;
 
-    public Settings (Context context, TimeStamper timeStamper) {
+    public Settings (Context context, TimeStamper timeStamper, String DOCUMENT_KEY) {
         sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE );
         this.timeStamper = timeStamper;
     }
@@ -63,14 +64,15 @@ public class Settings {
         this.DOCUMENT_KEY = DOCUMENT_KEY;
         userHeight = 0;
     }
-    public Settings(Context context)
+    public Settings(Context context, String DOCUMENT_KEY)
     {
         sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE );
-    }
-    public void setDOCUMENT_KEY(String DOCUMENT_KEY)
-    {
         this.DOCUMENT_KEY = DOCUMENT_KEY;
+        user_data = FirebaseFirestore.getInstance()
+                .collection(COLLECTION_KEY)
+                .document(DOCUMENT_KEY);
     }
+
     public void setDayID(String dayID)
     {
         this.dayID = dayID;
@@ -192,23 +194,6 @@ public class Settings {
         }
         editor.apply();
     }
-
-    /*public int getGoal() {
-        DocumentReference user_record = FirebaseFirestore.getInstance()
-                .collection(COLLECTION_KEY)
-                .document(DOCUMENT_KEY)
-                .collection(RECORD_KEY)
-                .document(getTodayID());
-
-        user_record.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                dayInfo1 = documentSnapshot.toObject(Day.class);
-                setGoal(dayInfo1.getGoal());
-            }
-        });
-        return goal;
-    }*/
 
     public int getGoal() {
         switch( timeStamper.getDayOfWeek() ) {
