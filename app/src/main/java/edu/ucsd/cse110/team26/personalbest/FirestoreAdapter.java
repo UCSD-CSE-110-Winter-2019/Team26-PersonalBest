@@ -115,7 +115,7 @@ class FirestoreAdapter implements IDataAdapter {
                 .collection("friends").document(friendEmail).get().addOnCompleteListener((task) -> {
                     if(task.isSuccessful()) {
                         DocumentSnapshot doc = task.getResult();
-                        if(doc.exists() && doc.getData().get("status").toString().equals("friends")) {
+                        if(doc.exists()) {
                             db.collection("users").document(friendEmail).get().addOnCompleteListener((t) -> {
                                 if(t.isSuccessful()) {
                                     DocumentSnapshot friend = t.getResult();

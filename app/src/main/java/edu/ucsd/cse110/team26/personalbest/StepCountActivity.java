@@ -133,8 +133,6 @@ public class StepCountActivity extends AppCompatActivity {
         dataAdapter = IDatabaseAdapterFactory.create(DEBUG, this.getApplicationContext());
         timeStamper = new ConcreteTimeStamper();
 
-        dataAdapter.acceptFriendRequest("ana@selvaraj.org", (success) -> {Log.i(TAG, "success");});
-
         fitnessService.setup();
 
         createBarChart = new BarChart(getApplicationContext(), mChart, stepCounts, walkData);
