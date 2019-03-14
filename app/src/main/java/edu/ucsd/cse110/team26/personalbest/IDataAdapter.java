@@ -40,6 +40,16 @@ interface IDataAdapter {
     void getFriend(String friendEmail, Callback<List<User>> userCallback);
 
     /**
+     * Gets the last numOfDays Days of data of the currently logged in user,
+     * calling the passed in callback with the resulting List of Day, or null if
+     * the server request failed.
+     *
+     * @param numOfDays the number of days to fetch before today, today inclusive
+     * @param dayCallback lambda to handle the resulting List of Days
+     */
+    void getDays(int numOfDays, Callback<List<Day>> dayCallback);
+
+    /**
      * Gets the last numOfDays Days of data of the friend with the specified ID,
      * calling the passed in callback with the resulting List of Day, or null if
      * the server request failed.
@@ -121,5 +131,32 @@ interface IDataAdapter {
      * @param booleanCallback callback to handle success/failure of request
      */
     void deleteFriend(String friendEmail, Callback<Boolean> booleanCallback);
+
+    /**
+     * Sends a message from the current user in the given chat.
+     * Calls given callback with true or false depending on if the server request was successful.
+     *
+     * @param chatId the ID of the chat to send to
+     * @param text message to send
+     * @param booleanCallback callback to handle success/failure
+     */
+    void sendMessage(String chatId, String text, Callback<Boolean> booleanCallback);
+
+    /**
+     * Starts listening for new messages in the given chat, calling the given callback
+     * when new messages are sent to the chat.
+     *
+     * @param chatId the Id of the chat to watch
+     * @param messageCallback callback to handle new messages received
+     */
+    void startChatListener(String chatId, Callback<Message> messageCallback);
+
+    /**
+     * Subscribes the user to get push notifications from the server when the given chat
+     * receives new messages.
+     *
+     * @param chatId the ID of the chat to subscribe to for push notifications
+     */
+    void subscribeToChatNotifications(String chatId);
 
 }

@@ -61,6 +61,11 @@ class MockDataAdapter implements IDataAdapter {
     public void getFriend(String friendEmail, Callback<List<User>> userCallback) {
     }
 
+    @Override
+    public void getDays(int numOfDays, Callback<List<Day>> dayCallback) {
+
+    }
+
     /**
      * Gets the last numOfDays Days of data of the friend with the specified ID,
      * calling the passed in callback with the resulting List of Day, or null if
@@ -180,6 +185,21 @@ class MockDataAdapter implements IDataAdapter {
      */
     @Override
     public void deleteFriend(String friendEmail, Callback<Boolean> booleanCallback) {
+
+    }
+
+    @Override
+    public void sendMessage(String chatId, String text, Callback<Boolean> booleanCallback) {
+
+    }
+
+    @Override
+    public void startChatListener(String chatId, Callback<Message> messageCallback) {
+
+    }
+
+    @Override
+    public void subscribeToChatNotifications(String chatId) {
 
     }
 }

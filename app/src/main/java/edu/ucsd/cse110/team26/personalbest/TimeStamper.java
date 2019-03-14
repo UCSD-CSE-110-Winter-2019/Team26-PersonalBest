@@ -15,6 +15,7 @@ public interface TimeStamper {
     long previousDay(long timeStamp);
     long nextDay(long timeStamp);
     String durationToString(long duration);
+    String timestampToString(long timestamp);
     String timestampToDayId(long timestamp);
     long dayIdToTimestamp(String dayID);
 }

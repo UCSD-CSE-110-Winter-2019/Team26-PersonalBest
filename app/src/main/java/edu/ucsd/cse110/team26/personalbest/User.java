@@ -5,6 +5,7 @@ class User {
     String name;
     String email;
     String uid;
+    String chatID;
     Friends friends;
 
     User() {

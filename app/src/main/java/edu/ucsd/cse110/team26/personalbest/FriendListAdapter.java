@@ -22,7 +22,8 @@ public class FriendListAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return FriendsListActivity.friendsList.sentRequests.size() + FriendsListActivity.friendsList.receivedRequests.size()
+        return FriendsListActivity.friendsList.sentRequests.size()
+                + FriendsListActivity.friendsList.receivedRequests.size()
                 + FriendsListActivity.friendsList.friends.size();
     }
 
@@ -66,11 +67,11 @@ public class FriendListAdapter extends BaseAdapter {
             convertView = inflater.inflate(R.layout.friend_item_list, parent, false);
 
 
-            holder.acceptRequest = (ImageButton) convertView.findViewById(R.id.acceptFriendRequest);
-            holder.rejectRequest = (ImageButton) convertView.findViewById(R.id.rejectFriendRequest);
-            holder.friendEmail = (TextView) convertView.findViewById(R.id.friendEmail);
-            holder.friendName = (TextView) convertView.findViewById(R.id.friendName);
-            holder.pending = (LinearLayout) convertView.findViewById(R.id.pendingFriend);
+            holder.acceptRequest = convertView.findViewById(R.id.acceptFriendRequest);
+            holder.rejectRequest = convertView.findViewById(R.id.rejectFriendRequest);
+            holder.friendEmail = convertView.findViewById(R.id.friendEmail);
+            holder.friendName = convertView.findViewById(R.id.friendName);
+            holder.pending = convertView.findViewById(R.id.pendingFriend);
 
             convertView.setTag(holder);
         } else {
@@ -81,29 +82,41 @@ public class FriendListAdapter extends BaseAdapter {
 
         switch(type) {
             case FRIEND:
-                holder.pending.setVisibility(View.GONE); break;
+                holder.pending.setVisibility(View.GONE);
+                break;
             case RECEIVEDREQUEST:
                 holder.pending.setVisibility(View.VISIBLE);
                 holder.acceptRequest.setVisibility(View.VISIBLE);
-                holder.rejectRequest.setVisibility(View.VISIBLE); break;
+                holder.rejectRequest.setVisibility(View.VISIBLE);
+                break;
             case SENTREQUEST:
                 holder.pending.setVisibility(View.VISIBLE);
                 holder.acceptRequest.setVisibility(View.GONE);
-                holder.rejectRequest.setVisibility(View.GONE); break;
+                holder.rejectRequest.setVisibility(View.GONE);
+                break;
         }
 
         holder.friendName.setText(friend.name);
         holder.friendEmail.setText(friend.email);
 
-        holder.acceptRequest.setOnClickListener(v -> dataAdapter.acceptFriendRequest(friend.email, (acceptRequestSuccess) -> {
-
-        if( acceptRequestSuccess ) {
-            holder.pending.setVisibility(View.GONE);
-            FriendsListActivity.friendsList.receivedRequests.remove(position);
-            FriendsListActivity.friendsList.friends.add(friend);
-            notifyDataSetChanged();
-        }
-    }));
+        holder.acceptRequest.setOnClickListener(v -> {
+            dataAdapter.acceptFriendRequest(friend.email, (success) -> {
+                if(success) {
+                    holder.pending.setVisibility(View.GONE);
+                    FriendsListActivity.friendsList.receivedRequests.remove(position);
+                    FriendsListActivity.friendsList.friends.add(friend);
+                    dataAdapter.getFriend(friend.email, (userList) -> {
+                        if(userList != null) {
+                            User f = userList.get(0);
+                            dataAdapter.subscribeToChatNotifications(f.chatID);
+                        } else {
+                            Log.d(getClass().getSimpleName(), "failed to get accepted friend");
+                        }
+                    });
+                    notifyDataSetChanged();
+                }
+            });
+        });
 
         holder.rejectRequest.setOnClickListener(v -> dataAdapter.rejectFriendRequest(friend.email, (rejectRequestSuccess) -> {
 
