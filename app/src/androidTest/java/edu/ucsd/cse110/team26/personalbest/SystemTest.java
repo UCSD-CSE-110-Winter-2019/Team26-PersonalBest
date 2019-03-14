@@ -66,7 +66,7 @@ public class SystemTest {
         onView(withId(R.id.chart1)).check(matches(isDisplayed()));
         onView(withId(R.id.action_bar)).check(matches(isDisplayed()));
         openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
-        onView(withId(R.id.title)).perform(click());
+        onView(withText("Settings")).perform(click());
 
         onView(withId(R.id.btnSettingsSave)).check(matches(isDisplayed()));
         onView(withId(R.id.btnSettingsGoBack)).check(matches(isDisplayed()));
@@ -86,7 +86,7 @@ public class SystemTest {
 
 
         openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
-        onView(withId(R.id.title)).perform(click());
+        onView(withText("Settings")).perform(click());
 
         onView(withId(R.id.goalEdit)).check(matches(withText("1000")));
         onView(withId(R.id.btnSettingsGoBack)).perform(click());

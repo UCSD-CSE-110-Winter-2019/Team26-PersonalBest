@@ -13,9 +13,12 @@
         tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".FriendListActivity"></activity>
         <activity
-            android:name=".FriendsActivity"
-            android:label="@string/title_activity_friends"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:name=".ChatHistoryActivity"
+            android:label="@string/title_activity_chat_history" />
+        <activity android:name=".FriendProfileActivity" />
+        <activity
+            android:name=".FriendsListActivity"
+            android:label="@string/title_activity_friends" />
         <activity android:name=".GetHeightActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -25,13 +28,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".StepCountActivity" />
-        <activity
-            android:name=".SettingsActivity"
-            android:parentActivityName=".StepCountActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".StepCountActivity" />
-        </activity>
+        <activity android:name=".SettingsActivity"></activity>
     </application>
 
 </manifest>

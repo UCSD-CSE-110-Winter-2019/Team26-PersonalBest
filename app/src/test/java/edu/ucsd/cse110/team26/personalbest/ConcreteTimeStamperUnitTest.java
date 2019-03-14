@@ -1,19 +1,11 @@
 package edu.ucsd.cse110.team26.personalbest;
-import android.content.Intent;
-import android.widget.Button;
-import android.widget.TextView;
-
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 
 import java.util.Calendar;
-import java.util.TimeZone;
 import java.util.Date;
-import androidx.test.platform.app.InstrumentationRegistry;
+import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

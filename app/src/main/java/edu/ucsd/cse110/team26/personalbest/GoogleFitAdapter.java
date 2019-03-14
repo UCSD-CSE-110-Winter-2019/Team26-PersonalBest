@@ -1,5 +1,6 @@
 package edu.ucsd.cse110.team26.personalbest;
 
+import android.app.Activity;
 import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -27,10 +28,10 @@ public class GoogleFitAdapter implements FitnessService {
     private final String TAG = "GoogleFitAdapter";
     private final String SESSION_NAME = "PersonalBestWalk";
 
-    private StepCountActivity activity;
+    private Activity activity;
     private GoogleSignInAccount lastSignedInAccount;
 
-    GoogleFitAdapter(StepCountActivity activity) {
+    GoogleFitAdapter(Activity activity) {
         this.activity = activity;
     }
 
@@ -49,7 +50,6 @@ public class GoogleFitAdapter implements FitnessService {
                     fitnessOptions);
         } else {
             startRecording();
-            updateStepCount();
         }
 
     }
@@ -69,18 +69,18 @@ public class GoogleFitAdapter implements FitnessService {
      * Reads the current daily step total, computed from midnight of the current day on the device's
      * current timezone.
      */
-    public void updateStepCount() {
+    public void updateStepCount(Callback<Long> stepCountCallback) {
         lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);
         if (lastSignedInAccount != null) {
             Fitness.getHistoryClient(activity, lastSignedInAccount)
                     .readDailyTotal(DataType.TYPE_STEP_COUNT_DELTA)
                     .addOnSuccessListener(dataSet -> {
-                        int totalSteps = dataSet.isEmpty()
+                        long totalSteps = dataSet.isEmpty()
                                 ? 0
                                 : dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
                         Log.i(TAG, "Steps successfully read: " + totalSteps);
 
-                        activity.setStepCount(totalSteps);
+                        stepCountCallback.call(totalSteps);
                     })
                     .addOnFailureListener(e -> Log.d(TAG, "There was a problem getting the step count.", e));
         } else {
@@ -191,6 +191,10 @@ public class GoogleFitAdapter implements FitnessService {
                     })
                     .addOnFailureListener(e -> Log.i(TAG, "Failed to read session"));
         }
+    }
+
+    public void getDays(long startTimestamp, long endTimestamp, Callback<List<Day>> dayCallback) {
+
     }
 
     @Override

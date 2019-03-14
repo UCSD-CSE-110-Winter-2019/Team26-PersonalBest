@@ -10,7 +10,7 @@ interface IDataAdapter {
      *
      * @param dayCallback callback lambda to handle the resulting Day
      */
-    void getToday(DayCallback dayCallback);
+    void getToday(Callback<Day> dayCallback);
 
     /**
      * Gets the logged-in user's data stored in the database
@@ -18,16 +18,16 @@ interface IDataAdapter {
      *
      * @param userCallback callback lambda to handle the user's data
      */
-    void getUser(UserCallback userCallback);
+    void getUser(Callback<User> userCallback);
 
     /**
-     * Updates the logged-in user's data stored in the database
+     * Updates the logged-in user's height stored in the database
      * Calls given callback with true or false depending on if the server request was successful.
      *
-     * @param user User's data to update
+     * @param height User's height to update
      * @param booleanCallback callback lambda to handle success/failure
      */
-    void updateUser(User user, BooleanCallback booleanCallback);
+    void updateUserHeight(int height, Callback<Boolean> booleanCallback);
 
     /**
      * Gets the profile information of the friend with given email.
@@ -37,25 +37,26 @@ interface IDataAdapter {
      * @param friendEmail email of friend to look up
      * @param userCallback callback lambda to handle result
      */
-    void getFriend(String friendEmail, UserCallback userCallback);
+    void getFriend(String friendEmail, Callback<List<User>> userCallback);
 
     /**
      * Gets the last numOfDays Days of data of the friend with the specified ID,
      * calling the passed in callback with the resulting List of Day, or null if
      * the server request failed.
      *
-     * @param friendID the uid of the friend to fetch
+     * @param friendEmail the email of the friend to fetch
      * @param numOfDays the number of days to fetch before today, today inclusive
      * @param dayCallback lambda to handle the resulting List of Days
      */
-    void getFriendDays(String friendID, int numOfDays, DayCallback dayCallback);
+    void getFriendDays(String friendEmail, int numOfDays, Callback<List<Day>> dayCallback);
 
     /**
      * Updates the database with the given days' data.
      *
      * @param days List of days to update the database with.
+     * @param booleanCallback callback to handle success/failure
      */
-    void updateDays(List<Day> days);
+    void updateDays(List<Day> days, Callback<Boolean> booleanCallback);
 
     /**
      * Gets the public data of users who have been sent friend requests by the logged in user.
@@ -65,7 +66,7 @@ interface IDataAdapter {
      *
      * @param userCallback callback to handle resulting list of users
      */
-    void getSentFriendRequests(UserCallback userCallback);
+    void getSentFriendRequests(Callback<List<User>> userCallback);
 
     /**
      * Gets the public data of users who have sent friend requests to the logged in user.
@@ -74,7 +75,14 @@ interface IDataAdapter {
      *
      * @param userCallback callback to handle resulting list of users
      */
-    void getReceivedFriendRequests(UserCallback userCallback);
+    void getReceivedFriendRequests(Callback<List<User>> userCallback);
+
+    /**
+     * Gets the public data of all users who are friends with the currently logged in user.
+     *
+     * @param userCallback callback to handle the resulting friend list
+     */
+    void getFriends(Callback<List<User>> userCallback);
 
     /**
      * Attempts to send a friend request from the logged in user to the user of the given email
@@ -86,7 +94,7 @@ interface IDataAdapter {
      * @param friendEmail the email to make a request to
      * @param userCallback callback to handle resulting list of users
      */
-    void makeFriendRequest(String friendEmail, UserCallback userCallback);
+    void makeFriendRequest(String friendEmail, Callback<List<User>> userCallback);
 
     /**
      * Accepts the friend request made by the given requester to the currently logged in user.
@@ -95,18 +103,23 @@ interface IDataAdapter {
      * @param requesterEmail the UID of the requester
      * @param booleanCallback callback to handle success/failure
      */
-    void acceptFriendRequest(String requesterEmail, BooleanCallback booleanCallback);
+    void acceptFriendRequest(String requesterEmail, Callback<Boolean> booleanCallback);
 
-    interface DayCallback {
-        void call(List<Day> days);
-    }
+    /**
+     * Rejects the friend request made by the given requester to the currently logged in user.
+     * Calls given callback with true or false depending on if the server request was successful.
+     *
+     * @param requesterEmail the UID of the requester
+     * @param booleanCallback callback to handle success/failure
+     */
+    void rejectFriendRequest(String requesterEmail, Callback<Boolean> booleanCallback);
 
-    interface UserCallback {
-        void call(List<User> users);
-    }
-
-    interface BooleanCallback {
-        void call(boolean bool);
-    }
+    /**
+     * Deletes the given friend from the current user's friends
+     *
+     * @param friendEmail email of friend to delete
+     * @param booleanCallback callback to handle success/failure of request
+     */
+    void deleteFriend(String friendEmail, Callback<Boolean> booleanCallback);
 
 }

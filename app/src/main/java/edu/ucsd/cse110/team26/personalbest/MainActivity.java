@@ -36,8 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
         if(!DEBUG) {
             FirebaseApp.initializeApp(this);
-            mAuth = FirebaseAuth.getInstance();
-            FirebaseUser user = mAuth.getCurrentUser();
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user != null) {
                 launchStepCountActivity();
             }
