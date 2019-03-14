@@ -190,13 +190,9 @@ public class StepCountActivity extends AppCompatActivity {
         sevenDayBarchart = findViewById(R.id.chart1);
         twentyEightDayBarchart = findViewById(R.id.chart2);
 
-
-
-
-
-        //createBarChart.setDOCUMENT_KEY(DOCUMENT_KEY);
-        //createBarChart.setSize(7);
-        //createBarChart.draw();
+        // =============
+        //using Firebase to update data from google fit to firebase
+        // =============
         if(!DEBUG)
         {
             //updateDataToFirebase();
@@ -277,31 +273,16 @@ public class StepCountActivity extends AppCompatActivity {
             updateStep.execute(-1);
         }
 
+        // =============
+        //using Firebase to update data from google fit to firebase
+        // =============
         if(!stepCounts.isEmpty() && !DEBUG)
         {
-            //updateDataToFirebase();
-            //dcreateBarChart.draw();
-            //createBarChart2.draw();
+            updateDataToFirebase();
         }
-        /*dataAdapter.getDays(7,weekInfo -> {
-            Log.d(TAG, weekInfo.toString());
-            createBarChart.draw(weekInfo);
-        });*/
-        //dataAdapter.getDays(7,weekInfo -> createBarChart.draw(weekInfo));
-        //createBarChart.draw();
-        //createBarChart2.draw();
-        /*sevenDayBarchart.setVisibility(View.VISIBLE);
-        twentyEightDayBarchart.setVisibility(View.GONE);
-        if(!month)
-        {
-            twentyEightDayBarchart.setVisibility(View.GONE);
-            sevenDayBarchart.setVisibility(View.VISIBLE);
-        }
-        else
-        {
-            twentyEightDayBarchart.setVisibility(View.VISIBLE);
-            sevenDayBarchart.setVisibility(View.GONE);
-        }*/
+
+        dataAdapter.getDays(7, weekInfo -> createBarChart.draw(weekInfo));
+        dataAdapter.getDays(28, weekInfo -> createBarChart2.draw(weekInfo));
 
         Settings settings = new Settings(getApplicationContext(), timeStamper);
         settings.setDOCUMENT_KEY(DOCUMENT_KEY);
@@ -334,23 +315,6 @@ public class StepCountActivity extends AppCompatActivity {
         }
     }
 
-    /*public void checkHeight()
-    {
-        //dataAdapter.getUser(x -> getHeight(x));
-        user_data.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                user = documentSnapshot.toObject(User.class);
-                if (user.getHeight() == 0)
-                {
-                    String name = user.getName();
-                    String email = user.getEmail();
-                    String userID = user.getUid();
-                    launchGetHeightActivity(name, email, userID);
-                }
-            }
-        });
-    }*/
 
     public void checkHeight(User user)
     {
@@ -531,6 +495,9 @@ public class StepCountActivity extends AppCompatActivity {
         lastEncouragingMessageSteps = 0;
     }
 
+    // ==============
+    // update data from google fit to firebase
+    // ==============
     public void updateDataToFirebase()
     {
         int[] stepList = new int[28];

@@ -56,40 +56,11 @@ public class Settings {
     public Settings (Context context, TimeStamper timeStamper) {
         sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE );
         this.timeStamper = timeStamper;
-        /*user_data = FirebaseFirestore.getInstance()
-                .collection(COLLECTION_KEY)
-                .document(DOCUMENT_KEY);*/
     }
-
-    /*public Settings(Context context, String dayID, String DOCUMENT_KEY)
-    {
-        sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE );
-        this.dayID = dayID;
-        this.DOCUMENT_KEY = DOCUMENT_KEY;
-        userHeight = 0;
-    }
-
-    public Settings(Context context, String DOCUMENT_KEY)
-    {
-        sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE );
-        this.DOCUMENT_KEY = DOCUMENT_KEY;
-        user_data = FirebaseFirestore.getInstance()
-                .collection(COLLECTION_KEY)
-                .document(GoogleSignIn.getLastSignedInAccount(context).getEmail());
-    }*/
 
     public void setDOCUMENT_KEY(String DOCUMENT_KEY)
     {
         this.DOCUMENT_KEY = DOCUMENT_KEY;
-    }
-
-    public void setDayID(String dayID)
-    {
-        this.dayID = dayID;
-    }
-    public void setTimeStamper(TimeStamper timeStamper)
-    {
-        this.timeStamper = timeStamper;
     }
 
     public void saveHeight( int feet, int inches ) {
@@ -135,7 +106,9 @@ public class Settings {
 
     public void saveTodayGoal(int new_goal)
     {
-        DocumentReference user_record = user_data
+        DocumentReference user_record = FirebaseFirestore.getInstance()
+                .collection(COLLECTION_KEY)
+                .document(DOCUMENT_KEY)
                 .collection(RECORD_KEY)
                 .document(getTodayID());
 
@@ -171,8 +144,6 @@ public class Settings {
                 break;
         }
         editor.apply();
-
-        //setupTmrGoal(new_goal);
     }
 
     public int getHeight(){
@@ -242,78 +213,11 @@ public class Settings {
         this.goal = goal;
     }
 
-    public int getCurrentStep()
-    {
-        DocumentReference user_record = FirebaseFirestore.getInstance()
-                .collection(COLLECTION_KEY)
-                .document(DOCUMENT_KEY)
-                .collection(RECORD_KEY)
-                .document(getTodayID());
-
-        user_record.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                dayInfo = documentSnapshot.toObject(Day.class);
-                setCurrentStep((int)(dayInfo.getTotalSteps() + dayInfo.getWalkSteps()));
-            }
-        });
-        return currentStep;
-    }
     public void setCurrentStep(int step)
     {
         this.currentStep = step ;
     }
 
-    public String getTmrID()
-    {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DATE, 1);
-        Date date = cal.getTime();
-        String year = String.valueOf(cal.get(Calendar.YEAR));
-        String month = String.valueOf(cal.get(Calendar.MONTH));
-        if(month.length() == 1)
-        {
-            month = "0" + month;
-        }
-        String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
-        if(day.length() == 1)
-        {
-            day = "0" + day;
-        }
-        String dayID = year + month + day;
-        return dayID;
-    }
-
-    public Date getTmrDate()
-    {
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DATE, 1);
-        Date date = cal.getTime();
-        return date;
-    }
-
-    /*public void setupTmrGoal(int new_goal)
-    {
-        DocumentReference user_record = FirebaseFirestore.getInstance()
-                .collection(COLLECTION_KEY)
-                .document(DOCUMENT_KEY)
-                .collection(RECORD_KEY)
-                .document(getTmrID());
-
-        user_record.set(new Day(new_goal, 0 ,0, getTmrID(), getTmrDate() ))
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "update the yesterday info successfully");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error updating the yesterday info");
-                    }
-                });
-    }*/
 
     public String getTodayID()
     {

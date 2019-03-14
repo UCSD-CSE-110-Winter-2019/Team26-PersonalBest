@@ -65,6 +65,7 @@ public class SettingsActivity extends AppCompatActivity {
         settings.saveHeight(feetNp.getValue(), inchesNp.getValue());
         if(!getIntent().getExtras().getBoolean("DEBUG") )
         {
+            settings.setDOCUMENT_KEY(getIntent().getStringExtra("DOCUMENT_KEY"));
             settings.saveTodayGoal(newGoal);
             settings.saveUserHeight(feetNp.getValue(), inchesNp.getValue());
         }

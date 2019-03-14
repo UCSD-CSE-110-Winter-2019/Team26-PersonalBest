@@ -38,20 +38,10 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class BarChart {
     private CombinedChart mChart;
-    private List<Integer> stepCounts;
-    private List<ArrayList<Walk>> walkData;
     private Context context;
     private int size;
-    private String userID;
     private String[] labels;
 
-    /*DocumentReference user_data;
-    CollectionReference user_list;
-    GoogleSignInAccount currentUser;
-    String COLLECTION_KEY = "users";
-    String RECORD_KEY = "record";
-    String DOCUMENT_KEY;
-    Day day;*/
     List<Day> info;
 
     private int[] weekGoal;
