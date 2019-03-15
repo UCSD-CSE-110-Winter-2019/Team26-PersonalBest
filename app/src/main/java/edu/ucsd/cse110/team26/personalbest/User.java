@@ -5,19 +5,22 @@ class User {
     String name;
     String email;
     String uid;
-    //Friends friends;
+
+    String chatID;
+    Friends friends;
+
+    User() {
+
+    }
 
     User(int height, String name, String email, String uid) {
         this.height = height;
         this.name = name;
         this.email = email;
         this.uid = uid;
-        //friends = new Friends();
+        friends = new Friends();
     }
-    User()
-    {
 
-    }
     public int getHeight()
     {
         return height;

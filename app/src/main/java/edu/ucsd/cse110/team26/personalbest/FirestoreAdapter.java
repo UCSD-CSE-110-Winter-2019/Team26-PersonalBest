@@ -1,23 +1,20 @@
 package edu.ucsd.cse110.team26.personalbest;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
 import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,11 +27,15 @@ class FirestoreAdapter implements IDataAdapter {
     private final static String USERS = "users";
     private final static String DAYS = "record";
     private final static String FRIENDS = "friends";
+    private final static String MESSAGES = "messages";
 
     private FirebaseFirestore db;
     private FirebaseFunctions funcs;
     private String userEmail;
     private TimeStamper timeStamper;
+
+    private CollectionReference userRef;
+    private CollectionReference chatRef;
 
     FirestoreAdapter(Context context, TimeStamper timeStamper) {
         db = FirebaseFirestore.getInstance();
@@ -347,6 +348,76 @@ class FirestoreAdapter implements IDataAdapter {
     @Override
     public void deleteFriend(String friendEmail, Callback<Boolean> booleanCallback) {
         handleFriendRequest("DELETE", friendEmail, booleanCallback);
+    }
+
+    /**
+     * Sends a message from the current user in the given chat.
+     * Calls given callback with true or false depending on if the server request was successful.
+     *
+     * @param chatId the ID of the chat to send to
+     * @param message message to send
+     * @param booleanCallback callback to handle success/failure
+     */
+    @Override
+    public void sendMessage(String chatId, String message, Callback<Boolean> booleanCallback) {
+        Log.d(TAG, "Sending message: " + message);
+
+        Map<String, Object> msg = new HashMap<>();
+        msg.put("timestamp", 0);
+        msg.put("text", message);
+        msg.put("from", userEmail);
+
+        chatRef.document(chatId).collection(MESSAGES).add(msg)
+                .addOnSuccessListener(r -> {
+                    booleanCallback.call(true);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error sending message: " + e);
+                    booleanCallback.call(false);
+                });
+    }
+
+
+    /**
+     * Starts listening for new messages in the given chat, calling the given callback
+     * when new messages are sent to the chat.
+     *
+     * @param chatId the Id of the chat to watch
+     * @param messageCallback callback to handle new messages received
+     */
+    @Override
+    public void startChatListener(String chatId, Callback<Message> messageCallback) {
+        chatRef.document(chatId).collection(MESSAGES).orderBy("timestamp", Query.Direction.ASCENDING)
+                .addSnapshotListener((newChatSnapShot, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, error.getLocalizedMessage());
+                        return;
+                    }
+
+                    if (newChatSnapShot != null && !newChatSnapShot.isEmpty()) {
+                        List<DocumentChange> documentChanges = newChatSnapShot.getDocumentChanges();
+                        for(DocumentChange change : documentChanges) {
+                            QueryDocumentSnapshot document = change.getDocument();
+                            Message m = document.toObject(Message.class);
+                            m.timestamp = (long) document.get("timestamp");
+                            Log.d(TAG, "New message: " + m);
+                            if(m.timestamp != 0) {
+                                messageCallback.call(m);
+                            }
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Subscribes the user to get push notifications from the server when the given chat
+     * receives new messages.
+     *
+     * @param chatId the ID of the chat to subscribe to for push notifications
+     */
+    @Override
+    public void subscribeToChatNotifications(String chatId) {
+        FirebaseMessaging.getInstance().subscribeToTopic(chatId);
     }
 
     private void handleFriendRequest(String reqType, String friendEmail, Callback<Boolean> booleanCallback) {

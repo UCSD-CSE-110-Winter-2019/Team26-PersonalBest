@@ -4,19 +4,17 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 
 public class ConcreteTimeStamperUnitTest {
     private ConcreteTimeStamper timeStamper = new ConcreteTimeStamper();
 
-    @Test
+
+    /*@Test
     public void isTodayTest(){
         Calendar cal = Calendar.getInstance(TimeZone.getDefault());
 
@@ -36,13 +34,12 @@ public class ConcreteTimeStamperUnitTest {
         time = date.getTime();
         assertTrue(timeStamper.isToday(time));
 
-
-    }
+    }*/
 
     @Test
     public void weekStartTest(){
         Calendar cal  = Calendar.getInstance(TimeZone.getDefault());
-       // Calendar cal = Calendar.getInstance();
+        // Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, 0); // ! clear would not reset the hour of day !
         cal.clear(Calendar.MINUTE);
         cal.clear(Calendar.SECOND);
@@ -74,6 +71,7 @@ public class ConcreteTimeStamperUnitTest {
 
     }
 
+
     /*@Test
     public void endOfDayTest(){
         assertEquals(23*60*60*1000 + 59*60*1000+ 59*1000 + 999, timeStamper.endOfDay(0));
@@ -84,6 +82,5 @@ public class ConcreteTimeStamperUnitTest {
         assertEquals(0, timeStamper.startOfDay(0));
     }*/
 
-
-
 }
+
