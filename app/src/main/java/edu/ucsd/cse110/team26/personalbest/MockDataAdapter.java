@@ -1,13 +1,23 @@
 package edu.ucsd.cse110.team26.personalbest;
 
+import android.util.Log;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 class MockDataAdapter implements IDataAdapter {
 
     static List<User> friendsList;
     static List<User> receivedFriendRequests;
     static List<User> sentFriendRequests;
+
+    String userEmail;
+
+    static Map<String, ArrayList<Message>> dataBase = new HashMap<String, ArrayList<Message>>();
+    static Map<String, Callback<Message>> dataBase2 = new HashMap<String, Callback<Message>>();
+
 
     MockDataAdapter() {
         if( friendsList == null )
@@ -207,10 +217,33 @@ class MockDataAdapter implements IDataAdapter {
     @Override
     public void sendMessage(String chatId, String text, Callback<Boolean> booleanCallback) {
 
+        Message msg = new Message("Bob@gmail.com",text);
+        if(dataBase.get(chatId) == null){
+            dataBase.put(chatId, new ArrayList<>());
+        }
+        dataBase.get(chatId).add(msg);
+
+        if(dataBase2.get(chatId)!=null){
+            dataBase2.get(chatId).call(msg);
+
+        }
+        booleanCallback.call(true);
+
+
     }
 
     @Override
     public void startChatListener(String chatId, Callback<Message> messageCallback) {
+
+
+        if(dataBase.get(chatId).size()!=0){
+            ArrayList<Message> messages = dataBase.get(chatId);
+            for(Message m : messages) {
+                messageCallback.call(m);
+
+            }
+            dataBase2.put(chatId,messageCallback);
+        }
 
     }
 
