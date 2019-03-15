@@ -16,6 +16,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.android.util.concurrent.RoboExecutorService;
 import org.robolectric.shadows.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 
@@ -36,7 +37,7 @@ public class sendMessagesUnitTest {
     }
 
     @Test
-    public void sendMessage(){
+    public void sendOneMessage(){
 
         User testUser = new User(0, "name", "bob@gmail.com", "1");
 
@@ -50,9 +51,40 @@ public class sendMessagesUnitTest {
 
         System.out.println(friendProfileActivity.friend);
 
-        friendProfileActivity.findViewById(R.id.btnSendMsg).performClick();
-
+        //friendProfileActivity.findViewById(R.id.btnSendMsg).performClick();
+        friendProfileActivity.dataAdapter.sendMessage(friendProfileActivity.friend.chatID ,message,(success)->{
+            assert(success);
+        });
         //friendProfileActivity.onOptionsItemSelected(R.id.action_chat_history);
+
+    }
+
+    @Test
+    public void sendMultipleMessages(){
+        User testUser = new User(0, "name", "bob@gmail.com", "1");
+
+        friendProfileActivity.friend=testUser;
+        friendProfileActivity.friend.chatID = "sally@gmail.com";
+
+        System.out.println(friendProfileActivity.friend);
+
+        //friendProfileActivity.findViewById(R.id.btnSendMsg).performClick();
+        friendProfileActivity.dataAdapter.sendMessage(friendProfileActivity.friend.chatID ,"Hi",(success)->{
+            assert(success);
+        });
+
+        friendProfileActivity.dataAdapter.sendMessage(friendProfileActivity.friend.chatID ,"How are you?",(success)-> {
+            assert (success);
+        });
+
+        friendProfileActivity.dataAdapter.sendMessage(friendProfileActivity.friend.chatID ,"How's CSE 110?",(success)-> {
+            assert (success);
+        });
+
+        friendProfileActivity.dataAdapter.sendMessage(friendProfileActivity.friend.chatID ,"I heard it was really hard :(",(success)-> {
+            assert (success);
+        });
+
 
     }
 
