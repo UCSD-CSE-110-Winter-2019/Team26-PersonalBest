@@ -17,7 +17,7 @@ public class FriendProfileActivity extends AppCompatActivity {
     private TextView friendName;
     private TextView friendEmail;
     private boolean DEBUG;
-    private IDataAdapter dataAdapter;
+    public IDataAdapter dataAdapter;
     private String email;
 
     public User friend;
