@@ -51,7 +51,14 @@ public class StepCountActivity extends AppCompatActivity {
     private List<Integer> stepCounts = new ArrayList<>();
     private List<ArrayList<Walk>> walkData = new ArrayList<>();
     private List<ArrayList<Walk>> walkData7days = new ArrayList<>();
+    private List<Integer> walkDataList = new ArrayList<>();
+    private List<Integer> walkData7daysList = new ArrayList<>();
+    private List<Long> timestamp7day = new ArrayList<>();
+    private List<Long> timestamp28day = new ArrayList<>();
     List<Integer> subStepCounts = new ArrayList<>();
+    List<Day> twentyEightDaysData = new ArrayList<>();
+    List<Day> sevenDaysData = new ArrayList<>();
+
     List<Walk> walksToday;
 
     private long startTimeStamp = -1;
@@ -95,6 +102,7 @@ public class StepCountActivity extends AppCompatActivity {
                     fitnessService.getStepsCount(timeStamper.lastSevenDays(), timeStamper.today(), subStepCounts);
                     walkData.clear();
                     long ts = timeStamper.startOfDay(timeStamper.lastTwentyEightDays());
+                    timestamp28day.add(ts);
                     for(int i = 0; i < 28; i++) {
                         ArrayList<Walk> list = new ArrayList<>();
                         walkData.add(list);
@@ -102,8 +110,10 @@ public class StepCountActivity extends AppCompatActivity {
                         if(timeStamper.isToday(ts))
                             walksToday = list;
                         ts = timeStamper.nextDay(ts);
+                        timestamp28day.add(ts);
                     }
                     ts = timeStamper.startOfDay(timeStamper.lastSevenDays());
+                    timestamp7day.add(ts);
                     for(int i = 0; i < 7; i++) {
                         ArrayList<Walk> list2 = new ArrayList<>();
                         walkData7days.add(list2);
@@ -111,6 +121,7 @@ public class StepCountActivity extends AppCompatActivity {
                         if(timeStamper.isToday(ts))
                             walksToday = list2;
                         ts = timeStamper.nextDay(ts);
+                        timestamp7day.add(ts);
                     }
 
                     Thread.sleep(10000);
@@ -155,19 +166,43 @@ public class StepCountActivity extends AppCompatActivity {
         timeStamper = new ConcreteTimeStamper();
 
         fitnessService.setup();
-        // fake goal
-        List<Integer> goalData = new ArrayList<>();
-        for (int j=0; j<28; j++) goalData.add(5000);
-
         boolean monthlySummary = true;
-        createBarChart = new BarChart(getApplicationContext(), twentyEightDayChart, stepCounts, walkData, goalData,monthlySummary);
-        createBarChart.draw();
+        createBarChart2 = new BarChart(getApplicationContext(), sevenDayChart, !monthlySummary);
+        createBarChart = new BarChart(getApplicationContext(), twentyEightDayChart ,monthlySummary);
+
+        int i=0;
+        for (ArrayList<Walk> walkArray: walkData) {
+            int walk=0;
+            for (Walk w: walkArray) {
+                walk += w.getSteps();
+            }
+            walkDataList.set(i, walk);
+            i++;
+        }
+        i=0;
+        for (ArrayList<Walk> walkArray: walkData7days) {
+            int walk=0;
+            for (Walk w: walkArray) {
+                walk += w.getSteps();
+            }
+            walkData7daysList.set(i, walk);
+            i++;
+        }
+
+        // 28-day bar chart
+        for (int j=0; j<28; j++) {
+            Day d = new Day(5000, stepCounts.get(j), walkDataList.get(j), timestamp28day.get(j));
+            twentyEightDaysData.add(d);
+        }
+        createBarChart.draw(twentyEightDaysData);
         twentyEightDayChart.setVisibility(View.GONE);
 
-        List<Integer> subGoalData = new ArrayList<>();
-        for (int j=0; j<7; j++) subGoalData.add(5000);
-        createBarChart2 = new BarChart(getApplicationContext(), sevenDayChart, subStepCounts, walkData7days, subGoalData,!monthlySummary);
-        createBarChart2.draw();
+        // 7-day bar chart
+        for (int j=0; j<7; j++) {
+            Day d = new Day(5000, subStepCounts.get(j), walkData7daysList.get(j), timestamp7day.get(j));
+            sevenDaysData.add(d);
+        }
+        createBarChart2.draw(sevenDaysData);
         sevenDayChart.setVisibility(View.VISIBLE);
 
         Switch sw = findViewById(R.id.switch1);

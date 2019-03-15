@@ -38,7 +38,8 @@ public class FriendProfileActivity extends AppCompatActivity {
         friendEmail = findViewById(R.id.friendEmail);
         CombinedChart chart = findViewById(R.id.chart);
         List<Day> friendsData = getFriendsData();
-        barChart = new BarChart(getApplicationContext(), friendsData ,true);
+        //barChart = new BarChart(getApplicationContext(), chart ,true);
+        //barChart.draw(friendsData);
 
         email = getIntent().getExtras().getString("Friend Email");
 
