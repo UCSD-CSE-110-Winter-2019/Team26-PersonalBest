@@ -85,7 +85,7 @@ public class BarChart {
         mChart.getXAxis().setAxisMaximum(data.getXMax() + 0.25f);
         mChart.getXAxis().setAxisMinimum(data.getXMin() - 0.25f);
         mChart.setData(dataCombined);
-
+        mChart.invalidate();
     }
 
     public void setupLabel()
