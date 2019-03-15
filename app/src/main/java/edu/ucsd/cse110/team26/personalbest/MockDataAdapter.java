@@ -15,8 +15,8 @@ class MockDataAdapter implements IDataAdapter {
 
     String userEmail;
 
-    Map<String, ArrayList<Message>> dataBase;
-    Map<String, Callback<Message>> dataBase2;
+    Map<String, ArrayList<Message>> dataBase = new HashMap<String, ArrayList<Message>>();
+    Map<String, Callback<Message>> dataBase2 = new HashMap<String, Callback<Message>>();
 
 
     MockDataAdapter() {
@@ -201,9 +201,13 @@ class MockDataAdapter implements IDataAdapter {
     @Override
     public void sendMessage(String chatId, String text, Callback<Boolean> booleanCallback) {
 
-        Message msg = new Message(userEmail,text);
-
+        Message msg = new Message("Bob@gmail.com",text);
+        System.out.println(msg);
+        if(dataBase.get(chatId) == null){
+            dataBase.put(chatId, new ArrayList<>());
+        }
         dataBase.get(chatId).add(msg);
+
         if(dataBase2.get(chatId)!=null){
             dataBase2.get(chatId).call(msg);
 
