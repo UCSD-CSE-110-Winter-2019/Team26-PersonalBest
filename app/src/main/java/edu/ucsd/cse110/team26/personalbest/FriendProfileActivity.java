@@ -46,6 +46,7 @@ public class FriendProfileActivity extends AppCompatActivity {
 
         EditText message = findViewById(R.id.sendMsg);
         Button btnSendMsg = findViewById(R.id.btnSendMsg);
+        //System.out.println(friend);
         btnSendMsg.setOnClickListener(view -> {
             dataAdapter.sendMessage(friend.chatID, message.getText().toString(), (success) -> {
 
