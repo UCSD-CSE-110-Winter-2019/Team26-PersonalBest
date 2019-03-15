@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
 
 import com.github.mikephil.charting.charts.CombinedChart;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -15,31 +16,38 @@ import com.github.mikephil.charting.data.CombinedData;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
 import static android.content.Context.MODE_PRIVATE;
 
 public class BarChart {
     private CombinedChart mChart;
+    private List<Integer> stepCounts;
+    private List<ArrayList<Walk>> walkData;
     private Context context;
     private int size;
     private String[] labels;
-    private List<Day> days;
+    private List<Integer> goalData;
 
-    public BarChart(Context context, CombinedChart mChart, boolean monthlySummary)
+    public BarChart(Context context, CombinedChart mChart, List<Integer> stepCounts, List<ArrayList<Walk>> walkData
+            ,List<Integer> goalData, boolean monthlySummary)
     {
         this.context = context;
         this.mChart = mChart;
+        this.stepCounts = stepCounts;
+        this.walkData = walkData;
+        this.goalData = goalData;
         if(monthlySummary) this.size = 28;
         else this.size = 7;
     }
 
 
-    public void draw(List<Day> days)
+    public void draw()
     {
-        this.days = days;
         mChart.setDrawGridBackground(false);
         mChart.getDescription().setText("");
         mChart.setHighlightFullBarEnabled(false);
@@ -61,15 +69,19 @@ public class BarChart {
         getBarEntries(entries);
 
         BarDataSet dataSet = new BarDataSet(entries, "Step Count");
-        dataSet.setStackLabels(new String[] {"During Walks", "Other Activities"});
+        dataSet.setStackLabels(new String[] {"Intentional Walks", "Unintentional Walks"});
         setupLabel();
         mChart.getXAxis().setLabelCount(dataSet.getEntryCount());
         XAxis xAxis = mChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTH_SIDED);
         xAxis.setAxisMinimum(0f);
         xAxis.setGranularity(1f);
-        xAxis.setValueFormatter((value, axis) -> labels[(int) value % labels.length]);
-
+        xAxis.setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                return labels[(int) value % labels.length];
+            }
+        });
 
         dataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
 
@@ -79,8 +91,8 @@ public class BarChart {
         BarData data = new BarData(dataSet);
 
 
-        dataSet.setColors(ContextCompat.getColor(mChart.getContext(), R.color.colorAccent),
-                ContextCompat.getColor(mChart.getContext(), R.color.colorPrimary));
+        dataSet.setColors(new int[] {ContextCompat.getColor(mChart.getContext(), R.color.colorAccent),
+                ContextCompat.getColor(mChart.getContext(), R.color.colorPrimary),});
 
         CombinedData dataCombined = new CombinedData();
         dataCombined.setData( generateLineData());
@@ -99,36 +111,53 @@ public class BarChart {
         switch (today)
         {
             case Calendar.MONDAY:
-                labels = new String[] {"T", "W", "Th", "F", "Sa","Su", "M"};
+                labels = new String[] {"Tue", "Wed", "Thur", "Fri", "Sat","Sun", "Mon"};
                 break;
             case Calendar.TUESDAY:
-                labels = new String[] {"W", "T", "F", "Sa","Su", "M","T"};
+                labels = new String[] {"Wed", "Thur", "Fri", "Sat","Sun", "Mon","Tue"};
                 break;
             case Calendar.WEDNESDAY:
-                labels = new String[] {"Th", "F", "Sa","Su", "M","T", "W"};
+                labels = new String[] {"Thur", "Fri", "Sat","Sun", "Mon","Tue", "Wed"};
                 break;
             case Calendar.THURSDAY:
-                labels = new String[] {"F", "Sa","Su", "M","T", "W", "Th"};
+                labels = new String[] {"Fri", "Sat","Sun", "Mon","Tue", "Wed", "Thur"};
                 break;
             case Calendar.FRIDAY:
-                labels = new String[] {"Sa","Su", "M", "T", "W", "Th", "F"};
+                labels = new String[] {"Sat","Sun", "Mon", "Tue", "Wed", "Thur", "Fri"};
                 break;
             case Calendar.SATURDAY:
-                labels = new String[] {"Su", "M","T", "W", "Th", "F", "Sa"};
+                labels = new String[] {"Sun", "Mon","Tue", "Wed", "Thur", "Fri", "Sat"};
                 break;
             case Calendar.SUNDAY:
-                labels = new String[] {"M", "T", "W", "Th", "F", "Sa","Su"};
+                labels = new String[] {"Mon", "Tue", "Wed", "Thur", "Fri", "Sat","Sun"};
                 break;
         }
     }
-
 
     private void getLineEntriesData(ArrayList<Entry> entries) {
         for (int i=0; i< this.size; i++) {
-            entries.add(new Entry(i, days.get(i).goal));
+            entries.add(new Entry(i, goalData.get(i)));
         }
     }
 
+    private void updateGoal()
+    {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        if(sharedPreferences.getBoolean("new_week",false) )
+        {
+            int previous_goal = sharedPreferences.getInt("goal_Sat", 5000);
+            editor.putInt("goal_Sun", previous_goal);
+            editor.putInt("goal_Mon", previous_goal);
+            editor.putInt("goal_Tue", previous_goal);
+            editor.putInt("goal_Wed", previous_goal);
+            editor.putInt("goal_Thu", previous_goal);
+            editor.putInt("goal_Fri", previous_goal);
+            editor.putInt("goal_Sat", previous_goal);
+            editor.putBoolean("new_week",false);
+        }
+        editor.apply();
+    }
 
     private LineData generateLineData() {
 
@@ -152,31 +181,35 @@ public class BarChart {
         return d;
     }
 
-    private void updateGoal()
-    {
+    private void getBarEntries(ArrayList<BarEntry> entries){
         SharedPreferences sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        if(sharedPreferences.getBoolean("new_week",false) )
+
+        long[] totalStep = new long[this.size];
+        int count = 0;
+        for(Integer i: stepCounts)
         {
-            int previous_goal = sharedPreferences.getInt("goal_Sat", 5000);
-            editor.putInt("goal_Sun", previous_goal);
-            editor.putInt("goal_Mon", previous_goal);
-            editor.putInt("goal_Tue", previous_goal);
-            editor.putInt("goal_Wed", previous_goal);
-            editor.putInt("goal_Thu", previous_goal);
-            editor.putInt("goal_Fri", previous_goal);
-            editor.putInt("goal_Sat", previous_goal);
-            editor.putBoolean("new_week",false);
+            totalStep[count] = totalStep[count] + i;
+
+            count++;
+        }
+        long[] totalIntent = new long[this.size];
+        count = 0;
+        for(ArrayList<Walk> i : walkData)
+        {
+            totalIntent[count] = 0;
+            for(Walk j: i)
+            {
+                totalIntent[count] = totalIntent[count] + j.getSteps();
+            }
+
+            count++;
+        }
+
+        for (int k=0; k<this.size; k++) {
+            entries.add(new BarEntry(k, new float[] {totalIntent[k], totalStep[k]-totalIntent[k]}));
         }
         editor.apply();
-    }
-
-    private void getBarEntries(ArrayList<BarEntry> entries){
-        long[] totalStep = new long[this.size];
-        for (int k=0; k<this.size; k++) {
-            entries.add(new BarEntry(k, new float[] {days.get(k).walkSteps, days.get(k).totalSteps-days.get(k).walkSteps}));
-        }
-
     }
 
     public String getLastDayOfLabel()
@@ -188,3 +221,4 @@ public class BarChart {
         return labels[0];
     }
 }
+
