@@ -51,11 +51,9 @@ public class sendMessagesUnitTest {
 
         System.out.println(friendProfileActivity.friend);
 
-        //friendProfileActivity.findViewById(R.id.btnSendMsg).performClick();
         friendProfileActivity.dataAdapter.sendMessage(friendProfileActivity.friend.chatID ,message,(success)->{
             assert(success);
         });
-        //friendProfileActivity.onOptionsItemSelected(R.id.action_chat_history);
 
     }
 
@@ -68,7 +66,6 @@ public class sendMessagesUnitTest {
 
         System.out.println(friendProfileActivity.friend);
 
-        //friendProfileActivity.findViewById(R.id.btnSendMsg).performClick();
         friendProfileActivity.dataAdapter.sendMessage(friendProfileActivity.friend.chatID ,"Hi",(success)->{
             assert(success);
         });
