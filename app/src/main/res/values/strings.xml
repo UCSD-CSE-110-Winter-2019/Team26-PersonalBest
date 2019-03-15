@@ -33,7 +33,8 @@
     <string name="friends_list">Friends List</string>
     <string name="send_a_message">Type a message</string>
     <string name="send">SEND</string>
-    <string name="title_activity_chat_history">ChatHistory</string>
+    <string name="title_activity_chat_history">Chat History</string>
     <string name="hint_chat_screen">message will appear here</string>
     <string name="chat_history">Chat History</string>
+    <string name="title_activity_friend_profile">Profile</string>
 </resources>

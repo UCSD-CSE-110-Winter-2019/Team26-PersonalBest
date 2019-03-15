@@ -138,7 +138,7 @@ exports.handleFriendRequest = functions.https.onCall((data, context) => {
 
             var deleteChat = userChecks.then(requesterRef.get())
             .then(snapshot => {
-                console.log(snapshot.data());
+                console.log(JSON.stringify(snapshot.data()));
                 var chatid = snapshot.get("chat");
                 console.log("deleting chat at " + chatid);
                 return admin.firestore().collection("chats").doc(chatid).delete();
@@ -168,30 +168,38 @@ exports.handleFriendRequest = functions.https.onCall((data, context) => {
     }
 });
 
-exports.addMessageTimestamps = functions.firestore
-    .document('chats/{chatId}/messages/{messageId}')
-    .onCreate((snap, context) =>
-        snap.ref.update({
-            timestamp: Date.now()
-        })
-    );
-
 exports.sendChatNotifications = functions.firestore
-   .document('chats/{chatId}/messages/{messageId}')
-   .onCreate((snap, context) => {
-    // Get an object with the current document value.
-    // If the document does not exist, it has been deleted.
+    .document('chats/{chatId}/messages/{messageId}')
+    .onCreate((snap, context) => {
+
+    // check if valid message
     const document = snap.exists ? snap.data() : null;
 
     if (document) {
+
+        // update timestamp
+        snap.ref.update({ timestamp: Date.now() })
+
+        // generate notification messsage
         var message = {
             notification: {
                 title: document.from + ' sent you a message',
                 body: document.text
             },
+            android: {
+                notification: {
+                    click_action: "OPEN_CHAT_VIEW"
+                }
+            },
+            data: {
+                title: document.from + ' sent you a message',
+                body: document.text,
+                chat: context.params.chatId
+            },
             topic: context.params.chatId
         };
 
+        // send FCM message
         return admin.messaging().send(message)
         .then((response) => {
             // Response is a message ID string.

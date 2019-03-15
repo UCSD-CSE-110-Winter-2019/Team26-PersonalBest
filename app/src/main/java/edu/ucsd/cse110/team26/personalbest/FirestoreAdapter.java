@@ -139,7 +139,7 @@ class FirestoreAdapter implements IDataAdapter {
                                                 friendData.get("name").toString(),
                                                 friendData.get("email").toString(),
                                                 "");
-                                        u.chatID = doc.get("chat").toString();
+                                        u.chatID = (doc.get("chat") != null)? doc.get("chat").toString() : "";
                                         friendList.add(u);
                                         userCallback.call(friendList);
                                     } else {
@@ -432,7 +432,9 @@ class FirestoreAdapter implements IDataAdapter {
      */
     @Override
     public void startChatListener(String chatId, Callback<Message> messageCallback) {
-        chatRef.document(chatId).collection(MESSAGES).orderBy("timestamp", Query.Direction.ASCENDING)
+        chatRef.document(chatId).collection(MESSAGES)
+                .orderBy("timestamp", Query.Direction.ASCENDING)
+                .limit(30)
                 .addSnapshotListener((newChatSnapShot, error) -> {
                     if (error != null) {
                         Log.e(TAG, error.getLocalizedMessage());
