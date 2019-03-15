@@ -70,6 +70,7 @@ public class StepCountActivity extends AppCompatActivity {
     private BarChart createBarChart;
     private GoalNotifications notifier;
 
+    private AlertDialog goalDialog;
 
     /* ================
     Description: keep the UI update with the current number of taken steps
@@ -281,7 +282,7 @@ public class StepCountActivity extends AppCompatActivity {
             //notification for when they cmolpete the goal;
             notifier.showNotification();
 
-            createAlertDialog(suggestedGoalNum);
+            goalDialog = createAlertDialog(suggestedGoalNum);
 
             Toast completeGoalToast = Toast.makeText(getApplicationContext(),
                     String.format(Locale.getDefault(),"Congratulations, you've completed your goal of %d steps today!", today.goal),
@@ -351,7 +352,7 @@ public class StepCountActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void createAlertDialog(final int suggestedGoal) {
+    public AlertDialog createAlertDialog(final int suggestedGoal) {
         AlertDialog alertDialog = new AlertDialog.Builder(StepCountActivity.this).create();
         alertDialog.setTitle("Suggesting Goals");
 
@@ -371,6 +372,7 @@ public class StepCountActivity extends AppCompatActivity {
             dialog.dismiss();
         });
         alertDialog.show();
+        return alertDialog;
     }
 
     public void launchGetHeightActivity() {
@@ -415,6 +417,22 @@ public class StepCountActivity extends AppCompatActivity {
         settings.saveGoal((int) today.goal);
         lastEncouragingMessageSteps = 0;
 
+    }
+
+    @Override
+    public void onPause(){
+        if(goalDialog != null){
+            goalDialog.dismiss();
+        }
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy(){
+        if(goalDialog != null){
+            goalDialog.dismiss();
+        }
+        super.onDestroy();
     }
 
 
