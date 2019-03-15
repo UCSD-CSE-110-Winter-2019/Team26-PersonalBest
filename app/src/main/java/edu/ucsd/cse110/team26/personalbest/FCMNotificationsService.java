@@ -28,38 +28,52 @@ public class FCMNotificationsService extends FirebaseMessagingService {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
 
             String chatId = remoteMessage.getData().get("chat");
-            Log.d(TAG, chatId);
+            String from = remoteMessage.getData().get("sender");
+            Log.d(TAG, from + " " + chatId);
+            if(chatId == null || from == null) return;
 
-            Intent intent = new Intent(this, ChatHistoryActivity.class);
-            intent.putExtra("chat", chatId);
-            intent.putExtra("DEBUG", false);
-
-            TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
-            taskStackBuilder.addParentStack(ChatHistoryActivity.class);
-            taskStackBuilder.addNextIntent(intent);
-            PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            Notification notification = new NotificationCompat.Builder(this, "CHAT")
-                    .setContentTitle(remoteMessage.getData().get("title"))
-                    .setContentText(remoteMessage.getData().get("body"))
-                    .setContentIntent(pendingIntent)
-                    .setGroup("CHAT")
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setAutoCancel(true)
-                    .build();
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                NotificationChannel channel = new NotificationChannel("CHAT",
-                        "Chat message notifications",
-                        NotificationManager.IMPORTANCE_DEFAULT);
-                notificationManager.createNotificationChannel(channel);
+            String userEmail = getSharedPreferences("user", MODE_PRIVATE).getString("email", "");
+            if(!userEmail.equals(from)) {
+                showChatNotification(remoteMessage.getData().get("title"),
+                        remoteMessage.getData().get("body"),
+                        chatId);
+            } else {
+                Log.d(TAG, "Notification was for message from self");
             }
 
-            NotificationManagerCompat manager = NotificationManagerCompat.from(this);
-            manager.notify(123, notification);
         }
 
+    }
+
+    private void showChatNotification(String title, String body, String chatId) {
+        Intent intent = new Intent(this, ChatHistoryActivity.class);
+        intent.putExtra("chat", chatId);
+        intent.putExtra("DEBUG", false);
+
+        TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
+        taskStackBuilder.addParentStack(ChatHistoryActivity.class);
+        taskStackBuilder.addNextIntent(intent);
+        PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification notification = new NotificationCompat.Builder(this, "CHAT")
+                .setContentTitle(title)
+                .setContentText(body)
+                .setContentIntent(pendingIntent)
+                .setGroup("CHAT")
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setAutoCancel(true)
+                .build();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationChannel channel = new NotificationChannel("CHAT",
+                    "Chat message notifications",
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        NotificationManagerCompat manager = NotificationManagerCompat.from(this);
+        manager.notify(123, notification);
     }
 
 }

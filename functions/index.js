@@ -194,7 +194,8 @@ exports.sendChatNotifications = functions.firestore
             data: {
                 title: document.from + ' sent you a message',
                 body: document.text,
-                chat: context.params.chatId
+                chat: context.params.chatId,
+                sender: document.from
             },
             topic: context.params.chatId
         };

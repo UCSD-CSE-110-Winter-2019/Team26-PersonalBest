@@ -1,6 +1,7 @@
 package edu.ucsd.cse110.team26.personalbest;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -20,6 +21,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static android.content.Context.MODE_PRIVATE;
 
 class FirestoreAdapter implements IDataAdapter {
     private final static String TAG = "FirestoreAdapter";
@@ -46,6 +49,9 @@ class FirestoreAdapter implements IDataAdapter {
         userEmail = lastSignedInAccount.getEmail();
         this.timeStamper = timeStamper;
         Log.i(TAG, "name: " + lastSignedInAccount.getDisplayName() + " email: " + userEmail);
+        context.getSharedPreferences("user", MODE_PRIVATE ).edit()
+                .putString("email", userEmail)
+                .apply();
     }
 
     /**
