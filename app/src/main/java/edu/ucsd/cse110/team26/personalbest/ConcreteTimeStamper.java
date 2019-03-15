@@ -141,7 +141,7 @@ public class ConcreteTimeStamper implements TimeStamper {
         if(duration < 60*60*1000) {
             return "" + duration/60000 + "m ago";
         } else if(duration < 24*60*60*1000){
-            return "" + duration/3600000 + ":" + (duration % 3600000)/60000 + " ago";
+            return "" + duration/3600000 + "h " + (duration % 3600000)/60000 + "m ago";
         } else {
             return "" + duration/(24*60*60*1000) + " days ago";
         }
