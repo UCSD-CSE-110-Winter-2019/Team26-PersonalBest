@@ -2,11 +2,19 @@ package edu.ucsd.cse110.team26.personalbest;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+
 import android.support.annotation.NonNull;
+
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
+
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -86,6 +94,9 @@ public class StepCountActivity extends AppCompatActivity {
     String COLLECTION_KEY = "users";
     String RECORD_KEY = "record";
     String DOCUMENT_KEY;
+
+    private GoalNotifications notifier;
+
 
 
     /* ================
@@ -172,7 +183,8 @@ public class StepCountActivity extends AppCompatActivity {
             //checkHeight();
         }
 
-
+        currentDate = timeStamper.now();
+        notifier=new GoalNotifications(this);
 
         fitnessService.setup();
         setupBarChart();
@@ -279,6 +291,7 @@ public class StepCountActivity extends AppCompatActivity {
             updateDataToFirebase();
         }
 
+
         dataAdapter.getDays(7, weekInfo -> createBarChart.draw(weekInfo));
         dataAdapter.getDays(28, weekInfo -> createBarChart2.draw(weekInfo));
 
@@ -286,6 +299,13 @@ public class StepCountActivity extends AppCompatActivity {
         settings.setDOCUMENT_KEY(DOCUMENT_KEY);
         today.goal = settings.getGoal();
         user.height = settings.getUserHeight();
+
+        //create notification channel
+        if(notifier == null){
+            notifier = new GoalNotifications(this);
+        }
+        notifier.createNotificationChannel();
+
         setStepCount(today.totalSteps);
 
         // Check if the user started a walk and has not stopped it
@@ -366,6 +386,10 @@ public class StepCountActivity extends AppCompatActivity {
             else{
                 suggestedGoalNum = 15000;
             }
+
+            //notification for when they cmolpete the goal;
+            notifier.showNotification();
+
             createAlertDialog(suggestedGoalNum);
 
             Toast completeGoalToast = Toast.makeText(getApplicationContext(),
@@ -445,14 +469,25 @@ public class StepCountActivity extends AppCompatActivity {
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES", (dialog, which) -> {
                     Settings settings = new Settings(getApplicationContext(), timeStamper);
                     settings.saveGoal(suggestedGoal);
+
                     if(!DEBUG)
                     {
                         settings.setDOCUMENT_KEY(DOCUMENT_KEY);
                         settings.saveTodayGoal(suggestedGoal);
                     }
+
+//                    if(notificationManager!=null){
+//                        notificationManager.cancelAll();
+//                    }
+
                     dialog.dismiss();
                 });
-        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) -> dialog.dismiss());
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) ->{
+//            if(notificationManager!=null){
+//                notificationManager.cancelAll();
+//            }
+            dialog.dismiss();
+        });
         alertDialog.show();
     }
 
@@ -584,6 +619,7 @@ public class StepCountActivity extends AppCompatActivity {
         }
         return weekDate;
     }
+
 
 }
 

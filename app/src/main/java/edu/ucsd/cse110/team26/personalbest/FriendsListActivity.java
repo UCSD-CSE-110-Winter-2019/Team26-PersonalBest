@@ -16,8 +16,7 @@ import java.util.List;
 
 public class FriendsListActivity extends AppCompatActivity {
 
-    private boolean DEBUG;
-    private String newFriendEmail = null;
+    private boolean DEBUG = false;
     IDataAdapter dataAdapter;
     ListView listView;
     public static Friends friendsList;
@@ -31,13 +30,15 @@ public class FriendsListActivity extends AppCompatActivity {
         friendsList = new Friends();
 
         Log.i(getClass().getName(), "Retrieving friends and requests from database to display");
-        friendsList.receivedRequests = new ArrayList<User>();
-        friendsList.sentRequests = new ArrayList<User>();
-        friendsList.friends = new ArrayList<User>();
+        friendsList.receivedRequests = new ArrayList<>();
+        friendsList.sentRequests = new ArrayList<>();
+        friendsList.friends = new ArrayList<>();
 
-        DEBUG = getIntent().getExtras().getBoolean("DEBUG", false);
+        if(getIntent().getExtras() != null) {
+            DEBUG = getIntent().getExtras().getBoolean("DEBUG", false);
+        }
         dataAdapter = IDatabaseAdapterFactory.create(DEBUG, FriendsListActivity.this);
-        listView = (ListView) findViewById(R.id.list);
+        listView = findViewById(R.id.list);
         friendAdapter = new FriendListAdapter(getApplicationContext(), dataAdapter);
         listView.setAdapter(friendAdapter);
 
