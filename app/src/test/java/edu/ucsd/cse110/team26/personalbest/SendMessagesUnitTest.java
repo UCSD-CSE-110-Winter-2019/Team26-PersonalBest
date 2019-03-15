@@ -144,24 +144,4 @@ public class SendMessagesUnitTest {
         assertEquals(expectedVal, chatHistory.getText().toString());
 
     }
-
-    @Test
-    public void checkSendMessagesUI(){
-        assertEquals(View.VISIBLE, friendProfileActivity.findViewById(R.id.friendName).getVisibility());
-        assertEquals(View.VISIBLE, friendProfileActivity.findViewById(R.id.friendEmail).getVisibility());
-        assertEquals(View.VISIBLE, friendProfileActivity.findViewById(R.id.sendMsg).getVisibility());
-        assertEquals(View.VISIBLE, friendProfileActivity.findViewById(R.id.btnSendMsg).getVisibility());
-    }
-
-    @Test
-    public void checkChatHistoryUI() {
-        Intent intent2 = new Intent(RuntimeEnvironment.application, ChatHistoryActivity.class);
-        intent2.putExtra("DEBUG", true);
-        intent2.putExtra("chat", "123");
-        activity = Robolectric.buildActivity(ChatHistoryActivity.class, intent2).create().get();
-
-        assertEquals(View.VISIBLE, activity.findViewById(R.id.text_message).getVisibility());
-        assertEquals(View.VISIBLE, activity.findViewById(R.id.btn_send).getVisibility());
-        assertEquals(View.VISIBLE, activity.findViewById(R.id.chat).getVisibility());
-    }
 }
