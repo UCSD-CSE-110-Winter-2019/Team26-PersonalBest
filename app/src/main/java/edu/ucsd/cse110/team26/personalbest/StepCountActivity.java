@@ -38,10 +38,6 @@ public class StepCountActivity extends AppCompatActivity {
     private static boolean DEBUG;
     private static boolean ESPRESSO;
 
-    private String channel_name = "GoalNotifications";
-    private String channel_description = "Notification channel for goal notifications";
-
-
     static boolean toggleEncouragementMessage = true;
 
     private UpdateStep updateStep;
@@ -67,14 +63,12 @@ public class StepCountActivity extends AppCompatActivity {
     private Day today = new Day();
     private User user = new User();
 
-    private AlertDialog goalDialog;
-    private NotificationManagerCompat notificationManager;
-
     IDataAdapter dataAdapter;
     TimeStamper timeStamper;
 
     // BarChart object
     private BarChart createBarChart;
+    private GoalNotifications notifier;
 
 
     /* ================
@@ -153,6 +147,7 @@ public class StepCountActivity extends AppCompatActivity {
         createBarChart.draw();
 
         currentDate = timeStamper.now();
+        notifier=new GoalNotifications(this);
 
         btnStartWalk.setOnClickListener(view -> {
             if(startTimeStamp == -1) {
@@ -213,7 +208,10 @@ public class StepCountActivity extends AppCompatActivity {
         }
 
         //create notification channel
-        createNotificationChannel();
+        if(notifier == null){
+            notifier = new GoalNotifications(this);
+        }
+        notifier.createNotificationChannel();
 
         setStepCount(today.totalSteps);
 
@@ -280,13 +278,8 @@ public class StepCountActivity extends AppCompatActivity {
                 suggestedGoalNum = 15000;
             }
 
-            NotificationsClass notifier = new NotificationsClass();
-            NotificationCompat.Builder notify = notifier.createNotification(this);
-            notificationManager = NotificationManagerCompat.from(this);
-
-// notificationId is a unique int for each notification that you must define
-            notificationManager.notify(1, notify.build());
-
+            //notification for when they cmolpete the goal;
+            notifier.showNotification();
 
             createAlertDialog(suggestedGoalNum);
 
@@ -366,15 +359,15 @@ public class StepCountActivity extends AppCompatActivity {
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES", (dialog, which) -> {
                     Settings settings = new Settings(getApplicationContext(), timeStamper);
                     settings.saveGoal(suggestedGoal);
-                    if(notificationManager!=null){
-                        notificationManager.cancelAll();
-                    }
+//                    if(notificationManager!=null){
+//                        notificationManager.cancelAll();
+//                    }
                     dialog.dismiss();
                 });
         alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) ->{
-            if(notificationManager!=null){
-                notificationManager.cancelAll();
-            }
+//            if(notificationManager!=null){
+//                notificationManager.cancelAll();
+//            }
             dialog.dismiss();
         });
         alertDialog.show();
@@ -401,22 +394,6 @@ public class StepCountActivity extends AppCompatActivity {
         editor.apply();
     }
 
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = channel_name;
-            String description = channel_description;
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel("GoalNotifyID", name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
-    }
-
 
     /**
      * Resets previousDaySteps and saves previous day's goal as new goal
@@ -438,22 +415,6 @@ public class StepCountActivity extends AppCompatActivity {
         settings.saveGoal((int) today.goal);
         lastEncouragingMessageSteps = 0;
 
-    }
-
-    @Override
-    public void onPause(){
-        if(goalDialog != null){
-            goalDialog.dismiss();
-        }
-        super.onPause();
-    }
-
-    @Override
-    public void onDestroy(){
-        if(goalDialog != null){
-            goalDialog.dismiss();
-        }
-        super.onDestroy();
     }
 
 
