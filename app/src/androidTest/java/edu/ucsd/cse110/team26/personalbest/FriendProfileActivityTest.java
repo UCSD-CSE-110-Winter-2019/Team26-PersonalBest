@@ -39,6 +39,8 @@ public class FriendProfileActivityTest {
         onView(withId(R.id.btnSendMsg)).check(matches(isDisplayed()));
         onView(withId(R.id.btnSendMsg)).check(matches(withText("SEND")));
 
+        onView(withId(R.id.monthChart)).check(matches(isDisplayed()));
+
         onView(withId(R.id.sendMsg)).check(matches(isDisplayed()));
         onView(withId(R.id.sendMsg)).check(matches(withHint("Type a message")));
 

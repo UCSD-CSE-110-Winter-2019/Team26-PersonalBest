@@ -20,7 +20,6 @@ import android.widget.NumberPicker;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,12 +31,9 @@ import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
-import static android.support.test.espresso.action.ViewActions.longClick;
 import static android.support.test.espresso.action.ViewActions.replaceText;
 import static android.support.test.espresso.action.ViewActions.scrollTo;
-import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.RootMatchers.isDialog;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withClassName;
 import static android.support.test.espresso.matcher.ViewMatchers.withContentDescription;
@@ -47,11 +43,10 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class SystemSocialTest {
+public class MessageTest {
 
     @Rule
     public ActivityTestRule<MainActivity> mActivityTestRule = new ActivityTestRule<>(MainActivity.class);
@@ -66,7 +61,7 @@ public class SystemSocialTest {
     }
 
     @Test
-    public void systemSocialTest() {
+    public void messageTest() {
         onView(withId(R.id.buttonGoToSteps)).perform(click());
 
         onView(withId(R.id.feet)).perform(new setValueNumberPicker(5));
@@ -77,24 +72,15 @@ public class SystemSocialTest {
         onView(withId(R.id.confirm))
                 .perform(click());
 
+
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
         // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
         try {
-            Thread.sleep(1000);
+            Thread.sleep(7000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        ViewInteraction imageView2 = onView(
-                allOf(withContentDescription("More options"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(R.id.action_bar),
-                                        1),
-                                0),
-                        isDisplayed()));
-        imageView2.check(matches(isDisplayed()));
 
         openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
 
@@ -112,20 +98,10 @@ public class SystemSocialTest {
         // The recommended way to handle such scenarios is to use Espresso idling resources:
         // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
         try {
-            Thread.sleep(1000);
+            Thread.sleep(7000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        ViewInteraction imageButton2 = onView(
-                allOf(withId(R.id.fab),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(android.R.id.content),
-                                        0),
-                                1),
-                        isDisplayed()));
-        imageButton2.check(matches(isDisplayed()));
 
         ViewInteraction floatingActionButton = onView(
                 allOf(withId(R.id.fab),
@@ -148,58 +124,13 @@ public class SystemSocialTest {
         editText.perform(replaceText("test"), closeSoftKeyboard());
 
         ViewInteraction appCompatButton3 = onView(
-                allOf(withId(android.R.id.button2), withText("Cancel"),
+                allOf(withId(android.R.id.button1), withText("Confirm"),
                         childAtPosition(
                                 childAtPosition(
                                         withClassName(is("android.widget.ScrollView")),
                                         0),
-                                2)));
+                                3)));
         appCompatButton3.perform(scrollTo(), click());
-
-        ViewInteraction floatingActionButton2 = onView(
-                allOf(withId(R.id.fab),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(android.R.id.content),
-                                        0),
-                                1),
-                        isDisplayed()));
-        floatingActionButton2.perform(click());
-
-
-        onView(withHint("Friend's Email Address")).inRoot(isDialog()).perform(typeText("test"));
-        onView(withText("Confirm")).inRoot(isDialog()).perform(click());
-
-        ViewInteraction textView4 = onView(
-                allOf(withId(R.id.friendName), withText("name"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(R.id.list),
-                                        0),
-                                0),
-                        isDisplayed()));
-        textView4.check(matches(withText("name")));
-
-        ViewInteraction textView5 = onView(
-                allOf(withId(R.id.friendEmail), withText("test"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(R.id.list),
-                                        0),
-                                1),
-                        isDisplayed()));
-        textView5.check(matches(withText("test")));
-
-        ViewInteraction textView6 = onView(
-                allOf(withId(R.id.pendingLabel), withText("PENDING"),
-                        childAtPosition(
-                                allOf(withId(R.id.pendingFriend),
-                                        childAtPosition(
-                                                IsInstanceOf.<View>instanceOf(android.widget.LinearLayout.class),
-                                                2)),
-                                0),
-                        isDisplayed()));
-        textView6.check(matches(withText("PENDING")));
 
         ViewInteraction appCompatImageButton = onView(
                 allOf(withContentDescription("Navigate up"),
@@ -216,7 +147,7 @@ public class SystemSocialTest {
         // The recommended way to handle such scenarios is to use Espresso idling resources:
         // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
         try {
-            Thread.sleep(1000);
+            Thread.sleep(7000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -237,7 +168,7 @@ public class SystemSocialTest {
         // The recommended way to handle such scenarios is to use Espresso idling resources:
         // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
         try {
-            Thread.sleep(1000);
+            Thread.sleep(7000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -254,53 +185,12 @@ public class SystemSocialTest {
         // The recommended way to handle such scenarios is to use Espresso idling resources:
         // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
         try {
-            Thread.sleep(1000);
+            Thread.sleep(7000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        ViewInteraction textView8 = onView(
-                allOf(withId(R.id.friendName), withText("name"),
-                        childAtPosition(
-                                childAtPosition(
-                                        IsInstanceOf.<View>instanceOf(android.view.ViewGroup.class),
-                                        0),
-                                0),
-                        isDisplayed()));
-        textView8.check(matches(withText("name")));
-
-        ViewInteraction textView9 = onView(
-                allOf(withId(R.id.friendEmail), withText("test"),
-                        childAtPosition(
-                                childAtPosition(
-                                        IsInstanceOf.<View>instanceOf(android.view.ViewGroup.class),
-                                        0),
-                                1),
-                        isDisplayed()));
-        textView9.check(matches(withText("test")));
-
-        ViewInteraction editText4 = onView(
-                allOf(withId(R.id.sendMsg), withHint("Type a message"),
-                        childAtPosition(
-                                childAtPosition(
-                                        IsInstanceOf.<View>instanceOf(android.widget.LinearLayout.class),
-                                        2),
-                                0),
-                        isDisplayed()));
-        editText4.check(matches(withHint("Type a message")));
-
-        ViewInteraction button3 = onView(
-                allOf(withId(R.id.btnSendMsg),
-                        childAtPosition(
-                                childAtPosition(
-                                        IsInstanceOf.<View>instanceOf(android.widget.LinearLayout.class),
-                                        2),
-                                1),
-                        isDisplayed()));
-        button3.check(matches(isDisplayed()));
-
         openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
-
 
         ViewInteraction appCompatTextView3 = onView(
                 allOf(withId(R.id.title), withText("Chat History"),
@@ -316,7 +206,7 @@ public class SystemSocialTest {
         // The recommended way to handle such scenarios is to use Espresso idling resources:
         // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
         try {
-            Thread.sleep(1000);
+            Thread.sleep(7000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -346,7 +236,7 @@ public class SystemSocialTest {
         // The recommended way to handle such scenarios is to use Espresso idling resources:
         // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
         try {
-            Thread.sleep(1000);
+            Thread.sleep(7000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -387,7 +277,7 @@ public class SystemSocialTest {
         // The recommended way to handle such scenarios is to use Espresso idling resources:
         // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
         try {
-            Thread.sleep(1000);
+            Thread.sleep(7000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -401,103 +291,6 @@ public class SystemSocialTest {
 
         onView(withId(R.id.chat)).check(matches(withText("(17970 days ago) Bob@gmail.com: hello\n")));
         onView(withId(R.id.chat)).check(matches(isDisplayed()));
-
-        // Added a sleep statement to match the app's execution delay.
-        // The recommended way to handle such scenarios is to use Espresso idling resources:
-        // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-
-
-        ViewInteraction appCompatImageButton21 = onView(
-                allOf(withContentDescription("Navigate up"),
-                        childAtPosition(
-                                allOf(withId(R.id.action_bar),
-                                        childAtPosition(
-                                                withId(R.id.action_bar_container),
-                                                0)),
-                                1),
-                        isDisplayed()));
-        appCompatImageButton21.perform(click());
-
-        // Added a sleep statement to match the app's execution delay.
-        // The recommended way to handle such scenarios is to use Espresso idling resources:
-        // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        ViewInteraction appCompatImageButton3 = onView(
-                allOf(withContentDescription("Navigate up"),
-                        childAtPosition(
-                                allOf(withId(R.id.action_bar),
-                                        childAtPosition(
-                                                withId(R.id.action_bar_container),
-                                                0)),
-                                1),
-                        isDisplayed()));
-        appCompatImageButton3.perform(click());
-
-        // Added a sleep statement to match the app's execution delay.
-        // The recommended way to handle such scenarios is to use Espresso idling resources:
-        // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
-        try {
-            Thread.sleep(7000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-
-        DataInteraction linearLayoutRemove = onData(anything())
-                .inAdapterView(allOf(withId(R.id.list),
-                        childAtPosition(
-                                withClassName(is("android.support.design.widget.CoordinatorLayout")),
-                                0)))
-                .atPosition(1);
-        linearLayoutRemove.perform(longClick());
-
-
-        onView(withText("Do you want to remove name from your friends list")).inRoot(isDialog()).check(matches(isDisplayed()));
-        onView(withText("YES")).inRoot(isDialog()).check(matches(isDisplayed()));
-        onView(withText("NO")).inRoot(isDialog()).check(matches(isDisplayed()));
-
-        onView(withText("YES")).inRoot(isDialog()).perform(click());
-
-        // Added a sleep statement to match the app's execution delay.
-        // The recommended way to handle such scenarios is to use Espresso idling resources:
-        // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-
-        ViewInteraction appCompatImageButton4 = onView(
-                allOf(withContentDescription("Navigate up"),
-                        childAtPosition(
-                                allOf(withId(R.id.action_bar),
-                                        childAtPosition(
-                                                withId(R.id.action_bar_container),
-                                                0)),
-                                1),
-                        isDisplayed()));
-        appCompatImageButton4.perform(click());
-
-
-        onView(withId(R.id.switch1)).perform(click());
-        onView(withId(R.id.monthChart)).check(matches(isDisplayed()));
-        onView(withId(R.id.weekChart)).check(matches(not(isDisplayed())));
-        onView(withId(R.id.switch1)).perform(click());
-        onView(withId(R.id.weekChart)).check(matches(isDisplayed()));
-        onView(withId(R.id.monthChart)).check(matches(not(isDisplayed())));
-
     }
 
     private static Matcher<View> childAtPosition(
@@ -518,6 +311,7 @@ public class SystemSocialTest {
             }
         };
     }
+
     public class setValueNumberPicker implements ViewAction {
         int newVal = 0;
         setValueNumberPicker( int newVal ) {this.newVal = newVal;}
