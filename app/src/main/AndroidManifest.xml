@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="edu.ucsd.cse110.team26.personalbest">
 
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -11,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".FriendListActivity"></activity>
+
         <activity
             android:name=".ChatHistoryActivity"
             android:label="@string/title_activity_chat_history" />

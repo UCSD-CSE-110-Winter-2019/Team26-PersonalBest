@@ -147,6 +147,20 @@ public class ConcreteTimeStamper implements TimeStamper {
     }
 
     @Override
+    public String timestampToString(long timestamp) {
+
+        long duration = now() - timestamp;
+
+        if(duration < 60*60*1000) {
+            return "" + duration/60000 + "m ago";
+        } else if(duration < 24*60*60*1000){
+            return "" + duration/3600000 + ":" + (duration % 3600000)/60000 + " ago";
+        } else {
+            return "" + duration/(24*60*60*1000) + " days ago";
+        }
+    }
+
+    @Override
     public long dayIdToTimestamp(String dayID) {
         try {
             Date d = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(dayID);

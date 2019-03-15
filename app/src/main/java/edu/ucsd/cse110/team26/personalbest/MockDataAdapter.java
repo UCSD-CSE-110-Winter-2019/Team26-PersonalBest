@@ -187,4 +187,19 @@ class MockDataAdapter implements IDataAdapter {
     public void deleteFriend(String friendEmail, Callback<Boolean> booleanCallback) {
 
     }
+
+    @Override
+    public void sendMessage(String chatId, String text, Callback<Boolean> booleanCallback) {
+
+    }
+
+    @Override
+    public void startChatListener(String chatId, Callback<Message> messageCallback) {
+
+    }
+
+    @Override
+    public void subscribeToChatNotifications(String chatId) {
+
+    }
 }

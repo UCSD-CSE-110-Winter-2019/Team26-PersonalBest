@@ -8,6 +8,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.CombinedChart;
@@ -47,6 +50,21 @@ public class FriendProfileActivity extends AppCompatActivity {
         dataAdapter.getFriend(email, (user) -> {
             friend = user.get(0);
             friendName.setText(friend.name);
+            Log.d(getClass().getSimpleName(), "Chat ID: " + friend.chatID);
+        });
+
+        EditText message = findViewById(R.id.sendMsg);
+        Button btnSendMsg = findViewById(R.id.btnSendMsg);
+        //System.out.println(friend);
+        btnSendMsg.setOnClickListener(view -> {
+            dataAdapter.sendMessage(friend.chatID, message.getText().toString(), (success) -> {
+
+                if(success) {
+                    Log.d(getClass().getSimpleName(), "Sent message");
+                    message.setText("");
+                }
+                else Log.d(getClass().getSimpleName(), "Failed to send message");
+            });
         });
 
         friendEmail.setText(email);
@@ -70,6 +88,7 @@ public class FriendProfileActivity extends AppCompatActivity {
             case R.id.action_chat_history:
                 Intent intent = new Intent(FriendProfileActivity.this, ChatHistoryActivity.class);
                 intent.putExtra("Friend Email", friend.email);
+                intent.putExtra("Chat", friend.chatID);
                 intent.putExtra("DEBUG", DEBUG);
                 startActivity(intent);
         }

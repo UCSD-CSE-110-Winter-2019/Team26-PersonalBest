@@ -2,10 +2,15 @@ package edu.ucsd.cse110.team26.personalbest;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -67,10 +72,11 @@ public class StepCountActivity extends AppCompatActivity {
     TimeStamper timeStamper;
 
     // BarChart object
-    private BarChart createBarChart;
-    private BarChart createBarChart2;
+
     CombinedChart sevenDayChart;
     CombinedChart twentyEightDayChart;
+    private GoalNotifications notifier;
+
 
     /* ================
     Description: keep the UI update with the current number of taken steps
@@ -192,6 +198,7 @@ public class StepCountActivity extends AppCompatActivity {
         });
 
         currentDate = timeStamper.now();
+        notifier=new GoalNotifications(this);
 
         btnStartWalk.setOnClickListener(view -> {
             if(startTimeStamp == -1) {
@@ -249,6 +256,12 @@ public class StepCountActivity extends AppCompatActivity {
         if(user.height == 0) {
             launchGetHeightActivity();
         }
+
+        //create notification channel
+        if(notifier == null){
+            notifier = new GoalNotifications(this);
+        }
+        notifier.createNotificationChannel();
 
         setStepCount(today.totalSteps);
 
@@ -312,6 +325,10 @@ public class StepCountActivity extends AppCompatActivity {
             else{
                 suggestedGoalNum = 15000;
             }
+
+            //notification for when they cmolpete the goal;
+            notifier.showNotification();
+
             createAlertDialog(suggestedGoalNum);
 
             Toast completeGoalToast = Toast.makeText(getApplicationContext(),
@@ -388,11 +405,19 @@ public class StepCountActivity extends AppCompatActivity {
 
         alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoal);
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES", (dialog, which) -> {
-            Settings settings = new Settings(getApplicationContext(), timeStamper);
-            settings.saveGoal(suggestedGoal);
+                    Settings settings = new Settings(getApplicationContext(), timeStamper);
+                    settings.saveGoal(suggestedGoal);
+//                    if(notificationManager!=null){
+//                        notificationManager.cancelAll();
+//                    }
+                    dialog.dismiss();
+                });
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) ->{
+//            if(notificationManager!=null){
+//                notificationManager.cancelAll();
+//            }
             dialog.dismiss();
         });
-        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) -> dialog.dismiss());
         alertDialog.show();
     }
 
@@ -417,6 +442,7 @@ public class StepCountActivity extends AppCompatActivity {
         editor.apply();
     }
 
+
     /**
      * Resets previousDaySteps and saves previous day's goal as new goal
      */
@@ -438,5 +464,6 @@ public class StepCountActivity extends AppCompatActivity {
         lastEncouragingMessageSteps = 0;
 
     }
+
 
 }

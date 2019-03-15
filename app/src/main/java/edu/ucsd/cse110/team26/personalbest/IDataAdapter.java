@@ -132,4 +132,31 @@ interface IDataAdapter {
      */
     void deleteFriend(String friendEmail, Callback<Boolean> booleanCallback);
 
+    /**
+     * Sends a message from the current user in the given chat.
+     * Calls given callback with true or false depending on if the server request was successful.
+     *
+     * @param chatId the ID of the chat to send to
+     * @param text message to send
+     * @param booleanCallback callback to handle success/failure
+     */
+    void sendMessage(String chatId, String text, Callback<Boolean> booleanCallback);
+
+    /**
+     * Starts listening for new messages in the given chat, calling the given callback
+     * when new messages are sent to the chat.
+     *
+     * @param chatId the Id of the chat to watch
+     * @param messageCallback callback to handle new messages received
+     */
+    void startChatListener(String chatId, Callback<Message> messageCallback);
+
+    /**
+     * Subscribes the user to get push notifications from the server when the given chat
+     * receives new messages.
+     *
+     * @param chatId the ID of the chat to subscribe to for push notifications
+     */
+    void subscribeToChatNotifications(String chatId);
+
 }
