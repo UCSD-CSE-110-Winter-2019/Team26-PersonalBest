@@ -29,7 +29,7 @@ import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricTestRunner.class)
 
-public class NotififcationsTest {
+public class GoalNotificationsUnitTest {
     private static final String TEST_SERVICE = "TEST_SERVICE";
 
     private StepCountActivity activity;
@@ -85,35 +85,5 @@ public class NotififcationsTest {
         assertEquals(1, shadowNotificationManager.size());
 
     }
-
-    //Test to see if user is on screen when goal is reached; user will interact with pop-up dialog
-    //if they interact with pop-up dialog, notification should disapper.
-    @Test
-    public void testNotificationDisappers(){
-        activity.initializeNewDay();
-        Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
-        settings.saveGoal(2000);
-
-        activity.setStepCount(2000);
-
-        ShadowAlertDialog.getLatestAlertDialog().getButton(Dialog.BUTTON_NEGATIVE).performClick();
-        NotificationManager notificationService = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
-        ShadowNotificationManager shadowNotificationManager = shadowOf(notificationService);
-
-        assertEquals(0, shadowNotificationManager.size());
-
-        activity.initializeNewDay();
-        settings.saveGoal(1500);
-
-        activity.setStepCount(1500);
-        ShadowAlertDialog.getLatestAlertDialog().getButton(Dialog.BUTTON_POSITIVE).performClick();
-        assertEquals(0, shadowNotificationManager.size());
-
-    }
-
-
-
-
-
 
 }
