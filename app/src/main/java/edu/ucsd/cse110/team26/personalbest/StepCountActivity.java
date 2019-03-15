@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.github.mikephil.charting.charts.CombinedChart;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -114,6 +115,8 @@ public class StepCountActivity extends AppCompatActivity {
                         for(int i = 0; i < 7; i++ ) {
                             week.add(month.get(i));
                         }
+                        Collections.reverse(month);
+                        Collections.reverse(week);
                         createMonthChart.draw(month);
                         createWeekChart.draw(week);
                     });
@@ -439,6 +442,7 @@ public class StepCountActivity extends AppCompatActivity {
             fitnessService.getWalks(ts, timeStamper.endOfDay(ts), list);
             if (timeStamper.isToday(ts))
                 walksToday = list;
+            Log.i(TAG, "Retrieving walk data for " + timeStamper.timestampToDayId(ts));
             ts = timeStamper.nextDay(ts);
         }
         try {
@@ -449,6 +453,8 @@ public class StepCountActivity extends AppCompatActivity {
         for(List<Walk> walklist : walkData) {
             Log.i(TAG, walklist.toString());
         }
+
+        Collections.reverse(walkData);
 
         ts = timeStamper.startOfDay(timeStamper.lastTwentyEightDays());
         for (int i = 0; i < 28; i++) {
@@ -462,6 +468,7 @@ public class StepCountActivity extends AppCompatActivity {
             else
                 monthUpdate.add(new Day((int) weekGoal.get(6), (int) stepCounts.get(i), walkStepCounts.get(i), ts));
             ts = timeStamper.nextDay(ts);
+            Log.i(TAG, "Initializing step count" + stepCounts.get(i) +  "for " + timeStamper.timestampToDayId(ts));
         }
         dataAdapter.updateDays(monthUpdate, (success) -> {
             if (success)

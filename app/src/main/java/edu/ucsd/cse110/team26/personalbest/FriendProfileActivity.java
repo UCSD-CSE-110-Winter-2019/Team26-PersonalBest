@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.github.mikephil.charting.charts.CombinedChart;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class FriendProfileActivity extends AppCompatActivity {
@@ -61,6 +62,7 @@ public class FriendProfileActivity extends AppCompatActivity {
                 month.add(new Day(5000, 0, 0, ts));
                 ts = timeStamper.previousDay(ts);
             }
+            Collections.reverse(month);
             createMonthChart.draw(month);
 
         });
