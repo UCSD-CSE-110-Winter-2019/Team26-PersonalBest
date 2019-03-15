@@ -5,7 +5,16 @@ class User {
     String name;
     String email;
     String uid;
+    String chatID;
     Friends friends;
+
+    User() {
+        height = 0;
+        name = "";
+        email = "";
+        uid = "";
+        friends = new Friends();
+    }
 
     User(int height, String name, String email, String uid) {
         this.height = height;
@@ -13,5 +22,10 @@ class User {
         this.email = email;
         this.uid = uid;
         friends = new Friends();
+    }
+
+    @Override
+    public String toString() {
+        return name + ": " + email;
     }
 }

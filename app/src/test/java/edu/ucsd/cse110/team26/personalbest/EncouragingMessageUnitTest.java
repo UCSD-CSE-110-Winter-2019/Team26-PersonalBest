@@ -71,6 +71,7 @@ public class EncouragingMessageUnitTest {
     @Test
     public void testEncouragingMessageAfterCompletedGoal() {
         activity.initializeNewDay();
+        StepCountActivity.toggleEncouragementMessage = false;
         Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
         settings.saveGoal(1000);
         activity.setStepCount(1000);
@@ -80,6 +81,22 @@ public class EncouragingMessageUnitTest {
         activity.setStepCount(1500);
         assertNotEquals("Good job! You've improved by 300% from yesterday", ShadowToast.getTextOfLatestToast());
 
+    }
+
+    /**
+     * Tests whether encouragement messages are switched off when current user has friends
+     */
+    @Test
+    public void testToggleEncouragementMessage() {
+        StepCountActivity.toggleEncouragementMessage = true;
+        Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
+        settings.saveGoal(1000);
+        activity.setStepCount(1000);
+
+        assertNotEquals("Good job! You've improved by 200% from yesterday", ShadowToast.getTextOfLatestToast());
+
+        activity.setStepCount(1500);
+        assertNotEquals("Good job! You've improved by 300% from yesterday", ShadowToast.getTextOfLatestToast());
     }
 
 }

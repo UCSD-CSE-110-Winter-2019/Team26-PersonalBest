@@ -42,6 +42,8 @@ public class StepCountActivity extends AppCompatActivity {
     private String channel_description = "Notification channel for goal notifications";
 
 
+    static boolean toggleEncouragementMessage = true;
+
     private UpdateStep updateStep;
 
     private TextView textSteps;
@@ -50,11 +52,8 @@ public class StepCountActivity extends AppCompatActivity {
     private Button btnEndWalk;
 
     FitnessService fitnessService;
-    private long currentSteps = 0;
     private long previousDaySteps = 0;
     private long lastEncouragingMessageSteps = 0;
-    private long goalSteps = 0;
-    private int user_height;
     private boolean goalCompleted;
     private List<Integer> stepCounts = new ArrayList<>();
     private List<ArrayList<Walk>> walkData = new ArrayList<>();
@@ -65,7 +64,8 @@ public class StepCountActivity extends AppCompatActivity {
     private long currentDate;
 
     private Walk currentWalk;
-    private User user;
+    private Day today = new Day();
+    private User user = new User();
 
     private AlertDialog goalDialog;
     private NotificationManagerCompat notificationManager;
@@ -95,7 +95,7 @@ public class StepCountActivity extends AppCompatActivity {
                         initializeNewDay();
                         currentDate = timeStamper.now();
                     }
-                    fitnessService.updateStepCount();
+                    fitnessService.updateStepCount(StepCountActivity.this::setStepCount);
                     stepCounts.clear();
                     fitnessService.getStepsCount(timeStamper.lastSevenDays(), timeStamper.today(), stepCounts);
 
@@ -132,38 +132,32 @@ public class StepCountActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_step_count);
 
+        if(getIntent().getExtras() != null) {
+            DEBUG = getIntent().getExtras().getBoolean("DEBUG");
+            ESPRESSO = getIntent().getExtras().getBoolean("ESPRESSO");
+        }
+
         textSteps = findViewById(R.id.textSteps);
-
-        DEBUG = getIntent().getExtras().getBoolean("DEBUG");
-        ESPRESSO = getIntent().getExtras().getBoolean("ESPRESSO");
-
+        btnStartWalk = findViewById(R.id.btnStartWalk);
+        btnEndWalk = findViewById(R.id.btnEndWalk);
+        textWalkData = findViewById(R.id.textWalkData);
+        CombinedChart mChart = findViewById(R.id.chart1);
 
         fitnessService = FitnessServiceFactory.create(DEBUG, this);
         dataAdapter = IDatabaseAdapterFactory.create(DEBUG, this.getApplicationContext());
-
         timeStamper = new ConcreteTimeStamper();
-        Log.i(TAG, "");
-        //user = new User();
-        dataAdapter.acceptFriendRequest("ana@selvaraj.org", (success) -> {
-            Log.d(TAG, "accepted: " + success);
-        });
 
         fitnessService.setup();
 
-        CombinedChart mChart = findViewById(R.id.chart1);
-        createBarChart = new BarChart(getApplicationContext(),mChart, stepCounts, walkData);
+        createBarChart = new BarChart(getApplicationContext(), mChart, stepCounts, walkData);
         createBarChart.draw();
 
         currentDate = timeStamper.now();
 
-        btnStartWalk = findViewById(R.id.btnStartWalk);
-        btnEndWalk = findViewById(R.id.btnEndWalk);
-        textWalkData = findViewById(R.id.textWalkData);
-
         btnStartWalk.setOnClickListener(view -> {
             if(startTimeStamp == -1) {
                 startTimeStamp = timeStamper.now();
-                initialSteps = currentSteps;
+                initialSteps = today.totalSteps;
                 SharedPreferences.Editor editor = getSharedPreferences("walk", MODE_PRIVATE).edit();
                 editor.putLong("startTimeStamp", startTimeStamp)
                         .putLong("initialSteps", initialSteps).apply();
@@ -196,6 +190,11 @@ public class StepCountActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         createBarChart.draw();
+
+        dataAdapter.getFriends( (friendsList) -> {
+            toggleEncouragementMessage = !friendsList.isEmpty();
+        });
+
         if(updateStep != null && !updateStep.isCancelled()) {
             updateStep.cancel(true);
         }
@@ -207,18 +206,16 @@ public class StepCountActivity extends AppCompatActivity {
         }
 
         Settings settings = new Settings(getApplicationContext(), timeStamper);
-        SharedPreferences user = getSharedPreferences("user", MODE_PRIVATE);
-        goalSteps = settings.getGoal();
-        user_height = settings.getHeight();
+        today.goal = settings.getGoal();
+        user.height = settings.getHeight();
+        if(user.height == 0) {
+            launchGetHeightActivity();
+        }
 
         //create notification channel
         createNotificationChannel();
 
-        if(user_height == 0) {
-            launchGetHeightActivity();
-        }
-
-        setStepCount(currentSteps);
+        setStepCount(today.totalSteps);
 
         // Check if the user started a walk and has not stopped it
         SharedPreferences walkInfo = getSharedPreferences("walk", MODE_PRIVATE );
@@ -235,7 +232,7 @@ public class StepCountActivity extends AppCompatActivity {
             } else {
                 btnStartWalk.setVisibility(View.GONE);
                 btnEndWalk.setVisibility(View.VISIBLE);
-                currentWalk = new Walk(currentSteps - initialSteps, startTimeStamp);
+                currentWalk = new Walk(today.totalSteps - initialSteps, startTimeStamp);
             }
         }
 
@@ -267,21 +264,22 @@ public class StepCountActivity extends AppCompatActivity {
 
     public void setStepCount(long stepCount) {
         Settings settings = new Settings(getApplicationContext(), timeStamper);
-        currentSteps = stepCount;
-        goalSteps = settings.getGoal();
-        textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", currentSteps, goalSteps));
+        today.totalSteps = stepCount;
+        today.goal = settings.getGoal();
+        textSteps.setText(String.format(Locale.getDefault(),"%d/%d steps today", today.totalSteps, today.goal));
         updateWalkData();
-        if(currentSteps >= goalSteps && !goalCompleted && goalSteps!= 0) {
+        if(today.totalSteps >= today.goal && !goalCompleted && today.goal != 0) {
             //do dialog box as well.
 
-            int suggestedGoalNum = (int)goalSteps;
+            int suggestedGoalNum = (int) today.goal;
 
-            if(goalSteps + 500 <= 15000){
+            if(today.goal + 500 <= 15000){
                 suggestedGoalNum += 500;
             }
             else{
                 suggestedGoalNum = 15000;
             }
+
             NotificationsClass notifier = new NotificationsClass();
             NotificationCompat.Builder notify = notifier.createNotification(this);
             notificationManager = NotificationManagerCompat.from(this);
@@ -290,27 +288,24 @@ public class StepCountActivity extends AppCompatActivity {
             notificationManager.notify(1, notify.build());
 
 
-            goalDialog = createAlertDialog(suggestedGoalNum);
-            goalDialog.show();
+            createAlertDialog(suggestedGoalNum);
 
             Toast completeGoalToast = Toast.makeText(getApplicationContext(),
-                    String.format(Locale.getDefault(),"Congratulations, you've completed your goal of %d steps today!", goalSteps),
+                    String.format(Locale.getDefault(),"Congratulations, you've completed your goal of %d steps today!", today.goal),
                     Toast.LENGTH_SHORT);
 
             completeGoalToast.show();
             goalCompleted = true;
         } else {
             goalCompleted = false;
-            if( previousDaySteps != 0 && currentSteps < goalSteps ) {
-                int improvementPercentage = (int) ((currentSteps - previousDaySteps) / previousDaySteps)*100;
-                if (lastEncouragingMessageSteps == 0 && previousDaySteps + 500 <= currentSteps) {
-                    lastEncouragingMessageSteps = currentSteps - (currentSteps - previousDaySteps) % 500;
-                    String message = String.format(Locale.US, "Good job! You've improved by %d%% from yesterday", improvementPercentage);
-                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-                } else if (lastEncouragingMessageSteps + 500 <= currentSteps && lastEncouragingMessageSteps != 0 ) {
-                    lastEncouragingMessageSteps = currentSteps - (currentSteps - previousDaySteps) % 500;
-                    String message = String.format(Locale.US, "Good job! You've improved by %d%% from yesterday", improvementPercentage);
-                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+            if( toggleEncouragementMessage ) {
+                if (previousDaySteps != 0 && today.totalSteps < today.goal) {
+                    int improvementPercentage = (int) ((today.totalSteps - previousDaySteps) / previousDaySteps) * 100;
+                    if ((lastEncouragingMessageSteps == 0 && previousDaySteps + 500 <= today.totalSteps)
+                            || (lastEncouragingMessageSteps + 500 <= today.totalSteps && lastEncouragingMessageSteps != 0)) {
+                        lastEncouragingMessageSteps = today.totalSteps - (today.totalSteps - previousDaySteps) % 500;
+                        EncouragementMessage.makeEncouragementMessage(getApplicationContext(), improvementPercentage);
+                    }
                 }
             }
 
@@ -320,21 +315,21 @@ public class StepCountActivity extends AppCompatActivity {
     public void updateWalkData() {
         if(startTimeStamp != -1 ) {
             initialSteps = getSharedPreferences("walk", MODE_PRIVATE).getLong("initialSteps", 0);
-            currentWalk.setSteps(currentSteps - initialSteps);
+            currentWalk.setSteps(today.totalSteps - initialSteps);
             textWalkData.setText(String.format(Locale.getDefault(),
                     "Current walk:\nWalk duration: %s\n%d steps taken\nDistance walked: %.1f feet\nAverage speed: %.1fmph",
                     timeStamper.durationToString(timeStamper.now() - startTimeStamp),
                     currentWalk.getSteps(),
-                    currentWalk.stepsToFeet(user_height),
-                    currentWalk.averageMph(user_height)));
+                    currentWalk.stepsToFeet(user.height),
+                    currentWalk.averageMph(user.height)));
         } else if(walksToday != null && !walksToday.isEmpty()) {
             Walk lastWalk = walksToday.get(walksToday.size() - 1);
             textWalkData.setText(String.format(Locale.getDefault(),
                     "Last walk:\nWalk duration: %s\n%d steps taken\nDistance walked: %.1f feet\nAverage speed: %.1fmph",
                     timeStamper.durationToString(lastWalk.getDurationInMillis()),
                     lastWalk.getSteps(),
-                    lastWalk.stepsToFeet(user_height),
-                    lastWalk.averageMph(user_height)));
+                    lastWalk.stepsToFeet(user.height),
+                    lastWalk.averageMph(user.height)));
         }
     }
 
@@ -363,7 +358,7 @@ public class StepCountActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public AlertDialog createAlertDialog(final int suggestedGoal) {
+    public void createAlertDialog(final int suggestedGoal) {
         AlertDialog alertDialog = new AlertDialog.Builder(StepCountActivity.this).create();
         alertDialog.setTitle("Suggesting Goals");
 
@@ -376,15 +371,13 @@ public class StepCountActivity extends AppCompatActivity {
                     }
                     dialog.dismiss();
                 });
-        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) -> {
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) ->{
             if(notificationManager!=null){
                 notificationManager.cancelAll();
             }
             dialog.dismiss();
-
         });
-        return alertDialog;
-        // alertDialog.show();
+        alertDialog.show();
     }
 
     public void launchGetHeightActivity() {
@@ -401,10 +394,8 @@ public class StepCountActivity extends AppCompatActivity {
         //if yes => new_week is true and we set the goal of this new_week to last goal on Sat (goal_Sat)
         Calendar calendar = Calendar.getInstance();
         int current_day = calendar.get(Calendar.DAY_OF_WEEK);
-        ConcreteTimeStamper timeStampNow = new ConcreteTimeStamper();
-        long current_time = timeStampNow.now();
-        if(current_time == timeStampNow.weekStart() &&  current_day == Calendar.SUNDAY)
-        {
+        long current_time = timeStamper.now();
+        if(current_time == timeStamper.weekStart() && current_day == Calendar.SUNDAY) {
             editor.putBoolean("new_week", true);
         }
         editor.apply();
@@ -432,19 +423,19 @@ public class StepCountActivity extends AppCompatActivity {
      */
     public void initializeNewDay() {
         long prev[] = timeStamper.getPreviousDay();
-        List<Integer> previousSteps = new ArrayList<Integer>();
+        List<Integer> previousSteps = new ArrayList<>();
         try {
-            fitnessService.getStepsCount( prev[0], prev[1], previousSteps);
-            sleep(10);
+            fitnessService.getStepsCount(prev[0], prev[1], previousSteps);
+            sleep(1000);
         } catch( Exception e ) {
             e.printStackTrace();
         }
-        if( previousSteps.size() == 0)
+        if(previousSteps.size() == 0)
             previousSteps.add(0);
         previousDaySteps = previousSteps.get(0);
         Log.i(TAG, String.format("New day. Setting previous day's steps to %d", previousDaySteps));
         Settings settings = new Settings(getApplicationContext(), timeStamper);
-        settings.saveGoal((int)goalSteps);
+        settings.saveGoal((int) today.goal);
         lastEncouragingMessageSteps = 0;
 
     }

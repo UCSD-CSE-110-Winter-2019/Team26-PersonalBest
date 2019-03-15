@@ -12,6 +12,10 @@ public interface TimeStamper {
     boolean isToday(long timeStamp);
     long endOfDay(long timeStamp);
     long startOfDay(long timeStamp);
+    long previousDay(long timeStamp);
     long nextDay(long timeStamp);
     String durationToString(long duration);
+    String timestampToString(long timestamp);
+    String timestampToDayId(long timestamp);
+    long dayIdToTimestamp(String dayID);
 }

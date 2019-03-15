@@ -1,8 +1,20 @@
 package edu.ucsd.cse110.team26.personalbest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 class MockDataAdapter implements IDataAdapter {
+
+    List<User> friendsList;
+    List<User> receivedFriendRequests;
+    List<User> sentFriendRequests;
+
+    MockDataAdapter() {
+        friendsList = new ArrayList<User>();
+        receivedFriendRequests = new ArrayList<User>();
+        sentFriendRequests = new ArrayList<User>();
+    }
+
     /**
      * Get today's data currently stored in the database.
      * Calls the given lambda with the resulting Day, or null if request failed.
@@ -10,7 +22,7 @@ class MockDataAdapter implements IDataAdapter {
      * @param dayCallback callback lambda to handle the resulting Day
      */
     @Override
-    public void getToday(DayCallback dayCallback) {
+    public void getToday(Callback<Day> dayCallback) {
 
     }
 
@@ -21,20 +33,20 @@ class MockDataAdapter implements IDataAdapter {
      * @param userCallback callback lambda to handle the user's data
      */
     @Override
-    public void getUser(UserCallback userCallback) {
+    public void getUser(Callback<User> userCallback) {
 
     }
 
     /**
-     * Updates the logged-in user's data stored in the database
+     * Updates the logged-in user's height stored in the database
      * Calls given callback with true or false depending on if the server request was successful.
      *
-     * @param user            User's data to update
+     * @param height User's height to update
      * @param booleanCallback callback lambda to handle success/failure
      */
     @Override
-    public void updateUser(User user, BooleanCallback booleanCallback) {
-
+    public void updateUserHeight(int height, Callback<Boolean> booleanCallback) {
+        booleanCallback.call(true);
     }
 
     /**
@@ -46,7 +58,11 @@ class MockDataAdapter implements IDataAdapter {
      * @param userCallback callback lambda to handle result
      */
     @Override
-    public void getFriend(String friendEmail, UserCallback userCallback) {
+    public void getFriend(String friendEmail, Callback<List<User>> userCallback) {
+    }
+
+    @Override
+    public void getDays(int numOfDays, Callback<List<Day>> dayCallback) {
 
     }
 
@@ -60,18 +76,19 @@ class MockDataAdapter implements IDataAdapter {
      * @param dayCallback lambda to handle the resulting List of Days
      */
     @Override
-    public void getFriendDays(String friendID, int numOfDays, DayCallback dayCallback) {
+    public void getFriendDays(String friendID, int numOfDays, Callback<List<Day>> dayCallback) {
 
     }
 
     /**
      * Updates the database with the given days' data.
      *
-     * @param days List of days to update the database with.
+     * @param days            List of days to update the database with.
+     * @param booleanCallback callback to handle success/failure
      */
     @Override
-    public void updateDays(List<Day> days) {
-
+    public void updateDays(List<Day> days, Callback<Boolean> booleanCallback) {
+        booleanCallback.call(true);
     }
 
     /**
@@ -83,8 +100,8 @@ class MockDataAdapter implements IDataAdapter {
      * @param userCallback callback to handle resulting list of users
      */
     @Override
-    public void getSentFriendRequests(UserCallback userCallback) {
-
+    public void getSentFriendRequests(Callback<List<User>> userCallback) {
+        userCallback.call(sentFriendRequests);
     }
 
     /**
@@ -95,8 +112,8 @@ class MockDataAdapter implements IDataAdapter {
      * @param userCallback callback to handle resulting list of users
      */
     @Override
-    public void getReceivedFriendRequests(UserCallback userCallback) {
-
+    public void getReceivedFriendRequests(Callback<List<User>> userCallback) {
+        userCallback.call(receivedFriendRequests);
     }
 
     /**
@@ -105,7 +122,7 @@ class MockDataAdapter implements IDataAdapter {
      * @param userCallback callback to handle the resulting friend list
      */
     @Override
-    public void getFriends(UserCallback userCallback) {
+    public void getFriends(Callback<List<User>> userCallback) {
 
     }
 
@@ -116,12 +133,19 @@ class MockDataAdapter implements IDataAdapter {
      * info of the requestee. Otherwise returns an empty User List.
      * If server request failed, calls callback with null User List.
      *
+     * If called twice with same email, makes friend request to current user from user of the
+     * given email address
+     *
      * @param friendEmail  the email to make a request to
      * @param userCallback callback to handle resulting list of users
      */
     @Override
-    public void makeFriendRequest(String friendEmail, UserCallback userCallback) {
-
+    public void makeFriendRequest(String friendEmail, Callback<List<User>> userCallback) {
+        User user = new User(0, "name", friendEmail, "1");
+        if( sentFriendRequests.contains(user) )
+            receivedFriendRequests.add(new User(0, "name", friendEmail, "1"));
+        else
+            sentFriendRequests.add(new User(0, "name", friendEmail, "1"));
     }
 
     /**
@@ -132,8 +156,13 @@ class MockDataAdapter implements IDataAdapter {
      * @param booleanCallback callback to handle success/failure
      */
     @Override
-    public void acceptFriendRequest(String requesterEmail, BooleanCallback booleanCallback) {
-
+    public void acceptFriendRequest(String requesterEmail, Callback<Boolean> booleanCallback) {
+        if( receivedFriendRequests.contains(new User(0, "name", requesterEmail, "1"))) {
+            friendsList.add(new User(0, "name", requesterEmail, "1"));
+            booleanCallback.call(true);
+        } else {
+            booleanCallback.call(false);
+        }
     }
 
     /**
@@ -144,8 +173,8 @@ class MockDataAdapter implements IDataAdapter {
      * @param booleanCallback callback to handle success/failure
      */
     @Override
-    public void rejectFriendRequest(String requesterEmail, BooleanCallback booleanCallback) {
-
+    public void rejectFriendRequest(String requesterEmail, Callback<Boolean> booleanCallback) {
+        friendsList.remove(new User(0, "name", requesterEmail, "1"));
     }
 
     /**
@@ -155,7 +184,22 @@ class MockDataAdapter implements IDataAdapter {
      * @param booleanCallback callback to handle success/failure of request
      */
     @Override
-    public void deleteFriend(String friendEmail, BooleanCallback booleanCallback) {
+    public void deleteFriend(String friendEmail, Callback<Boolean> booleanCallback) {
+
+    }
+
+    @Override
+    public void sendMessage(String chatId, String text, Callback<Boolean> booleanCallback) {
+
+    }
+
+    @Override
+    public void startChatListener(String chatId, Callback<Message> messageCallback) {
+
+    }
+
+    @Override
+    public void subscribeToChatNotifications(String chatId) {
 
     }
 }

@@ -1,7 +1,11 @@
 package edu.ucsd.cse110.team26.personalbest;
 
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class ConcreteTimeStamper implements TimeStamper {
@@ -103,6 +107,14 @@ public class ConcreteTimeStamper implements TimeStamper {
     }
 
     @Override
+    public long previousDay(long timeStamp) {
+        Calendar cal = Calendar.getInstance(TimeZone.getDefault());
+        cal.setTimeInMillis(timeStamp);
+        cal.add(Calendar.DATE, 1);
+        return cal.getTimeInMillis();
+    }
+
+    @Override
     public long nextDay(long timeStamp) {
         Calendar cal = Calendar.getInstance(TimeZone.getDefault());
         cal.setTimeInMillis(timeStamp);
@@ -119,6 +131,38 @@ public class ConcreteTimeStamper implements TimeStamper {
         } else {
             return "" + duration/3600000 + ":" + (duration % 3600000)/60000;
         }
+    }
+
+    @Override
+    public String timestampToString(long timestamp) {
+
+        long duration = now() - timestamp;
+
+        if(duration < 60*60*1000) {
+            return "" + duration/60000 + "m ago";
+        } else if(duration < 24*60*60*1000){
+            return "" + duration/3600000 + ":" + (duration % 3600000)/60000 + " ago";
+        } else {
+            return "" + duration/(24*60*60*1000) + " days ago";
+        }
+    }
+
+    @Override
+    public long dayIdToTimestamp(String dayID) {
+        try {
+            Date d = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(dayID);
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(d);
+            return startOfDay(cal.getTimeInMillis());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    @Override
+    public String timestampToDayId(long timestamp) {
+        return new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(timestamp));
     }
 
 }

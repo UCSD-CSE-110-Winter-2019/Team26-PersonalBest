@@ -1,5 +1,6 @@
 package edu.ucsd.cse110.team26.personalbest;
 
+import android.app.Activity;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -9,13 +10,13 @@ class MockFitnessAdapter implements FitnessService {
 
     private final static String TAG = "[MockFitnessAdapter]";
 
-    private StepCountActivity activity;
+    private Activity activity;
 
     private long steps = 0;
     private List<Walk> walks = new ArrayList<>();
     private TimeStamper timeStamper = new ConcreteTimeStamper();
 
-    MockFitnessAdapter(StepCountActivity activity) {
+    MockFitnessAdapter(Activity activity) {
         this.activity = activity;
     }
 
@@ -30,9 +31,9 @@ class MockFitnessAdapter implements FitnessService {
     }
 
     @Override
-    public void updateStepCount() {
+    public void updateStepCount(Callback<Long> stepCountCallback) {
         steps += 1;
-        activity.setStepCount(steps);
+        stepCountCallback.call(steps);
         Log.d(TAG, "update steps: " + steps);
     }
 
