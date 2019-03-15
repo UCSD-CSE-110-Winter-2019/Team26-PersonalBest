@@ -44,31 +44,16 @@ public class BarChart {
 
     List<Day> info;
 
-    private int[] weekGoal;
-    private int[] weekStep;
-    private int[] weekWalk;
-
     public BarChart(Context context, CombinedChart mChart)
     {
         this.context = context;
         this.mChart = mChart;
     }
 
-    public void setSize(int size)
-    {
-        this.size = size;
-        weekGoal = new int[size];
-        weekStep = new int[size];
-        weekWalk = new int[size];
-    }
-
     public void draw(List<Day> info)
     {
         this.info = info;
         this.size = info.size();
-        weekGoal = new int[size];
-        weekStep = new int[size];
-        weekWalk = new int[size];
         mChart.setDrawGridBackground(false);
         mChart.getDescription().setText("");
         mChart.setHighlightFullBarEnabled(false);
