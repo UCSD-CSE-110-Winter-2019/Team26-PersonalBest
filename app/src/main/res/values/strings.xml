@@ -38,4 +38,5 @@
     <string name="chat_history">Chat History</string>
     <string name="title_activity_friend_profile">Profile</string>
     <string name="monthly_weekly_summary">Monthly/Weekly Summary</string>
+    <string name="hint_mock_encouragement">Encouragement Message every __ steps</string>
 </resources>

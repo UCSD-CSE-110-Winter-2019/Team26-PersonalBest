@@ -13,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,9 +46,13 @@ public class StepCountActivity extends AppCompatActivity {
     private Button btnStartWalk;
     private Button btnEndWalk;
 
+    private EditText increment;
+
     FitnessService fitnessService;
     private long previousDaySteps = 0;
     private long lastEncouragingMessageSteps = 0;
+    public long encouragementInc = 500;
+
     private boolean goalCompleted;
     private List<Integer> stepCounts = new ArrayList<>();
     private List<Integer> walkStepCounts = new ArrayList<>();
@@ -112,6 +117,7 @@ public class StepCountActivity extends AppCompatActivity {
                             month.add(new Day(5000, 0, 0, ts));
                             ts = timeStamper.previousDay(ts);
                         }
+                        Collections.reverse(month);
                         for(int i = 0; i < 7; i++ ) {
                             week.add(month.get(i));
                         }
@@ -151,6 +157,7 @@ public class StepCountActivity extends AppCompatActivity {
         monthChart = findViewById(R.id.monthChart);
         createWeekChart = new BarChart(weekChart);
         createMonthChart = new BarChart(monthChart);
+        increment = findViewById(R.id.encourageMessage);
 
         fitnessService = FitnessServiceFactory.create(DEBUG, this);
         dataAdapter = IDatabaseAdapterFactory.create(DEBUG, this.getApplicationContext());
@@ -217,7 +224,12 @@ public class StepCountActivity extends AppCompatActivity {
         super.onStart();
 
         dataAdapter.getFriends( (friendsList) -> {
-            toggleEncouragementMessage = !friendsList.isEmpty();
+            toggleEncouragementMessage = friendsList.isEmpty();
+            if( toggleEncouragementMessage ) {
+                increment.setVisibility(View.VISIBLE);
+            } else
+                increment.setVisibility(View.GONE);
+
         });
 
         if(updateStep != null && !updateStep.isCancelled()) {
@@ -327,11 +339,14 @@ public class StepCountActivity extends AppCompatActivity {
         } else {
             goalCompleted = false;
             if( toggleEncouragementMessage ) {
+                if( !(increment.getText().toString()).equals("")) {
+                    encouragementInc = Long.parseLong(increment.getText().toString());
+                }
                 if (previousDaySteps != 0 && today.totalSteps < today.goal) {
                     int improvementPercentage = (int) ((today.totalSteps - previousDaySteps) / previousDaySteps) * 100;
-                    if ((lastEncouragingMessageSteps == 0 && previousDaySteps + 500 <= today.totalSteps)
-                            || (lastEncouragingMessageSteps + 500 <= today.totalSteps && lastEncouragingMessageSteps != 0)) {
-                        lastEncouragingMessageSteps = today.totalSteps - (today.totalSteps - previousDaySteps) % 500;
+                    if ((lastEncouragingMessageSteps == 0 && previousDaySteps + encouragementInc <= today.totalSteps)
+                            || (lastEncouragingMessageSteps + encouragementInc <= today.totalSteps && lastEncouragingMessageSteps != 0)) {
+                        lastEncouragingMessageSteps = today.totalSteps - (today.totalSteps - previousDaySteps) % encouragementInc;
                         EncouragementMessage.makeEncouragementMessage(getApplicationContext(), improvementPercentage);
                     }
                 }
@@ -473,7 +488,7 @@ public class StepCountActivity extends AppCompatActivity {
         }
         dataAdapter.updateDays(monthUpdate, (success) -> {
             if (success)
-                Log.i(TAG, "Successfully updated last" + monthUpdate.size() + "days of data in firestore");
+                Log.i(TAG, "Successfully updated last " + monthUpdate.size() + " days of data in firestore");
         });
     }
 
