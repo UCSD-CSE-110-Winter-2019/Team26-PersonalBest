@@ -1,6 +1,5 @@
 package edu.ucsd.cse110.team26.personalbest;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
 
@@ -21,23 +20,21 @@ import java.util.List;
 
 public class BarChart {
     private CombinedChart mChart;
-    private Context context;
-    private int size;
+    private int size = 7;
     private String[] labels;
     private List<Day> days;
 
-    public BarChart(Context context, CombinedChart mChart, List<Day> days)
+    public BarChart(CombinedChart mChart)
     {
-        this.context = context;
         this.mChart = mChart;
-        this.days = days;
-        if(days.size() == 28) this.size = 28;
-        else this.size = 7;
     }
 
 
-    public void draw()
+    public void draw(List<Day> days)
     {
+        this.days = days;
+        if(days.size() == 28) this.size = 28;
+        else this.size = 7;
         mChart.setDrawGridBackground(false);
         mChart.getDescription().setText("");
         mChart.setHighlightFullBarEnabled(false);

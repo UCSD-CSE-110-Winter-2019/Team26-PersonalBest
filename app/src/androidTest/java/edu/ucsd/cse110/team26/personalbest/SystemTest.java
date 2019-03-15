@@ -63,7 +63,7 @@ public class SystemTest {
         onView(withId(R.id.textSteps)).check(matches(isDisplayed()));
         onView(withId(R.id.textSteps)).check(matches(withText("0/5000 steps today")));
         onView(withId(R.id.btnStartWalk)).check(matches(withText("START WALK")));
-        onView(withId(R.id.chart1)).check(matches(isDisplayed()));
+        onView(withId(R.id.weekChart)).check(matches(isDisplayed()));
         onView(withId(R.id.action_bar)).check(matches(isDisplayed()));
         openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
         onView(withText("Settings")).perform(click());
@@ -96,9 +96,9 @@ public class SystemTest {
         onView(withId(R.id.btnStartWalk)).check(matches(not(isDisplayed())));
         onView(withId(R.id.textWalkData)).check(matches(withText("Current walk:\nWalk duration: 0s\n0 steps taken\nDistance walked: 0.0 feet\nAverage speed: 0.0mph")));
         onView(withId(R.id.btnEndWalk)).check(matches(withText("END WALK")));
-        onView(withId(R.id.chart1)).check(matches(isDisplayed()));
+        onView(withId(R.id.weekChart)).check(matches(isDisplayed()));
         onView(withId(R.id.btnEndWalk)).perform(click());
-        onView(withId(R.id.chart1)).check(matches(isDisplayed()));
+        onView(withId(R.id.weekChart)).check(matches(isDisplayed()));
 
         mActivityTestRule.getActivity().finish();
     }

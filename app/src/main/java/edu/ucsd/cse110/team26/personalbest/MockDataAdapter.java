@@ -1,7 +1,5 @@
 package edu.ucsd.cse110.team26.personalbest;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,7 +72,7 @@ class MockDataAdapter implements IDataAdapter {
     public void getFriend(String friendEmail, Callback<List<User>> userCallback) {
         List<User> list = new ArrayList<User>();
         User testUser = new User(0, "name", friendEmail, "1");
-
+        testUser.chatID = "test";
         list.add(testUser);
 
         userCallback.call(list);
@@ -235,14 +233,15 @@ class MockDataAdapter implements IDataAdapter {
     @Override
     public void startChatListener(String chatId, Callback<Message> messageCallback) {
 
+        if( dataBase.get(chatId) != null ) {
+            if (dataBase.get(chatId).size() != 0) {
+                ArrayList<Message> messages = dataBase.get(chatId);
+                for (Message m : messages) {
+                    messageCallback.call(m);
 
-        if(dataBase.get(chatId).size()!=0){
-            ArrayList<Message> messages = dataBase.get(chatId);
-            for(Message m : messages) {
-                messageCallback.call(m);
-
+                }
+                dataBase2.put(chatId, messageCallback);
             }
-            dataBase2.put(chatId,messageCallback);
         }
 
     }

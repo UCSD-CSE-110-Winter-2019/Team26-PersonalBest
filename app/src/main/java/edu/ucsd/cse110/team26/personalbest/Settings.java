@@ -19,10 +19,17 @@ public class Settings {
     private SharedPreferences sharedPreferences;
     private TimeStamper timeStamper;
     private int defGoal = 5000;
+    private boolean DEBUG;
 
     public Settings (Context context, TimeStamper timeStamper) {
         sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE );
         this.timeStamper = timeStamper;
+    }
+
+    public Settings( Context context, boolean DEBUG ) {
+        sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE);
+        this.DEBUG = DEBUG;
+        this.timeStamper = TimeStamperFactory.create(this.DEBUG);
     }
 
     public void saveHeight( int feet, int inches ) {

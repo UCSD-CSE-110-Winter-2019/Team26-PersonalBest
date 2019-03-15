@@ -29,8 +29,14 @@ public class ChatHistoryActivityTest {
     public void chatHistoryTest() {
         Intent i = new Intent();
         i.putExtra("DEBUG", true);
-        i.putExtra("Chat", "");
+        i.putExtra("chat", "test");
         mActivityRule.launchActivity(i);
+
+        try {
+            Thread.sleep(7000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         onView(withId(R.id.btn_send))
                 .check(matches(withText("SEND")));

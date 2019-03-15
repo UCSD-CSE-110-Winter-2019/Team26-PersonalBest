@@ -98,6 +98,27 @@ public class StepCountActivity extends AppCompatActivity {
                     fitnessService.updateStepCount(StepCountActivity.this::setStepCount);
 
                     Thread.sleep(10000);
+
+                    dataAdapter.getDays(28, (list) -> {
+                        month = new ArrayList<Day>();
+                        week = new ArrayList<Day>();
+                        month.addAll(list);
+                        long ts;
+                        if( list.size() != 0 )
+                            ts = timeStamper.previousDay(timeStamper.startOfDay(month.get(month.size()-1).timeStamp));
+                        else
+                            ts = timeStamper.previousDay(timeStamper.startOfDay(timeStamper.now()));
+                        for(int i = month.size(); i < 28; i++ ) {
+                            month.add(new Day(5000, 0, 0, ts));
+                            ts = timeStamper.previousDay(ts);
+                        }
+                        for(int i = 0; i < 7; i++ ) {
+                            week.add(month.get(i));
+                        }
+                        createMonthChart.draw(month);
+                        createWeekChart.draw(week);
+
+                    });
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -127,36 +148,16 @@ public class StepCountActivity extends AppCompatActivity {
         textWalkData = findViewById(R.id.textWalkData);
         weekChart = findViewById(R.id.weekChart);
         monthChart = findViewById(R.id.monthChart);
+        createWeekChart = new BarChart(weekChart);
+        createMonthChart = new BarChart(monthChart);
 
         fitnessService = FitnessServiceFactory.create(DEBUG, this);
         dataAdapter = IDatabaseAdapterFactory.create(DEBUG, this.getApplicationContext());
         timeStamper = new ConcreteTimeStamper();
-        settings = new Settings(getApplicationContext(), timeStamper);
+        settings = new Settings(getApplicationContext(), DEBUG);
 
         fitnessService.setup();
 
-        dataAdapter.getDays(28, (list) -> {
-            month = new ArrayList<Day>();
-            week = new ArrayList<Day>();
-            month.addAll(list);
-            long ts;
-            if( list.size() != 0 )
-                ts = timeStamper.previousDay(timeStamper.startOfDay(month.get(month.size()-1).timeStamp));
-            else
-                ts = timeStamper.previousDay(timeStamper.startOfDay(timeStamper.now()));
-            for(int i = month.size(); i < 28; i++ ) {
-                month.add(new Day(5000, 0, 0, ts));
-                ts = timeStamper.previousDay(ts);
-            }
-            for(int i = 0; i < 7; i++ ) {
-                week.add(month.get(i));
-            }
-            createWeekChart = new BarChart(getApplicationContext(), weekChart, week);
-            createMonthChart = new BarChart(getApplicationContext(), monthChart, month);
-            createMonthChart.draw();
-            createWeekChart.draw();
-
-        });
 
         // 28-day bar chart
         monthChart.setVisibility(View.GONE);
@@ -438,8 +439,6 @@ public class StepCountActivity extends AppCompatActivity {
             fitnessService.getWalks(ts, timeStamper.endOfDay(ts), list);
             if (timeStamper.isToday(ts))
                 walksToday = list;
-
-
         }
         try {
             Thread.sleep(10000);
@@ -465,7 +464,7 @@ public class StepCountActivity extends AppCompatActivity {
         }
         dataAdapter.updateDays(monthUpdate, (success) -> {
             if (success)
-                Log.i(TAG, "Successfully updated last 28 days of data in firestore");
+                Log.i(TAG, "Successfully updated last" + monthUpdate.size() + "days of data in firestore");
         });
     }
 

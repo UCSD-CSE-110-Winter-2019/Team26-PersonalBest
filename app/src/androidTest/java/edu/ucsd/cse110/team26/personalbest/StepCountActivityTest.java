@@ -60,7 +60,8 @@ public class StepCountActivityTest {
 
         onView(withId(R.id.textSteps)).check(matches(isDisplayed()));
         onView(withId(R.id.btnStartWalk)).check(matches(withText("START WALK")));
-        onView(withId(R.id.chart1)).check(matches(isDisplayed()));
+        onView(withId(R.id.weekChart)).check(matches(isDisplayed()));
+        onView(withId(R.id.switch1)).check(matches(isDisplayed()));
         onView(withId(R.id.action_bar)).check(matches(isDisplayed()));
     }
 

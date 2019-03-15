@@ -44,12 +44,14 @@ public class FriendProfileActivity extends AppCompatActivity {
         friendName = findViewById(R.id.friendName);
         friendEmail = findViewById(R.id.friendEmail);
         monthChart = findViewById(R.id.monthChart);
+        createMonthChart = new BarChart(monthChart);
 
         email = getIntent().getExtras().getString("Friend Email");
 
         dataAdapter.getFriendDays(email, 28, (list) -> {
             month = new ArrayList<Day>();
             month.addAll(list);
+            Log.i(getClass().getSimpleName(), "Successfully retrieved" + list.size() + "days of data");
             long ts;
             if( list.size() != 0 )
                 ts = timeStamper.previousDay(timeStamper.startOfDay(month.get(month.size()-1).timeStamp));
@@ -59,8 +61,7 @@ public class FriendProfileActivity extends AppCompatActivity {
                 month.add(new Day(5000, 0, 0, ts));
                 ts = timeStamper.previousDay(ts);
             }
-            createMonthChart = new BarChart(getApplicationContext(), monthChart, month);
-            createMonthChart.draw();
+            createMonthChart.draw(month);
 
         });
 
