@@ -50,6 +50,14 @@ public class BarChart {
         this.mChart = mChart;
     }
 
+    public BarChart(Context context, CombinedChart mChart, List<Day> info)
+    {
+        this.context = context;
+        this.mChart = mChart;
+        this.info = info;
+        this.size = info.size();
+    }
+
     public void draw(List<Day> info)
     {
         this.info = info;
@@ -178,6 +186,11 @@ public class BarChart {
             entries.add(new BarEntry(i, new float[] {info.get(i).getWalkSteps(),
                     info.get(i).getTotalSteps() - info.get(i).getWalkSteps() }));
         }
+    }
+
+    public int getSize()
+    {
+        return this.size;
     }
 
     public String getLastDayOfLabel()

@@ -21,7 +21,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(RobolectricTestRunner.class)
-public class LastSevenDaysBarChartUnitTest
+public class BarChartUnitTest
 {
     private Context context;
     private CombinedChart mChart;
@@ -36,16 +36,11 @@ public class LastSevenDaysBarChartUnitTest
         intent.putExtra("DEBUG", true);
         //activity = Robolectric.buildActivity(StepCountActivity.class, intent).create().get();
 
-        List<Integer> stepCounts =  new ArrayList<>();
-        List<ArrayList<Walk>> walkData = new ArrayList<>();
-        stepCounts.add(0);
+        List<Day>dayList = new ArrayList<>();
+        Day day = new Day(5000, 2000, 1000, 0);
+        dayList.add(day);
 
-        ArrayList<Walk> fakeWalk = new ArrayList<>();
-        Walk walk = new Walk(0,0);
-        fakeWalk.add(walk);
-        walkData.add(fakeWalk);
-
-        createBarChart = new BarChart(context, mChart);
+        createBarChart = new BarChart(context, mChart, dayList);
         createBarChart.setupLabel();
     }
 
@@ -70,7 +65,10 @@ public class LastSevenDaysBarChartUnitTest
         assertEquals(firstDay, weekDay[sevenDaysAgo-1]);
     }
 
-
-
+    @Test
+    public void testSize() {
+        int size = createBarChart.getSize();
+        assertEquals(1, size);
+    }
 
 }
