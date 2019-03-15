@@ -75,6 +75,11 @@ public class MockTimeStamper implements TimeStamper {
     }
 
     @Override
+    public long lastTwentyEightDays() {
+        return 0;
+    }
+
+    @Override
     public String timestampToDayId(long timestamp) {
         return null;
     }

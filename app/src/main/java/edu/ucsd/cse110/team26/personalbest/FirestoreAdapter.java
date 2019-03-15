@@ -190,7 +190,7 @@ class FirestoreAdapter implements IDataAdapter {
         // check if friends
         userRef.document(userEmail).collection(FRIENDS).document(friendEmail).get()
                 .addOnSuccessListener(snapshot -> {
-                    if(snapshot.exists() && snapshot.getData().get("status") == "friends") {
+                    if(snapshot.exists() && snapshot.getData().get("status").toString().equals("friends")) {
                         // pull friend's day data
                         getDays(friendEmail, numOfDays, dayCallback);
                     } else {

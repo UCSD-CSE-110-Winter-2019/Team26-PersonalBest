@@ -12,8 +12,8 @@
         android:id="@+id/textSteps"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="20dp"
-        android:textSize="30sp"
+        android:padding="5dp"
+        android:textSize="20sp"
         android:text="" />
 
     <Button
@@ -37,14 +37,28 @@
         android:id="@+id/textWalkData"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
+        android:textSize="15sp"
         android:text="@string/empty_space" />
 
+    <Switch
+        android:id="@+id/switch1"
+        android:layout_width="181dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:checked="false"
+        android:text="@string/monthly_weekly_summary" />
+
     <com.github.mikephil.charting.charts.CombinedChart
-        android:id="@+id/chart1"
-        android:layout_width="match_parent"
-        android:layout_height="280dp"
-        android:layout_margin="30dp"/>
+        android:id="@+id/monthChart"
+        android:layout_width="385dp"
+        android:layout_height="240dp"
+        android:layout_margin="10dp" />
+
+    <com.github.mikephil.charting.charts.CombinedChart
+        android:id="@+id/weekChart"
+        android:layout_width="385dp"
+        android:layout_height="240dp"
+        android:layout_margin="10dp" />
 
 
 </LinearLayout>

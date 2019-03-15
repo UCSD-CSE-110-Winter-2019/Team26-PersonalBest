@@ -92,15 +92,69 @@ public class Settings {
         return defGoal;
     }
 
-    public List<Integer> getGoalsOfWeek(){
+
+    public List<Integer> getGoalsOfLastWeek() {
         List<Integer> list = new ArrayList<Integer>();
-        list.add(sharedPreferences.getInt("goal_sunday", defGoal));
-        list.add(sharedPreferences.getInt("goal_monday", defGoal));
-        list.add(sharedPreferences.getInt("goal_tuesday", defGoal));
-        list.add(sharedPreferences.getInt("goal_wednesday", defGoal));
-        list.add(sharedPreferences.getInt("goal_thursday", defGoal));
-        list.add(sharedPreferences.getInt("goal_friday", defGoal));
-        list.add(sharedPreferences.getInt("goal_saturday", defGoal));
+        switch( timeStamper.getDayOfWeek() ) {
+            case SUNDAY:
+                list.add(sharedPreferences.getInt("goal_monday", defGoal));
+                list.add(sharedPreferences.getInt("goal_tuesday", defGoal));
+                list.add(sharedPreferences.getInt("goal_wednesday", defGoal));
+                list.add(sharedPreferences.getInt("goal_thursday", defGoal));
+                list.add(sharedPreferences.getInt("goal_friday", defGoal));
+                list.add(sharedPreferences.getInt("goal_saturday", defGoal));
+                list.add(sharedPreferences.getInt("goal_sunday", defGoal)); break;
+            case MONDAY:
+                list.add(sharedPreferences.getInt("goal_tuesday", defGoal));
+                list.add(sharedPreferences.getInt("goal_wednesday", defGoal));
+                list.add(sharedPreferences.getInt("goal_thursday", defGoal));
+                list.add(sharedPreferences.getInt("goal_friday", defGoal));
+                list.add(sharedPreferences.getInt("goal_saturday", defGoal));
+                list.add(sharedPreferences.getInt("goal_sunday", defGoal));
+                list.add(sharedPreferences.getInt("goal_monday", defGoal)); break;
+            case TUESDAY:
+                list.add(sharedPreferences.getInt("goal_wednesday", defGoal));
+                list.add(sharedPreferences.getInt("goal_thursday", defGoal));
+                list.add(sharedPreferences.getInt("goal_friday", defGoal));
+                list.add(sharedPreferences.getInt("goal_saturday", defGoal));
+                list.add(sharedPreferences.getInt("goal_sunday", defGoal));
+                list.add(sharedPreferences.getInt("goal_monday", defGoal));
+                list.add(sharedPreferences.getInt("goal_tuesday", defGoal));break;
+            case WEDNESDAY:
+                list.add(sharedPreferences.getInt("goal_thursday", defGoal));
+                list.add(sharedPreferences.getInt("goal_friday", defGoal));
+                list.add(sharedPreferences.getInt("goal_saturday", defGoal));
+                list.add(sharedPreferences.getInt("goal_sunday", defGoal));
+                list.add(sharedPreferences.getInt("goal_monday", defGoal));
+                list.add(sharedPreferences.getInt("goal_tuesday", defGoal));
+                list.add(sharedPreferences.getInt("goal_wednesday", defGoal));break;
+            case THURSDAY:
+                list.add(sharedPreferences.getInt("goal_friday", defGoal));
+                list.add(sharedPreferences.getInt("goal_saturday", defGoal));
+                list.add(sharedPreferences.getInt("goal_sunday", defGoal));
+                list.add(sharedPreferences.getInt("goal_monday", defGoal));
+                list.add(sharedPreferences.getInt("goal_tuesday", defGoal));
+                list.add(sharedPreferences.getInt("goal_wednesday", defGoal));
+                list.add(sharedPreferences.getInt("goal_thursday", defGoal));break;
+            case FRIDAY:
+                list.add(sharedPreferences.getInt("goal_saturday", defGoal));
+                list.add(sharedPreferences.getInt("goal_sunday", defGoal));
+                list.add(sharedPreferences.getInt("goal_monday", defGoal));
+                list.add(sharedPreferences.getInt("goal_tuesday", defGoal));
+                list.add(sharedPreferences.getInt("goal_wednesday", defGoal));
+                list.add(sharedPreferences.getInt("goal_thursday", defGoal));
+                list.add(sharedPreferences.getInt("goal_friday", defGoal));
+            case SATURDAY:
+            default:
+                list.add(sharedPreferences.getInt("goal_sunday", defGoal));
+                list.add(sharedPreferences.getInt("goal_monday", defGoal));
+                list.add(sharedPreferences.getInt("goal_tuesday", defGoal));
+                list.add(sharedPreferences.getInt("goal_wednesday", defGoal));
+                list.add(sharedPreferences.getInt("goal_thursday", defGoal));
+                list.add(sharedPreferences.getInt("goal_friday", defGoal));
+                list.add(sharedPreferences.getInt("goal_saturday", defGoal));
+
+        }
         return list;
     }
 }
