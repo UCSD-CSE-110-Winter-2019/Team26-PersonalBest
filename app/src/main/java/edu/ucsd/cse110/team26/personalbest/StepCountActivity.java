@@ -238,6 +238,11 @@ public class StepCountActivity extends AppCompatActivity {
         if(user.height == 0) {
             launchGetHeightActivity();
         }
+        user.height = settings.getHeight();
+        dataAdapter.updateUserHeight(user.height, (success)-> {
+            if(success)
+                Log.i(TAG, "Successfully updated user's height in firestore database");
+        });
 
         //create notification channel
         if(notifier == null){
