@@ -3,6 +3,7 @@ package edu.ucsd.cse110.team26.personalbest;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.components.AxisBase;
@@ -47,6 +48,10 @@ public class BarChart {
     {
         this.info = info;
         this.size = info.size();
+        if(info.isEmpty())
+        {
+            Log.d("Barchart", "An loz roi");
+        }
         mChart.setDrawGridBackground(false);
         mChart.getDescription().setText("");
         mChart.setHighlightFullBarEnabled(false);

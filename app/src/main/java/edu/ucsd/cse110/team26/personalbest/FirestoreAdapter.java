@@ -5,8 +5,10 @@ import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -17,6 +19,7 @@ import com.google.firebase.functions.FirebaseFunctions;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,11 +83,8 @@ class FirestoreAdapter implements IDataAdapter {
     public void getUser(Callback<User> userCallback) {
         userRef.document(userEmail).get().addOnSuccessListener(user -> {
             if(user.exists()) {
-                Map<String, Object> userData = user.getData();
-                userCallback.call(new User((int) userData.get("height"),
-                        userData.get("name").toString(),
-                        userData.get("email").toString(),
-                        userData.get("uid").toString()));
+                User current_user = user.toObject(User.class);
+                userCallback.call(current_user);
             } else {
                 userCallback.call(null);
             }
@@ -206,25 +206,52 @@ class FirestoreAdapter implements IDataAdapter {
 
     // Private helper function - DRY
     private void getDays(String email, int numOfDays, Callback<List<Day>> dayCallback) {
-        String startDayId = timeStamper.getTargetID(numOfDays);
+        String[] listID = listDay(numOfDays);
+        List<Day> listDay = new ArrayList<>();
+        for(int i = 0; i < numOfDays ; i++)
+        {
+            DocumentReference db = FirebaseFirestore.getInstance()
+                    .collection(USERS).document(email).collection(DAYS)
+                    .document(listID[i]);
+            db.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>()
+            {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    Day day = documentSnapshot.toObject(Day.class);
+                    listDay.add(day);
+                    Log.d(TAG, documentSnapshot.getId() + " => " + day);
+                }
+            });
+        }
+        if(!listDay.isEmpty())
+        {
+            dayCallback.call(listDay);
+        }
+    }
 
-        db.collection(USERS).document(email).collection(DAYS)
-                //.orderBy("dayID", Query.Direction.ASCENDING)
-                .whereGreaterThanOrEqualTo("dayID", startDayId)
-                .get()
-                .addOnSuccessListener(snapshots -> {
-                    ArrayList<Day> dayList = new ArrayList<>();
-                    for(QueryDocumentSnapshot doc : snapshots) {
-                        Day day = doc.toObject(Day.class);
-                        Log.d(TAG, doc.getId() + " => " + day);
-                        dayList.add(day);
-                    }
-                    dayCallback.call(dayList);
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to fetch day data");
-                    dayCallback.call(null);
-                });
+    public String[] listDay(int size) {
+        String[] listID = new String[size];
+        int count = 0;
+        for(int i = 0 - size + 1 ; i < 1; i++)
+        {
+            Calendar cal = Calendar.getInstance();
+            cal.add(Calendar.DATE, i);
+            String year = String.valueOf(cal.get(Calendar.YEAR));
+            String month = String.valueOf(cal.get(Calendar.MONTH));
+            if(month.length() == 1)
+            {
+                month = "0" + month;
+            }
+            String day = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
+            if(day.length() == 1)
+            {
+                day = "0" + day;
+            }
+            String dayID = year + month + day;
+            listID[count] = dayID;
+            count++;
+        }
+        return listID;
     }
 
     /**

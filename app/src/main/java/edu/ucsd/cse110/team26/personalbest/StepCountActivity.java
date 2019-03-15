@@ -2,19 +2,11 @@ package edu.ucsd.cse110.team26.personalbest;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-
 import android.support.annotation.NonNull;
-
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -75,7 +67,7 @@ public class StepCountActivity extends AppCompatActivity {
     private Walk currentWalk;
     private Day today = new Day();
     private User user = new User();
-    private int height;
+    private long height;
 
     IDataAdapter dataAdapter;
     TimeStamper timeStamper;
@@ -92,13 +84,10 @@ public class StepCountActivity extends AppCompatActivity {
     DocumentReference user_data;
     CollectionReference user_list;
     String COLLECTION_KEY = "users";
-    String RECORD_KEY = "record";
+    String RECORD_KEY = "days";
     String DOCUMENT_KEY;
 
     private GoalNotifications notifier;
-
-
-
     /* ================
     Description: keep the UI update with the current number of taken steps
     Pre:
@@ -166,7 +155,6 @@ public class StepCountActivity extends AppCompatActivity {
 
         DOCUMENT_KEY = getIntent().getExtras().getString("DOCUMENT_KEY");
 
-
         fitnessService = FitnessServiceFactory.create(DEBUG, this);
         dataAdapter = IDatabaseAdapterFactory.create(DEBUG, this.getApplicationContext());
 
@@ -188,6 +176,7 @@ public class StepCountActivity extends AppCompatActivity {
 
         fitnessService.setup();
         setupBarChart();
+
         buttonWalk();
     }
 
@@ -199,18 +188,30 @@ public class StepCountActivity extends AppCompatActivity {
         // =============
         //using Firebase to update data from google fit to firebase
         // =============
-        if(!DEBUG)
+        if(!DEBUG && !stepCounts.isEmpty())
         {
             //updateDataToFirebase();
         }
 
         createBarChart = new BarChart(getApplicationContext(),sevenDayBarchart);
+        createBarChart2 = new BarChart(getApplicationContext(),twentyEightDayBarchart);
+
+        List<Day> listDay = new ArrayList<>();
+        listDay.add(new Day(5000, 200, 100));
+        listDay.add(new Day(5000, 200, 100));
+        listDay.add(new Day(5000, 200, 100));
+        listDay.add(new Day(5000, 200, 100));
+        listDay.add(new Day(5000, 200, 100));
+        listDay.add(new Day(5000, 200, 100));
+        listDay.add(new Day(5000, 200, 100));
+        //createBarChart.draw(listDay);
+
         dataAdapter.getDays(7,listInfo -> createBarChart.draw(listInfo) );
         sevenDayBarchart.setVisibility(View.VISIBLE);
 
-        createBarChart2 = new BarChart(getApplicationContext(),twentyEightDayBarchart);
         dataAdapter.getDays(28,listInfo-> createBarChart2.draw(listInfo));
         twentyEightDayBarchart.setVisibility(View.GONE);
+
 
         Switch sw = findViewById(R.id.switch1);
         sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -272,7 +273,6 @@ public class StepCountActivity extends AppCompatActivity {
             toggleEncouragementMessage = !friendsList.isEmpty();
         });
 
-
         if(updateStep != null && !updateStep.isCancelled()) {
             updateStep.cancel(true);
         }
@@ -288,9 +288,8 @@ public class StepCountActivity extends AppCompatActivity {
         // =============
         if(!stepCounts.isEmpty() && !DEBUG)
         {
-            updateDataToFirebase();
+            //updateDataToFirebase();
         }
-
 
         dataAdapter.getDays(7, weekInfo -> createBarChart.draw(weekInfo));
         dataAdapter.getDays(28, weekInfo -> createBarChart2.draw(weekInfo));

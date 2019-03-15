@@ -1,14 +1,9 @@
 package edu.ucsd.cse110.team26.personalbest;
 
-import android.app.Dialog;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.app.NotificationCompat;
 import android.widget.TextView;
-
-import com.google.gson.annotations.Until;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,15 +11,11 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.shadows.ShadowAlertDialog;
-import org.robolectric.shadows.ShadowNotification;
 import org.robolectric.shadows.ShadowNotificationManager;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
 import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricTestRunner.class)
@@ -41,8 +32,6 @@ public class GoalNotificationsUnitTest {
         Intent intent = new Intent(RuntimeEnvironment.application, StepCountActivity.class);
         intent.putExtra("DEBUG", true);
         activity = Robolectric.buildActivity(StepCountActivity.class, intent).create().get();
-
-
         textSteps = activity.findViewById(R.id.textSteps);
     }
 
