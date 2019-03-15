@@ -3,24 +3,16 @@ package edu.ucsd.cse110.team26.personalbest;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
-import android.text.format.Time;
 import android.util.Log;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
-
-import javax.annotation.Nullable;
 
 import static android.content.Context.MODE_PRIVATE;
 import static java.util.Calendar.FRIDAY;
@@ -52,6 +44,7 @@ public class Settings {
     private int walkSteps;
     private Date date;
     DocumentReference user_data;
+
 
     public Settings (Context context, TimeStamper timeStamper) {
         sharedPreferences = context.getSharedPreferences("user", MODE_PRIVATE );
