@@ -13,11 +13,9 @@ import static org.junit.Assert.assertEquals;
 public class ConcreteTimeStamperUnitTest {
     private ConcreteTimeStamper timeStamper = new ConcreteTimeStamper();
 
-
     /*@Test
     public void isTodayTest(){
         Calendar cal = Calendar.getInstance(TimeZone.getDefault());
-
 
         assertTrue(timeStamper.isToday(cal.getTimeInMillis()));
         assertFalse(timeStamper.isToday(5000));
@@ -33,7 +31,6 @@ public class ConcreteTimeStamperUnitTest {
         date = new Date(time + time % (23 * 60 * 60 * 1000));
         time = date.getTime();
         assertTrue(timeStamper.isToday(time));
-
     }*/
 
     @Test

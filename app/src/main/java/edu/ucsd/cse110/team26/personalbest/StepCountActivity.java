@@ -20,14 +20,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.CombinedChart;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -166,10 +162,6 @@ public class StepCountActivity extends AppCompatActivity {
         timeStamper = new ConcreteTimeStamper();
         currentDate = timeStamper.now();
 
-        FirebaseApp.initializeApp(getApplicationContext());
-        user_data = FirebaseFirestore.getInstance()
-                .collection(COLLECTION_KEY)
-                .document(DOCUMENT_KEY);
         //dataAdapter.getUser(x -> checkHeight(x));
         if(!DEBUG)
         {
