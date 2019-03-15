@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 public class SendMessagesUnitTest {
     private FriendProfileActivity friendProfileActivity;
-    private FriendsListActivity activity;
+    private ChatHistoryActivity activity;
     private ListView list;
     private View itemView;
 
@@ -30,10 +30,14 @@ public class SendMessagesUnitTest {
     @Before
     public void setUp() throws Exception {
 
-
         Intent intent = new Intent(RuntimeEnvironment.application, FriendProfileActivity.class);
         intent.putExtra("DEBUG", true);
+
         friendProfileActivity = Robolectric.buildActivity(FriendProfileActivity.class, intent).create().get();
+
+
+
+
     }
 
     @Test
@@ -47,13 +51,26 @@ public class SendMessagesUnitTest {
         text.setText(message);
 
         friendProfileActivity.friend=testUser;
-        friendProfileActivity.friend.chatID = "sally@gmail.com";
-
-        System.out.println(friendProfileActivity.friend);
+        friendProfileActivity.friend.chatID = "123";
 
         friendProfileActivity.dataAdapter.sendMessage(friendProfileActivity.friend.chatID ,message,(success)->{
             assert(success);
         });
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Intent intent2 = new Intent(RuntimeEnvironment.application, ChatHistoryActivity.class);
+        intent2.putExtra("DEBUG", true);
+        intent2.putExtra("chat", "123");
+        activity = Robolectric.buildActivity(ChatHistoryActivity.class, intent2).create().get();
+
+        TextView chatHistory = activity.findViewById(R.id.chat);
+
+        assertEquals("(17970 days ago) Bob@gmail.com: Hi\n", chatHistory.getText().toString());
 
     }
 
@@ -62,31 +79,27 @@ public class SendMessagesUnitTest {
         User testUser = new User(0, "name", "bob@gmail.com", "1");
 
         friendProfileActivity.friend=testUser;
-        friendProfileActivity.friend.chatID = "sally@gmail.com";
-
-        System.out.println(friendProfileActivity.friend);
+        friendProfileActivity.friend.chatID = "123";
 
         friendProfileActivity.dataAdapter.sendMessage(friendProfileActivity.friend.chatID ,"Hi",(success)->{
 
             assert(success);
         });
-
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
 
         friendProfileActivity.dataAdapter.sendMessage(friendProfileActivity.friend.chatID ,"How are you?",(success)-> {
             assert (success);
         });
-
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
 
         friendProfileActivity.dataAdapter.sendMessage(friendProfileActivity.friend.chatID ,"How's CSE 110?",(success)-> {
             assert (success);
@@ -97,6 +110,14 @@ public class SendMessagesUnitTest {
             e.printStackTrace();
         }
 
+        friendProfileActivity.dataAdapter.sendMessage(friendProfileActivity.friend.chatID ,"How are you?",(success)-> {
+            assert (success);
+        });
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         friendProfileActivity.dataAdapter.sendMessage(friendProfileActivity.friend.chatID ,"I heard it was really hard :(",(success)-> {
             assert (success);
@@ -107,7 +128,20 @@ public class SendMessagesUnitTest {
             e.printStackTrace();
         }
 
+        Intent intent2 = new Intent(RuntimeEnvironment.application, ChatHistoryActivity.class);
+        intent2.putExtra("DEBUG", true);
+        intent2.putExtra("chat", "123");
+        activity = Robolectric.buildActivity(ChatHistoryActivity.class, intent2).create().get();
 
+        TextView chatHistory = activity.findViewById(R.id.chat);
+        String expectedVal = "(17970 days ago) Bob@gmail.com: Hi\n"+
+                "(17970 days ago) Bob@gmail.com: Hi\n" +
+                "(17970 days ago) Bob@gmail.com: How are you?\n" +
+                "(17970 days ago) Bob@gmail.com: How's CSE 110?\n" +
+                "(17970 days ago) Bob@gmail.com: How are you?\n" +
+                "(17970 days ago) Bob@gmail.com: I heard it was really hard :(\n";
+
+        assertEquals(expectedVal, chatHistory.getText().toString());
 
     }
 
