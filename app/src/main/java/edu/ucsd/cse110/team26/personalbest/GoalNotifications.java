@@ -8,9 +8,10 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Build;
-import android.content.SharedPreferences;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.app.TaskStackBuilder;
+
 
 import static android.app.PendingIntent.getActivity;
 
@@ -23,9 +24,15 @@ public class GoalNotifications {//extends BroadcastReceiver {
         this.context=context;
     }
     public NotificationCompat.Builder createNotification(Context context){
+        TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this.context);
+
         Intent intent = new Intent(context, SettingsActivity.class);
+
+        taskStackBuilder.addParentStack(StepCountActivity.class);
+        taskStackBuilder.addNextIntent(intent);
+
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+        PendingIntent pendingIntent = taskStackBuilder.getPendingIntent( 0, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "GoalNotifyID")
                 .setSmallIcon(R.drawable.ic_notifications_black_24dp)
