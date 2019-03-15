@@ -63,6 +63,7 @@ public class StepCountActivity extends AppCompatActivity {
     private Day today = new Day();
     private User user = new User();
 
+    private boolean showDialogNotifications = true;
     IDataAdapter dataAdapter;
     TimeStamper timeStamper;
 
@@ -88,6 +89,7 @@ public class StepCountActivity extends AppCompatActivity {
                 while(run) {
                     if( !timeStamper.isToday(currentDate) ) {
                         initializeNewDay();
+                        showDialogNotifications = true;
                         currentDate = timeStamper.now();
                     }
                     fitnessService.updateStepCount(StepCountActivity.this::setStepCount);
@@ -278,17 +280,18 @@ public class StepCountActivity extends AppCompatActivity {
             else{
                 suggestedGoalNum = 15000;
             }
+            if(showDialogNotifications) {
+                //notification for when they cmolpete the goal;
+                notifier.showNotification();
 
-            //notification for when they cmolpete the goal;
-            notifier.showNotification();
+                goalDialog = createAlertDialog(suggestedGoalNum);
 
-            goalDialog = createAlertDialog(suggestedGoalNum);
+                Toast completeGoalToast = Toast.makeText(getApplicationContext(),
+                        String.format(Locale.getDefault(), "Congratulations, you've completed your goal of %d steps today!", today.goal),
+                        Toast.LENGTH_SHORT);
 
-            Toast completeGoalToast = Toast.makeText(getApplicationContext(),
-                    String.format(Locale.getDefault(),"Congratulations, you've completed your goal of %d steps today!", today.goal),
-                    Toast.LENGTH_SHORT);
-
-            completeGoalToast.show();
+                completeGoalToast.show();
+            }
             goalCompleted = true;
         } else {
             goalCompleted = false;
@@ -360,12 +363,14 @@ public class StepCountActivity extends AppCompatActivity {
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES", (dialog, which) -> {
                     Settings settings = new Settings(getApplicationContext(), timeStamper);
                     settings.saveGoal(suggestedGoal);
+                    showDialogNotifications = true;
 //                    if(notificationManager!=null){
 //                        notificationManager.cancelAll();
 //                    }
                     dialog.dismiss();
                 });
         alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) ->{
+            showDialogNotifications = false;
 //            if(notificationManager!=null){
 //                notificationManager.cancelAll();
 //            }
