@@ -116,8 +116,6 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "Env checked, debug flag is " + DEBUG);
         Log.i(TAG, "Env checked, espresso flag is " + ESPRESSO);
 
-        DEBUG = true;
-        ESPRESSO = true;
     }
 
     public void launchStepCountActivity() {

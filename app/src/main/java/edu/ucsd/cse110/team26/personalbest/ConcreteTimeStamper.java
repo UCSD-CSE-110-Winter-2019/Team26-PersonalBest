@@ -110,7 +110,7 @@ public class ConcreteTimeStamper implements TimeStamper {
     public long previousDay(long timeStamp) {
         Calendar cal = Calendar.getInstance(TimeZone.getDefault());
         cal.setTimeInMillis(timeStamp);
-        cal.add(Calendar.DATE, 1);
+        cal.add(Calendar.DATE, -1);
         return cal.getTimeInMillis();
     }
 

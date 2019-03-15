@@ -210,6 +210,7 @@ class FirestoreAdapter implements IDataAdapter {
         for (int i = 0; i < numOfDays; i++) startTimestamp = timeStamper.previousDay(startTimestamp);
         String startDayId = timeStamper.timestampToDayId(startTimestamp);
 
+        Log.d(TAG, "Getting " + email + "'s day data from after " + startDayId);
         userRef.document(email).collection(DAYS)
                 .orderBy("dayId", Query.Direction.DESCENDING)
                 .whereGreaterThanOrEqualTo("dayId", startDayId)
@@ -218,7 +219,7 @@ class FirestoreAdapter implements IDataAdapter {
                     ArrayList<Day> dayList = new ArrayList<>();
                     for(QueryDocumentSnapshot doc : snapshots) {
                         Day day = doc.toObject(Day.class);
-                        Log.d(TAG, doc.getId() + " => " + day);
+                        // Log.d(TAG, doc.getId() + " => " + day);
                         dayList.add(day);
                     }
                     dayCallback.call(dayList);

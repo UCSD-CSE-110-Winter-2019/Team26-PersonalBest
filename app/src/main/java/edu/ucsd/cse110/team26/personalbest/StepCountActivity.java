@@ -97,9 +97,8 @@ public class StepCountActivity extends AppCompatActivity {
                     }
                     fitnessService.updateStepCount(StepCountActivity.this::setStepCount);
 
-                    Thread.sleep(10000);
-
                     dataAdapter.getDays(28, (list) -> {
+                        Log.d(TAG, list.toString());
                         month = new ArrayList<Day>();
                         week = new ArrayList<Day>();
                         month.addAll(list);
@@ -117,8 +116,9 @@ public class StepCountActivity extends AppCompatActivity {
                         }
                         createMonthChart.draw(month);
                         createWeekChart.draw(week);
-
                     });
+
+                    Thread.sleep(10000);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
