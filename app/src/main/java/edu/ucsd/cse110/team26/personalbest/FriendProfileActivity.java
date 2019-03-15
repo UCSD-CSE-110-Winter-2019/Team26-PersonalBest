@@ -41,6 +41,7 @@ public class FriendProfileActivity extends AppCompatActivity {
             friend = user.get(0);
             friendName.setText(friend.name);
             Log.d(getClass().getSimpleName(), "Chat ID: " + friend.chatID);
+            dataAdapter.subscribeToChatNotifications(friend.chatID);
         });
 
         EditText message = findViewById(R.id.sendMsg);
@@ -78,7 +79,7 @@ public class FriendProfileActivity extends AppCompatActivity {
             case R.id.action_chat_history:
                 Intent intent = new Intent(FriendProfileActivity.this, ChatHistoryActivity.class);
                 intent.putExtra("Friend Email", friend.email);
-                intent.putExtra("Chat", friend.chatID);
+                intent.putExtra("chat", friend.chatID);
                 intent.putExtra("DEBUG", DEBUG);
                 startActivity(intent);
         }

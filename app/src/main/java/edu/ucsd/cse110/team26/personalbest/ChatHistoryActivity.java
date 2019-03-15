@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 public class ChatHistoryActivity extends AppCompatActivity {
 
+    private final String TAG = getClass().getSimpleName();
+
     private IDataAdapter dataAdapter;
     private boolean DEBUG;
     private String chatID;
@@ -25,23 +27,27 @@ public class ChatHistoryActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-
         if(getIntent().getExtras() != null) {
             DEBUG = getIntent().getExtras().getBoolean("DEBUG", false);
-            chatID = getIntent().getExtras().getString("Chat");
+            chatID = getIntent().getExtras().getString("chat");
         }
         dataAdapter = IDatabaseAdapterFactory.create(DEBUG, getApplicationContext());
-        Log.d(getClass().getSimpleName(), "Chat ID: " + chatID);
+        Log.d(TAG, "Chat ID: " + chatID);
+
+        if(chatID.equals("")) {
+            Log.e(TAG, "Chat id invalid");
+            finish();
+        }
 
         EditText message = findViewById(R.id.text_message);
         Button btnSend = findViewById(R.id.btn_send);
         btnSend.setOnClickListener(view -> {
             dataAdapter.sendMessage(chatID, message.getText().toString(), (success) -> {
                 if(success) {
-                    Log.d(getClass().getSimpleName(), "Sent message");
+                    Log.d(TAG, "Sent message");
                     message.setText("");
                 }
-                else Log.d(getClass().getSimpleName(), "Failed to send message");
+                else Log.d(TAG, "Failed to send message");
             });
         });
 
