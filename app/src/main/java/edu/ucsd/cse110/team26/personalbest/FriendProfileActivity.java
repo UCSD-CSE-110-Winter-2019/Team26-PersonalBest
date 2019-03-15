@@ -62,9 +62,7 @@ public class FriendProfileActivity extends AppCompatActivity {
                 month.add(new Day(5000, 0, 0, ts));
                 ts = timeStamper.previousDay(ts);
             }
-            Collections.reverse(month);
             createMonthChart.draw(month);
-
         });
 
         Log.i(getClass().getSimpleName(), getIntent().getStringExtra("Friend Email"));

@@ -115,8 +115,6 @@ public class StepCountActivity extends AppCompatActivity {
                         for(int i = 0; i < 7; i++ ) {
                             week.add(month.get(i));
                         }
-                        Collections.reverse(month);
-                        Collections.reverse(week);
                         createMonthChart.draw(month);
                         createWeekChart.draw(week);
                     });
@@ -458,8 +456,6 @@ public class StepCountActivity extends AppCompatActivity {
         for(List<Walk> walklist : walkData) {
             Log.i(TAG, walklist.toString());
         }
-
-        Collections.reverse(walkData);
 
         ts = timeStamper.startOfDay(timeStamper.lastTwentyEightDays());
         for (int i = 0; i < 28; i++) {

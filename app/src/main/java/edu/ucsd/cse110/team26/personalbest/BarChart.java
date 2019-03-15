@@ -16,6 +16,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 
 public class BarChart {
@@ -33,6 +34,7 @@ public class BarChart {
     public void draw(List<Day> days)
     {
         this.days = days;
+        Collections.reverse(days);
         if(days.size() == 28) this.size = 28;
         else this.size = 7;
         mChart.setDrawGridBackground(false);
@@ -147,7 +149,6 @@ public class BarChart {
     }
 
     private void getBarEntries(ArrayList<BarEntry> entries){
-        long[] totalStep = new long[this.size];
         for (int k=0; k<this.size; k++) {
             entries.add(new BarEntry(k, new float[] {days.get(k).walkSteps, days.get(k).totalSteps-days.get(k).walkSteps}));
         }
