@@ -439,6 +439,7 @@ public class StepCountActivity extends AppCompatActivity {
             fitnessService.getWalks(ts, timeStamper.endOfDay(ts), list);
             if (timeStamper.isToday(ts))
                 walksToday = list;
+            ts = timeStamper.nextDay(ts);
         }
         try {
             Thread.sleep(10000);
