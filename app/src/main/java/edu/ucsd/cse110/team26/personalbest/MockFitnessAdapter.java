@@ -21,11 +21,6 @@ class MockFitnessAdapter implements FitnessService {
     }
 
     @Override
-    public int getRequestCode() {
-        return 0;
-    }
-
-    @Override
     public void setup() {
 
     }

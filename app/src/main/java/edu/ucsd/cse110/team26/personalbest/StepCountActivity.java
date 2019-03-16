@@ -291,20 +291,6 @@ public class StepCountActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // If authentication was required during google fit setup, this will be called after the user authenticates
-        if (resultCode == Activity.RESULT_OK && !ESPRESSO) {
-            if (requestCode == fitnessService.getRequestCode()) {
-                if(updateStep != null && !updateStep.isCancelled()) updateStep.cancel(true);
-                updateStep = new UpdateStep();
-                updateStep.execute(-1);
-            }
-        } else {
-            Log.e(TAG, "ERROR, google fit result code: " + resultCode);
-        }
-    }
-
     public void setStepCount(long stepCount) {
         Settings settings = new Settings(getApplicationContext(), timeStamper);
         today.totalSteps = stepCount;
