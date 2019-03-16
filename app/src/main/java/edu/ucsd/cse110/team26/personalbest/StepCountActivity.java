@@ -25,8 +25,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import static java.lang.Thread.sleep;
-
 // reference: https://www.studytutorial.in/android-combined-line-and-bar-chart-using-mpandroid-library-android-tutorial
 
 public class StepCountActivity extends AppCompatActivity {
@@ -49,7 +47,7 @@ public class StepCountActivity extends AppCompatActivity {
     private EditText increment;
 
     FitnessService fitnessService;
-    private long previousDaySteps = 0;
+    long previousDaySteps = 0;
     private long lastEncouragingMessageSteps = 0;
     public long encouragementInc = 500;
 
@@ -165,7 +163,6 @@ public class StepCountActivity extends AppCompatActivity {
         settings = new Settings(getApplicationContext(), DEBUG);
 
         fitnessService.setup();
-
 
         // 28-day bar chart
         monthChart.setVisibility(View.GONE);
@@ -341,11 +338,13 @@ public class StepCountActivity extends AppCompatActivity {
             if( toggleEncouragementMessage ) {
                 if( !(increment.getText().toString()).equals("")) {
                     encouragementInc = Long.parseLong(increment.getText().toString());
+                    Log.i(TAG, "Set new increment for encouraging messages to"+encouragementInc);
                 }
-                if (previousDaySteps != 0 && today.totalSteps < today.goal) {
+                if (previousDaySteps != 0  && previousDaySteps < today.totalSteps && today.totalSteps < today.goal) {
                     int improvementPercentage = (int) ((today.totalSteps - previousDaySteps) / previousDaySteps) * 100;
                     if ((lastEncouragingMessageSteps == 0 && previousDaySteps + encouragementInc <= today.totalSteps)
                             || (lastEncouragingMessageSteps + encouragementInc <= today.totalSteps && lastEncouragingMessageSteps != 0)) {
+                        Log.i(TAG, "Sending Encouragement message");
                         lastEncouragingMessageSteps = today.totalSteps - (today.totalSteps - previousDaySteps) % encouragementInc;
                         EncouragementMessage.makeEncouragementMessage(getApplicationContext(), improvementPercentage);
                     }
@@ -424,24 +423,12 @@ public class StepCountActivity extends AppCompatActivity {
     }
 
     /**
-     * Resets previousDaySteps and saves previous day's goal as new goal
+     * Resets saves previous day's goal as new goal
      */
     public void initializeNewDay() {
-        long prev[] = timeStamper.getPreviousDay();
-        List<Integer> previousSteps = new ArrayList<>();
-        try {
-            fitnessService.getStepsCount(prev[0], prev[1], previousSteps);
-            sleep(1000);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (previousSteps.size() == 0)
-            previousSteps.add(0);
-        previousDaySteps = previousSteps.get(0);
-        Log.i(TAG, String.format("New day. Setting previous day's steps to %d", previousDaySteps));
-        Settings settings = new Settings(getApplicationContext(), timeStamper);
         settings.saveGoal((int) today.goal);
         lastEncouragingMessageSteps = 0;
+        encouragementInc = 500;
     }
 
     public void updateDatabase() {
@@ -473,6 +460,8 @@ public class StepCountActivity extends AppCompatActivity {
         }
 
         ts = timeStamper.startOfDay(timeStamper.lastTwentyEightDays());
+        previousDaySteps = stepCounts.get(1);
+        Log.i(TAG, "Setting previous day steps to " + previousDaySteps);
         for (int i = 0; i < 28; i++) {
             walkStepCount = 0;
             for (Walk w : walkData.get(i)) {
@@ -484,7 +473,6 @@ public class StepCountActivity extends AppCompatActivity {
             else
                 monthUpdate.add(new Day((int) weekGoal.get(6), (int) stepCounts.get(i), walkStepCounts.get(i), ts));
             ts = timeStamper.nextDay(ts);
-            Log.i(TAG, "Initializing step count" + stepCounts.get(i) +  "for " + timeStamper.timestampToDayId(ts));
         }
         dataAdapter.updateDays(monthUpdate, (success) -> {
             if (success)

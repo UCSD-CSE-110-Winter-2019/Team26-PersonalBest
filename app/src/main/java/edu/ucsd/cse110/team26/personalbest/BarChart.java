@@ -35,8 +35,7 @@ public class BarChart {
     {
         this.days = days;
         Collections.reverse(days);
-        if(days.size() == 28) this.size = 28;
-        else this.size = 7;
+        size = days.size();
         mChart.setDrawGridBackground(false);
         mChart.getDescription().setText("");
         mChart.setHighlightFullBarEnabled(false);

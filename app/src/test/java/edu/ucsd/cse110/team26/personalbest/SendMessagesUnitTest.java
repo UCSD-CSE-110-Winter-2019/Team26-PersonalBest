@@ -56,7 +56,8 @@ public class SendMessagesUnitTest {
 
         TextView chatHistory = activity.findViewById(R.id.chat);
 
-        assert(chatHistory.getText().toString().contains("(17970 days ago) Bob@gmail.com: Hi\n"));
+        assert(chatHistory.getText().toString().contains("Bob@gmail.com: Hi\n"));
+
 
     }
 
@@ -120,14 +121,14 @@ public class SendMessagesUnitTest {
         activity = Robolectric.buildActivity(ChatHistoryActivity.class, intent2).create().get();
 
         TextView chatHistory = activity.findViewById(R.id.chat);
-        String expectedVal = "(17970 days ago) Bob@gmail.com: Hi\n" +
-                "(17970 days ago) Bob@gmail.com: How are you?\n" +
-                "(17970 days ago) Bob@gmail.com: How's CSE 110?\n" +
-                "(17970 days ago) Bob@gmail.com: How are you?\n" +
-                "(17970 days ago) Bob@gmail.com: I heard it was really hard :(\n";
-
-        assert(chatHistory.getText().toString().contains(expectedVal));
-
+        String expectedMsg1 = "Bob@gmail.com: Hi\n";
+        String expectedMsg2 = "Bob@gmail.com: How are you?\n";
+        String expectedMsg3 = "Bob@gmail.com: How's CSE 110?\n";
+        String expectedMsg4 = "Bob@gmail.com: I heard it was really hard :(";
+        assert(chatHistory.getText().toString().contains(expectedMsg1));
+        assert(chatHistory.getText().toString().contains(expectedMsg2));
+        assert(chatHistory.getText().toString().contains(expectedMsg3));
+        assert(chatHistory.getText().toString().contains(expectedMsg4));
     }
 
 }

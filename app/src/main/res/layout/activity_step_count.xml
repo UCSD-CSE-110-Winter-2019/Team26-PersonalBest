@@ -23,6 +23,8 @@
             android:layout_width="80dp"
             android:layout_height="20dp"
             android:textSize="12sp"
+            android:textColor="#000"
+            android:text=""
             android:hint="@string/hint_mock_encouragement"
             android:id="@+id/encourageMessage"
             android:inputType="number" />

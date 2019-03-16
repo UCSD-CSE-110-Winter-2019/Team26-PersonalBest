@@ -41,10 +41,11 @@ public class EncouragingMessageUnitTest {
      */
     @Test
     public void testEncouragingMessage() {
-        activity.initializeNewDay();
         Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
         settings.saveGoal(10000);
         activity.setStepCount(500);
+
+        activity.previousDaySteps = 500;
 
         assertNull(ShadowToast.getTextOfLatestToast());
 
