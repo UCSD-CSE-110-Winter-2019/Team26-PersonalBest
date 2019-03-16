@@ -11,11 +11,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.DataType;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
@@ -155,13 +152,13 @@ public class MainActivity extends AppCompatActivity {
     public void launchStepCountActivity() {
 
         PeriodicWorkRequest stepCheckRequest = new PeriodicWorkRequest.Builder(StepCheckWorker.class,
-                1,
-                TimeUnit.HOURS)
+                5, TimeUnit.MINUTES,
+                5, TimeUnit.MINUTES)
                 .addTag("StepCheckWorker")
                 .build();
 
         if(!DEBUG) {
-            WorkManager.getInstance().cancelAllWorkByTag("StepCheckWorker");
+            WorkManager.getInstance().cancelAllWork().getResult();
             WorkManager.getInstance().enqueue(stepCheckRequest);
             Log.d(TAG, "Started StepCheckWorker work");
         }

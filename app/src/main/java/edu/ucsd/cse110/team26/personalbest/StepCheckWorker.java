@@ -46,8 +46,13 @@ public class StepCheckWorker extends Worker {
             List<Walk> walkList = new ArrayList<>();
             try {
                 fitnessService.getWalks(timeStamper.startOfDay(timeStamper.now()), timeStamper.endOfDay(timeStamper.now()), walkList);
-                Thread.sleep(10000);
                 int walkSteps = 0;
+                int timeout = 0;
+                while(walkList.size() == 0 && timeout < 30) {
+                    timeout++;
+                    Thread.sleep(1000);
+                }
+                if(timeout >= 30 && walkList.size() == 0) return;
                 for(Walk w : walkList) {
                     walkSteps += w.getSteps();
                 }

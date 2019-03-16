@@ -66,7 +66,6 @@ public class StepCountActivity extends AppCompatActivity {
     private Day today = new Day();
     private User user = new User();
 
-    private boolean showDialogNotifications = true;
     IDataAdapter dataAdapter;
     TimeStamper timeStamper;
 
@@ -89,8 +88,8 @@ public class StepCountActivity extends AppCompatActivity {
 
         @Override
         protected Integer doInBackground(Integer... params) {
-            updateDatabase();
             try {
+                updateDatabase();
                 resp = params[0];
                 while(run) {
                     if( !timeStamper.isToday(currentDate) ) {
@@ -306,10 +305,10 @@ public class StepCountActivity extends AppCompatActivity {
             else{
                 suggestedGoalNum = 15000;
             }
-            boolean hasOccured = getSharedPreferences("user", MODE_PRIVATE).contains("ShowDialog");
-            System.out.println(hasOccured);
-            if(!hasOccured ) {
-                //notification for when they cmolpete the goal;
+            boolean hasOccurred = timeStamper.isToday(getSharedPreferences("user", MODE_PRIVATE).getLong("ShowDialog", 0));
+
+            if(!hasOccurred) {
+                //notification for when they complete the goal;
                 notifier.showNotification();
 
                 createAlertDialog(suggestedGoalNum);
@@ -320,8 +319,6 @@ public class StepCountActivity extends AppCompatActivity {
 
                 completeGoalToast.show();
             }
-
-
             goalCompleted = true;
         } else {
             goalCompleted = false;
@@ -393,18 +390,17 @@ public class StepCountActivity extends AppCompatActivity {
     public void createAlertDialog(final int suggestedGoal) {
         AlertDialog alertDialog = new AlertDialog.Builder(StepCountActivity.this).create();
         alertDialog.setTitle("Suggesting Goals");
+        SharedPreferences.Editor editor1 = getSharedPreferences("user",MODE_PRIVATE).edit();
+        editor1.putLong("ShowDialog", timeStamper.now()).apply();
 
-        alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoal);
+        alertDialog.setMessage("Would you like to increase your goal to " + suggestedGoal + "?");
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES", (dialog, which) -> {
                     Settings settings = new Settings(getApplicationContext(), timeStamper);
                     settings.saveGoal(suggestedGoal);
+                    editor1.putLong("ShowDialog", 0).apply();
                     dialog.dismiss();
                 });
-        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) ->{
-            SharedPreferences.Editor editor1 = getSharedPreferences("user",MODE_PRIVATE).edit();
-            editor1.putLong("ShowDialog", timeStamper.now()).apply();
-            dialog.dismiss();
-        });
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) -> dialog.dismiss());
         alertDialog.show();
     }
 
@@ -421,11 +417,6 @@ public class StepCountActivity extends AppCompatActivity {
         settings.saveGoal((int) today.goal);
         lastEncouragingMessageSteps = 0;
         encouragementInc = 500;
-
-        if(getSharedPreferences("user", MODE_PRIVATE).contains("ShowDialog")){
-            SharedPreferences.Editor editNewDay = getSharedPreferences("user", MODE_PRIVATE).edit();
-            editNewDay.remove("ShowDialog");
-        }
     }
 
     public void updateDatabase() {
@@ -448,7 +439,9 @@ public class StepCountActivity extends AppCompatActivity {
             ts = timeStamper.nextDay(ts);
         }
         try {
-            Thread.sleep(10000);
+            while(stepCounts.size() == 0)
+                Log.i(TAG, "updateDatabase waiting for stepCounts...");
+                Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -466,9 +459,9 @@ public class StepCountActivity extends AppCompatActivity {
             }
             walkStepCounts.add(i, walkStepCount);
             if (i >= 21)
-                monthUpdate.add(new Day((int) weekGoal.get(i - 21), (int) stepCounts.get(i), walkStepCounts.get(i), ts));
+                monthUpdate.add(new Day(weekGoal.get(i - 21), stepCounts.get(i), walkStepCounts.get(i), ts));
             else
-                monthUpdate.add(new Day((int) weekGoal.get(6), (int) stepCounts.get(i), walkStepCounts.get(i), ts));
+                monthUpdate.add(new Day(weekGoal.get(6), stepCounts.get(i), walkStepCounts.get(i), ts));
             ts = timeStamper.nextDay(ts);
         }
         dataAdapter.updateDays(monthUpdate, (success) -> {
