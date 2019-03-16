@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.test.espresso.DataInteraction;
+import android.support.test.espresso.Espresso;
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.ViewInteraction;
@@ -176,7 +177,7 @@ public class SystemSocialTest {
             e.printStackTrace();
         }
 
-        onView(withContentDescription("Navigate up")).perform(click());
+        Espresso.pressBack();
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
@@ -297,7 +298,7 @@ public class SystemSocialTest {
         onView(withId(R.id.chat)).check(matches(withHint("message will appear here")));
         onView(withId(R.id.chat)).check(matches(isDisplayed()));
 
-        onView(withContentDescription("Navigate up")).perform(click());
+        Espresso.pressBack();
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
@@ -370,7 +371,7 @@ public class SystemSocialTest {
 
 
 
-        onView(withContentDescription("Navigate up")).perform(click());
+        Espresso.pressBack();
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
@@ -381,7 +382,7 @@ public class SystemSocialTest {
             e.printStackTrace();
         }
 
-        onView(withContentDescription("Navigate up")).perform(click());
+        Espresso.pressBack();
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
@@ -417,7 +418,7 @@ public class SystemSocialTest {
             e.printStackTrace();
         }
 
-        onView(withContentDescription("Navigate up")).perform(click());
+        Espresso.pressBack();
 
         onView(withId(R.id.switch1)).perform(click());
         onView(withId(R.id.monthChart)).check(matches(isDisplayed()));
