@@ -48,6 +48,7 @@ public class FriendsListActivity extends AppCompatActivity {
             friendAdapter.notifyDataSetChanged();
         });
 
+        //Thread.sleep
         dataAdapter.getSentFriendRequests( (List<User> send) -> {
             friendsList.sentRequests.addAll(send);
             Log.i(getClass().getName(), "Count of sent requests:" + send.size());

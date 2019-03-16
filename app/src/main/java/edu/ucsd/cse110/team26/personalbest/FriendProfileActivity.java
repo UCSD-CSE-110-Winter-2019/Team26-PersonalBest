@@ -8,10 +8,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.github.mikephil.charting.charts.CombinedChart;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class FriendProfileActivity extends AppCompatActivity {
     private TextView friendName;
@@ -19,6 +24,11 @@ public class FriendProfileActivity extends AppCompatActivity {
     private boolean DEBUG;
     public IDataAdapter dataAdapter;
     private String email;
+    private TimeStamper timeStamper;
+    private List<Day> month;
+
+    private CombinedChart monthChart;
+    private BarChart createMonthChart;
 
     public User friend;
 
@@ -30,11 +40,30 @@ public class FriendProfileActivity extends AppCompatActivity {
 
         DEBUG = getIntent().getExtras().getBoolean("DEBUG", false);
         dataAdapter = IDatabaseAdapterFactory.create(DEBUG, getApplicationContext());
+        timeStamper = TimeStamperFactory.create(DEBUG);
 
         friendName = findViewById(R.id.friendName);
         friendEmail = findViewById(R.id.friendEmail);
+        monthChart = findViewById(R.id.monthChart);
+        createMonthChart = new BarChart(monthChart);
 
         email = getIntent().getExtras().getString("Friend Email");
+
+        dataAdapter.getFriendDays(email, 28, (list) -> {
+            month = new ArrayList<Day>();
+            month.addAll(list);
+            Log.i(getClass().getSimpleName(), "Successfully retrieved" + list.size() + "days of data");
+            long ts;
+            if( list.size() != 0 )
+                ts = timeStamper.previousDay(timeStamper.startOfDay(month.get(month.size()-1).timeStamp));
+            else
+                ts = timeStamper.previousDay(timeStamper.startOfDay(timeStamper.now()));
+            for(int i = month.size(); i < 28; i++ ) {
+                month.add(new Day(5000, 0, 0, ts));
+                ts = timeStamper.previousDay(ts);
+            }
+            createMonthChart.draw(month);
+        });
 
         Log.i(getClass().getSimpleName(), getIntent().getStringExtra("Friend Email"));
         dataAdapter.getFriend(email, (user) -> {
@@ -46,7 +75,6 @@ public class FriendProfileActivity extends AppCompatActivity {
 
         EditText message = findViewById(R.id.sendMsg);
         Button btnSendMsg = findViewById(R.id.btnSendMsg);
-        //System.out.println(friend);
         btnSendMsg.setOnClickListener(view -> {
             dataAdapter.sendMessage(friend.chatID, message.getText().toString(), (success) -> {
 

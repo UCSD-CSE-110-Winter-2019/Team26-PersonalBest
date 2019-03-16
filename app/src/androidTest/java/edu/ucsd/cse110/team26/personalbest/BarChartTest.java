@@ -19,11 +19,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.action.ViewActions.replaceText;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
@@ -32,7 +29,7 @@ import static org.hamcrest.Matchers.not;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class SystemTest {
+public class BarChartTest {
 
     @Rule
     public ActivityTestRule<MainActivity> mActivityTestRule = new ActivityTestRule<>(MainActivity.class);
@@ -47,60 +44,34 @@ public class SystemTest {
     }
 
     /**
-     * Integration test that checks functionality of Milestone 1 features
+     * Tests whether UI components in StepCount Activity exist with the correct text
      */
     @Test
-    public void scenarioBasedSystemTest() {
+    public void stepCountActivityTest() {
         onView(withId(R.id.buttonGoToSteps)).perform(click());
 
         onView(withId(R.id.feet)).perform(new setValueNumberPicker(5));
+
         onView(withId(R.id.inch)).perform(new setValueNumberPicker(5));
         onView(withId(R.id.confirm))
                 .perform(click());
         onView(withId(R.id.confirm))
                 .perform(click());
 
+
         onView(withId(R.id.textSteps)).check(matches(isDisplayed()));
-        onView(withId(R.id.textSteps)).check(matches(withText("0/5000 steps today")));
         onView(withId(R.id.btnStartWalk)).check(matches(withText("START WALK")));
         onView(withId(R.id.weekChart)).check(matches(isDisplayed()));
+        onView(withId(R.id.switch1)).check(matches(isDisplayed()));
         onView(withId(R.id.action_bar)).check(matches(isDisplayed()));
-        openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
-        onView(withText("Settings")).perform(click());
 
-        onView(withId(R.id.btnSettingsSave)).check(matches(isDisplayed()));
-        onView(withId(R.id.btnSettingsGoBack)).check(matches(isDisplayed()));
-        onView(withId(R.id.btnSettingsGoBack)).check(matches(withText("GO BACK")));
-        onView(withId(R.id.btnSettingsSave)).check(matches(withText("SAVE")));
-        onView(withId(R.id.goalEdit)).check(matches(isDisplayed()));
-        onView(withId(R.id.feetNumberPicker)).check(matches(isDisplayed()));
-        onView(withId(R.id.inchesNumberPicker)).check(matches(isDisplayed()));
-        onView(withId(R.id.heightLabel)).check(matches(isDisplayed()));
-        onView(withId(R.id.heightLabel)).check(matches(withText("Height:")));
-        onView(withId(R.id.goalLabel)).check(matches(isDisplayed()));
-        onView(withId(R.id.goalLabel)).check(matches(withText("Goal:")));
-        onView(withId(R.id.goalEdit)).check(matches(withText("5000")));
-        onView(withId(R.id.goalEdit)).perform(replaceText("1000"));
-        onView(withId(R.id.btnSettingsSave)).perform(click());
-        onView(withId(R.id.btnSettingsGoBack)).perform(click());
-
-
-        openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
-        onView(withText("Settings")).perform(click());
-
-        onView(withId(R.id.goalEdit)).check(matches(withText("1000")));
-        onView(withId(R.id.btnSettingsGoBack)).perform(click());
-
-        onView(withId(R.id.textSteps)).check(matches(withText("0/1000 steps today")));
-        onView(withId(R.id.btnStartWalk)).perform((click()));
-        onView(withId(R.id.btnStartWalk)).check(matches(not(isDisplayed())));
-        onView(withId(R.id.textWalkData)).check(matches(withText("Current walk:\nWalk duration: 0s\n0 steps taken\nDistance walked: 0.0 feet\nAverage speed: 0.0mph")));
-        onView(withId(R.id.btnEndWalk)).check(matches(withText("END WALK")));
+        onView(withId(R.id.switch1)).perform(click());
+        onView(withId(R.id.monthChart)).check(matches(isDisplayed()));
+        onView(withId(R.id.weekChart)).check(matches(not(isDisplayed())));
+        onView(withId(R.id.switch1)).perform(click());
         onView(withId(R.id.weekChart)).check(matches(isDisplayed()));
-        onView(withId(R.id.btnEndWalk)).perform(click());
-        onView(withId(R.id.weekChart)).check(matches(isDisplayed()));
+        onView(withId(R.id.monthChart)).check(matches(not(isDisplayed())));
 
-        mActivityTestRule.getActivity().finish();
     }
 
     public class setValueNumberPicker implements ViewAction {
@@ -123,5 +94,4 @@ public class SystemTest {
         }
 
     }
-
 }

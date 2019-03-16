@@ -2,15 +2,10 @@ package edu.ucsd.cse110.team26.personalbest;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -18,17 +13,17 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.CombinedChart;
 
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-
-import static java.lang.Thread.sleep;
 
 // reference: https://www.studytutorial.in/android-combined-line-and-bar-chart-using-mpandroid-library-android-tutorial
 
@@ -42,19 +37,29 @@ public class StepCountActivity extends AppCompatActivity {
 
     private UpdateStep updateStep;
 
+    private Settings settings;
+
     private TextView textSteps;
     private TextView textWalkData;
     private Button btnStartWalk;
     private Button btnEndWalk;
 
+    private EditText increment;
+
     FitnessService fitnessService;
-    private long previousDaySteps = 0;
+    long previousDaySteps = 0;
     private long lastEncouragingMessageSteps = 0;
+    public long encouragementInc = 500;
+
     private boolean goalCompleted;
     private List<Integer> stepCounts = new ArrayList<>();
+    private List<Integer> walkStepCounts = new ArrayList<>();
     private List<ArrayList<Walk>> walkData = new ArrayList<>();
     List<Walk> walksToday;
 
+    private List<Day> week;
+    private List<Day> month;
+    private List<Day> monthUpdate = new ArrayList<Day>();
     private long startTimeStamp = -1;
     private long initialSteps = 0;
     private long currentDate;
@@ -67,8 +72,12 @@ public class StepCountActivity extends AppCompatActivity {
     TimeStamper timeStamper;
 
     // BarChart object
-    private BarChart createBarChart;
+    private BarChart createMonthChart;
+    private BarChart createWeekChart;
     private GoalNotifications notifier;
+
+    private CombinedChart monthChart;
+    private CombinedChart weekChart;
 
 
     /* ================
@@ -82,6 +91,7 @@ public class StepCountActivity extends AppCompatActivity {
 
         @Override
         protected Integer doInBackground(Integer... params) {
+            updateDatabase();
             try {
                 resp = params[0];
                 while(run) {
@@ -90,24 +100,30 @@ public class StepCountActivity extends AppCompatActivity {
                         currentDate = timeStamper.now();
                     }
                     fitnessService.updateStepCount(StepCountActivity.this::setStepCount);
-                    stepCounts.clear();
-                    fitnessService.getStepsCount(timeStamper.lastSevenDays(), timeStamper.today(), stepCounts);
 
-                    walkData.clear();
-                    long ts = timeStamper.startOfDay(timeStamper.lastSevenDays());
-                    for(int i = 0; i < 7; i++) {
-                        ArrayList<Walk> list = new ArrayList<>();
-                        walkData.add(list);
-                        fitnessService.getWalks(ts, timeStamper.endOfDay(ts), list);
-                        if(timeStamper.isToday(ts))
-                            walksToday = list;
-                        ts = timeStamper.nextDay(ts);
-                    }
+                    dataAdapter.getDays(28, (list) -> {
+                        Log.d(TAG, list.toString());
+                        month = new ArrayList<Day>();
+                        week = new ArrayList<Day>();
+                        month.addAll(list);
+                        long ts;
+                        if( list.size() != 0 )
+                            ts = timeStamper.previousDay(timeStamper.startOfDay(month.get(month.size()-1).timeStamp));
+                        else
+                            ts = timeStamper.previousDay(timeStamper.startOfDay(timeStamper.now()));
+                        for(int i = month.size(); i < 28; i++ ) {
+                            month.add(new Day(5000, 0, 0, ts));
+                            ts = timeStamper.previousDay(ts);
+                        }
+                        Collections.reverse(month);
+                        for(int i = 0; i < 7; i++ ) {
+                            week.add(month.get(i));
+                        }
+                        createMonthChart.draw(month);
+                        createWeekChart.draw(week);
+                    });
 
                     Thread.sleep(10000);
-                    for(List<Walk> walklist : walkData) {
-                        Log.i(TAG, walklist.toString());
-                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -135,16 +151,35 @@ public class StepCountActivity extends AppCompatActivity {
         btnStartWalk = findViewById(R.id.btnStartWalk);
         btnEndWalk = findViewById(R.id.btnEndWalk);
         textWalkData = findViewById(R.id.textWalkData);
-        CombinedChart mChart = findViewById(R.id.chart1);
+        weekChart = findViewById(R.id.weekChart);
+        monthChart = findViewById(R.id.monthChart);
+        createWeekChart = new BarChart(weekChart);
+        createMonthChart = new BarChart(monthChart);
+        increment = findViewById(R.id.encourageMessage);
 
         fitnessService = FitnessServiceFactory.create(DEBUG, this);
         dataAdapter = IDatabaseAdapterFactory.create(DEBUG, this.getApplicationContext());
         timeStamper = new ConcreteTimeStamper();
+        settings = new Settings(getApplicationContext(), DEBUG);
 
         fitnessService.setup();
 
-        createBarChart = new BarChart(getApplicationContext(), mChart, stepCounts, walkData);
-        createBarChart.draw();
+        // 28-day bar chart
+        monthChart.setVisibility(View.GONE);
+
+        // 7-day bar chart
+        weekChart.setVisibility(View.VISIBLE);
+
+        Switch sw = findViewById(R.id.switch1);
+        sw.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                weekChart.setVisibility(View.GONE);
+                monthChart.setVisibility(View.VISIBLE);
+            } else {
+                weekChart.setVisibility(View.VISIBLE);
+                monthChart.setVisibility(View.GONE);
+            }
+        });
 
         currentDate = timeStamper.now();
         notifier=new GoalNotifications(this);
@@ -184,10 +219,14 @@ public class StepCountActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        createBarChart.draw();
 
         dataAdapter.getFriends( (friendsList) -> {
-            toggleEncouragementMessage = !friendsList.isEmpty();
+            toggleEncouragementMessage = friendsList.isEmpty();
+            if( toggleEncouragementMessage ) {
+                increment.setVisibility(View.VISIBLE);
+            } else
+                increment.setVisibility(View.GONE);
+
         });
 
         if(updateStep != null && !updateStep.isCancelled()) {
@@ -206,6 +245,11 @@ public class StepCountActivity extends AppCompatActivity {
         if(user.height == 0) {
             launchGetHeightActivity();
         }
+        user.height = settings.getHeight();
+        dataAdapter.updateUserHeight(user.height, (success)-> {
+            if(success)
+                Log.i(TAG, "Successfully updated user's height in firestore database");
+        });
 
         //create notification channel
         if(notifier == null){
@@ -292,11 +336,16 @@ public class StepCountActivity extends AppCompatActivity {
         } else {
             goalCompleted = false;
             if( toggleEncouragementMessage ) {
-                if (previousDaySteps != 0 && today.totalSteps < today.goal) {
+                if( !(increment.getText().toString()).equals("")) {
+                    encouragementInc = Long.parseLong(increment.getText().toString());
+                    Log.i(TAG, "Set new increment for encouraging messages to"+encouragementInc);
+                }
+                if (previousDaySteps != 0  && previousDaySteps < today.totalSteps && today.totalSteps < today.goal) {
                     int improvementPercentage = (int) ((today.totalSteps - previousDaySteps) / previousDaySteps) * 100;
-                    if ((lastEncouragingMessageSteps == 0 && previousDaySteps + 500 <= today.totalSteps)
-                            || (lastEncouragingMessageSteps + 500 <= today.totalSteps && lastEncouragingMessageSteps != 0)) {
-                        lastEncouragingMessageSteps = today.totalSteps - (today.totalSteps - previousDaySteps) % 500;
+                    if ((lastEncouragingMessageSteps == 0 && previousDaySteps + encouragementInc <= today.totalSteps)
+                            || (lastEncouragingMessageSteps + encouragementInc <= today.totalSteps && lastEncouragingMessageSteps != 0)) {
+                        Log.i(TAG, "Sending Encouragement message");
+                        lastEncouragingMessageSteps = today.totalSteps - (today.totalSteps - previousDaySteps) % encouragementInc;
                         EncouragementMessage.makeEncouragementMessage(getApplicationContext(), improvementPercentage);
                     }
                 }
@@ -359,15 +408,9 @@ public class StepCountActivity extends AppCompatActivity {
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES", (dialog, which) -> {
                     Settings settings = new Settings(getApplicationContext(), timeStamper);
                     settings.saveGoal(suggestedGoal);
-//                    if(notificationManager!=null){
-//                        notificationManager.cancelAll();
-//                    }
                     dialog.dismiss();
                 });
         alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) ->{
-//            if(notificationManager!=null){
-//                notificationManager.cancelAll();
-//            }
             dialog.dismiss();
         });
         alertDialog.show();
@@ -379,42 +422,62 @@ public class StepCountActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void checkNewWeek() {
-        SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        //check if this is the beginning of the new week
-        //if yes => new_week is true and we set the goal of this new_week to last goal on Sat (goal_Sat)
-        Calendar calendar = Calendar.getInstance();
-        int current_day = calendar.get(Calendar.DAY_OF_WEEK);
-        long current_time = timeStamper.now();
-        if(current_time == timeStamper.weekStart() && current_day == Calendar.SUNDAY) {
-            editor.putBoolean("new_week", true);
-        }
-        editor.apply();
-    }
-
-
     /**
-     * Resets previousDaySteps and saves previous day's goal as new goal
+     * Resets saves previous day's goal as new goal
      */
     public void initializeNewDay() {
-        long prev[] = timeStamper.getPreviousDay();
-        List<Integer> previousSteps = new ArrayList<>();
-        try {
-            fitnessService.getStepsCount(prev[0], prev[1], previousSteps);
-            sleep(1000);
-        } catch( Exception e ) {
-            e.printStackTrace();
-        }
-        if(previousSteps.size() == 0)
-            previousSteps.add(0);
-        previousDaySteps = previousSteps.get(0);
-        Log.i(TAG, String.format("New day. Setting previous day's steps to %d", previousDaySteps));
-        Settings settings = new Settings(getApplicationContext(), timeStamper);
         settings.saveGoal((int) today.goal);
         lastEncouragingMessageSteps = 0;
+        encouragementInc = 500;
+    }
 
+    public void updateDatabase() {
+        stepCounts.clear();
+        fitnessService.getStepsCount(timeStamper.lastTwentyEightDays(), timeStamper.today(), stepCounts);
+
+        walkData.clear();
+        walkStepCounts.clear();
+        monthUpdate.clear();
+        int walkStepCount;
+        List<Integer> weekGoal = settings.getGoalsOfLastWeek();
+        long ts = timeStamper.startOfDay(timeStamper.lastTwentyEightDays());
+        for (int i = 0; i < 28; i++) {
+            ArrayList<Walk> list = new ArrayList<>();
+            walkData.add(list);
+            fitnessService.getWalks(ts, timeStamper.endOfDay(ts), list);
+            if (timeStamper.isToday(ts))
+                walksToday = list;
+            Log.i(TAG, "Retrieving walk data for " + timeStamper.timestampToDayId(ts));
+            ts = timeStamper.nextDay(ts);
+        }
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        for(List<Walk> walklist : walkData) {
+            Log.i(TAG, walklist.toString());
+        }
+
+        ts = timeStamper.startOfDay(timeStamper.lastTwentyEightDays());
+        previousDaySteps = stepCounts.get(1);
+        Log.i(TAG, "Setting previous day steps to " + previousDaySteps);
+        for (int i = 0; i < 28; i++) {
+            walkStepCount = 0;
+            for (Walk w : walkData.get(i)) {
+                walkStepCount += w.getSteps();
+            }
+            walkStepCounts.add(i, walkStepCount);
+            if (i >= 21)
+                monthUpdate.add(new Day((int) weekGoal.get(i - 21), (int) stepCounts.get(i), walkStepCounts.get(i), ts));
+            else
+                monthUpdate.add(new Day((int) weekGoal.get(6), (int) stepCounts.get(i), walkStepCounts.get(i), ts));
+            ts = timeStamper.nextDay(ts);
+        }
+        dataAdapter.updateDays(monthUpdate, (success) -> {
+            if (success)
+                Log.i(TAG, "Successfully updated last " + monthUpdate.size() + " days of data in firestore");
+        });
     }
 
 

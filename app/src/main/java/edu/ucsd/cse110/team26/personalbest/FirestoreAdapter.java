@@ -190,7 +190,7 @@ class FirestoreAdapter implements IDataAdapter {
         // check if friends
         userRef.document(userEmail).collection(FRIENDS).document(friendEmail).get()
                 .addOnSuccessListener(snapshot -> {
-                    if(snapshot.exists() && snapshot.getData().get("status") == "friends") {
+                    if(snapshot.exists() && snapshot.getData().get("status").toString().equals("friends")) {
                         // pull friend's day data
                         getDays(friendEmail, numOfDays, dayCallback);
                     } else {
@@ -210,6 +210,7 @@ class FirestoreAdapter implements IDataAdapter {
         for (int i = 0; i < numOfDays; i++) startTimestamp = timeStamper.previousDay(startTimestamp);
         String startDayId = timeStamper.timestampToDayId(startTimestamp);
 
+        Log.d(TAG, "Getting " + email + "'s day data from after " + startDayId);
         userRef.document(email).collection(DAYS)
                 .orderBy("dayId", Query.Direction.DESCENDING)
                 .whereGreaterThanOrEqualTo("dayId", startDayId)
@@ -218,7 +219,7 @@ class FirestoreAdapter implements IDataAdapter {
                     ArrayList<Day> dayList = new ArrayList<>();
                     for(QueryDocumentSnapshot doc : snapshots) {
                         Day day = doc.toObject(Day.class);
-                        Log.d(TAG, doc.getId() + " => " + day);
+                        // Log.d(TAG, doc.getId() + " => " + day);
                         dayList.add(day);
                     }
                     dayCallback.call(dayList);

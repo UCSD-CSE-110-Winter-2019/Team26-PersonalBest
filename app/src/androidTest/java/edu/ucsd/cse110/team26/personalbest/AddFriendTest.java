@@ -19,16 +19,20 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.RootMatchers.isDialog;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.withHint;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class StepCountActivityTest {
+public class AddFriendTest {
 
     @Rule
     public ActivityTestRule<MainActivity> mActivityTestRule = new ActivityTestRule<>(MainActivity.class);
@@ -46,7 +50,7 @@ public class StepCountActivityTest {
      * Tests whether UI components in StepCount Activity exist with the correct text
      */
     @Test
-    public void stepCountActivityTest() {
+    public void friendListActivityTest() {
         onView(withId(R.id.buttonGoToSteps)).perform(click());
 
         onView(withId(R.id.feet)).perform(new setValueNumberPicker(5));
@@ -57,12 +61,17 @@ public class StepCountActivityTest {
         onView(withId(R.id.confirm))
                 .perform(click());
 
+        openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext());
+        onView(withText("Friend List")).perform(click());
 
-        onView(withId(R.id.textSteps)).check(matches(isDisplayed()));
-        onView(withId(R.id.btnStartWalk)).check(matches(withText("START WALK")));
-        onView(withId(R.id.weekChart)).check(matches(isDisplayed()));
-        onView(withId(R.id.switch1)).check(matches(isDisplayed()));
-        onView(withId(R.id.action_bar)).check(matches(isDisplayed()));
+        onView(withId(R.id.fab)).check(matches(isDisplayed()));
+
+        onView(withId(R.id.fab)).perform(click());
+
+        onView(withHint("Friend's Email Address")).inRoot(isDialog()).check(matches(isDisplayed()));
+        onView(withText("Confirm")).inRoot(isDialog()).check(matches(isDisplayed()));
+        onView(withText("Cancel")).inRoot(isDialog()).check(matches(isDisplayed()));
+
     }
 
     public class setValueNumberPicker implements ViewAction {
