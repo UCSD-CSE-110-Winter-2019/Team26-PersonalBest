@@ -18,4 +18,5 @@ public interface TimeStamper {
     String timestampToString(long timestamp);
     String timestampToDayId(long timestamp);
     long dayIdToTimestamp(String dayID);
+    long lastTwentyEightDays();
 }

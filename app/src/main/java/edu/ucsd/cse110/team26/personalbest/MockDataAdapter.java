@@ -1,7 +1,5 @@
 package edu.ucsd.cse110.team26.personalbest;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,9 +7,9 @@ import java.util.Map;
 
 class MockDataAdapter implements IDataAdapter {
 
-    List<User> friendsList;
-    List<User> receivedFriendRequests;
-    List<User> sentFriendRequests;
+    static List<User> friendsList;
+    static List<User> receivedFriendRequests;
+    static List<User> sentFriendRequests;
 
     String userEmail;
 
@@ -20,9 +18,12 @@ class MockDataAdapter implements IDataAdapter {
 
 
     MockDataAdapter() {
-        friendsList = new ArrayList<User>();
-        receivedFriendRequests = new ArrayList<User>();
-        sentFriendRequests = new ArrayList<User>();
+        if( friendsList == null )
+            friendsList = new ArrayList<User>();
+        if( receivedFriendRequests == null )
+            receivedFriendRequests = new ArrayList<User>();
+        if( sentFriendRequests == null )
+            sentFriendRequests = new ArrayList<User>();
     }
 
     /**
@@ -69,6 +70,12 @@ class MockDataAdapter implements IDataAdapter {
      */
     @Override
     public void getFriend(String friendEmail, Callback<List<User>> userCallback) {
+        List<User> list = new ArrayList<User>();
+        User testUser = new User(0, "name", friendEmail, "1");
+        testUser.chatID = "test";
+        list.add(testUser);
+
+        userCallback.call(list);
     }
 
     @Override
@@ -87,7 +94,10 @@ class MockDataAdapter implements IDataAdapter {
      */
     @Override
     public void getFriendDays(String friendID, int numOfDays, Callback<List<Day>> dayCallback) {
-
+        List<Day> days = new ArrayList<Day>();
+        TimeStamper ts = new ConcreteTimeStamper();
+        for( int i = 0; i < numOfDays; i++ ) days.add(new Day(5000, 10, 5,  ts.now()));
+        dayCallback.call(days);
     }
 
     /**
@@ -133,7 +143,7 @@ class MockDataAdapter implements IDataAdapter {
      */
     @Override
     public void getFriends(Callback<List<User>> userCallback) {
-
+        userCallback.call(friendsList);
     }
 
     /**
@@ -152,10 +162,9 @@ class MockDataAdapter implements IDataAdapter {
     @Override
     public void makeFriendRequest(String friendEmail, Callback<List<User>> userCallback) {
         User user = new User(0, "name", friendEmail, "1");
-        if( sentFriendRequests.contains(user) )
-            receivedFriendRequests.add(new User(0, "name", friendEmail, "1"));
-        else
-            sentFriendRequests.add(new User(0, "name", friendEmail, "1"));
+        sentFriendRequests.add(user);
+        friendsList.add(user);
+        userCallback.call(sentFriendRequests);
     }
 
     /**
@@ -167,8 +176,10 @@ class MockDataAdapter implements IDataAdapter {
      */
     @Override
     public void acceptFriendRequest(String requesterEmail, Callback<Boolean> booleanCallback) {
-        if( receivedFriendRequests.contains(new User(0, "name", requesterEmail, "1"))) {
-            friendsList.add(new User(0, "name", requesterEmail, "1"));
+        User user = new User(0, "name", requesterEmail, "1");
+        if( receivedFriendRequests.contains(user)) {
+            friendsList.add(user);
+            receivedFriendRequests.remove(user);
             booleanCallback.call(true);
         } else {
             booleanCallback.call(false);
@@ -184,7 +195,8 @@ class MockDataAdapter implements IDataAdapter {
      */
     @Override
     public void rejectFriendRequest(String requesterEmail, Callback<Boolean> booleanCallback) {
-        friendsList.remove(new User(0, "name", requesterEmail, "1"));
+        receivedFriendRequests.remove(new User(0, "name", requesterEmail, "1"));
+        booleanCallback.call(true);
     }
 
     /**
@@ -195,7 +207,9 @@ class MockDataAdapter implements IDataAdapter {
      */
     @Override
     public void deleteFriend(String friendEmail, Callback<Boolean> booleanCallback) {
-
+        User user = new User(0, "name", friendEmail, "1");
+        friendsList.remove(user);
+        booleanCallback.call(true);
     }
 
     @Override
@@ -219,14 +233,15 @@ class MockDataAdapter implements IDataAdapter {
     @Override
     public void startChatListener(String chatId, Callback<Message> messageCallback) {
 
+        if( dataBase.get(chatId) != null ) {
+            if (dataBase.get(chatId).size() != 0) {
+                ArrayList<Message> messages = dataBase.get(chatId);
+                for (Message m : messages) {
+                    messageCallback.call(m);
 
-        if(dataBase.get(chatId).size()!=0){
-            ArrayList<Message> messages = dataBase.get(chatId);
-            for(Message m : messages) {
-                messageCallback.call(m);
-
+                }
+                dataBase2.put(chatId, messageCallback);
             }
-            dataBase2.put(chatId,messageCallback);
         }
 
     }

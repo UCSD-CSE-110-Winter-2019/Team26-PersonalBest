@@ -9,18 +9,18 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 
-public class AddFriendDialog {
+class AddFriendDialog {
     Context context;
     private Resources resources;
     private IDataAdapter dataAdapter;
 
-    public AddFriendDialog( Context context, IDataAdapter dataAdapter) {
+    AddFriendDialog(Context context, IDataAdapter dataAdapter) {
         this.resources = context.getResources();
         this.context = context;
         this.dataAdapter = dataAdapter;
     }
 
-    public AlertDialog createDialog() {
+    AlertDialog createDialog() {
         Log.i(getClass().getName(), "Creating Add Friend Dialog box");
         AlertDialog.Builder builder;
         builder = new AlertDialog.Builder(context);
@@ -45,7 +45,7 @@ public class AddFriendDialog {
                             invToast.show();
                         } else {
                             Log.i(getClass().getName(), "Dismissing dialog because of successful friend request");
-                            if( !FriendsListActivity.friendsList.sentRequests.contains(friendsList)) {
+                            if( !FriendsListActivity.friendsList.sentRequests.contains(friendsList.get(0))) {
                                 FriendsListActivity.friendsList.sentRequests.add(friendsList.get(0));
                             }
                             FriendsListActivity.friendAdapter.notifyDataSetChanged();

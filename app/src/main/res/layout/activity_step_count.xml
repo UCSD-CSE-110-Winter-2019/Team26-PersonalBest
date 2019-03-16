@@ -8,13 +8,28 @@
     android:padding="20dp"
     tools:context=".MainActivity">
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
     <TextView
         android:id="@+id/textSteps"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="20dp"
-        android:textSize="30sp"
+        android:padding="5dp"
+        android:textSize="20sp"
         android:text="" />
+        <EditText
+            android:layout_width="80dp"
+            android:layout_height="20dp"
+            android:textSize="12sp"
+            android:textColor="#000"
+            android:text=""
+            android:hint="@string/hint_mock_encouragement"
+            android:id="@+id/encourageMessage"
+            android:background="@drawable/edit_text_style"
+            android:inputType="number" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/btnStartWalk"
@@ -37,14 +52,30 @@
         android:id="@+id/textWalkData"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
+        android:textSize="15sp"
         android:text="@string/empty_space" />
 
+    <Switch
+        android:id="@+id/switch1"
+        android:layout_width="181dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:checked="false"
+        android:text="@string/monthly_weekly_summary" />
+
     <com.github.mikephil.charting.charts.CombinedChart
-        android:id="@+id/chart1"
-        android:layout_width="match_parent"
-        android:layout_height="280dp"
-        android:layout_margin="30dp"/>
+        android:id="@+id/monthChart"
+        android:layout_width="385dp"
+        android:layout_height="240dp"
+        android:layout_margin="10dp"
+        android:visibility="gone"/>
+
+    <com.github.mikephil.charting.charts.CombinedChart
+        android:id="@+id/weekChart"
+        android:layout_width="385dp"
+        android:layout_height="240dp"
+        android:layout_margin="10dp" />
+
 
 
 </LinearLayout>

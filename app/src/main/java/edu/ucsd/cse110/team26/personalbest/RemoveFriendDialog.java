@@ -4,7 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.Resources;
 
-public class RemoveFriendDialog {
+class RemoveFriendDialog {
     User requested;
     Context context;
     private Resources resources;

@@ -49,5 +49,7 @@ public class RemoveFriendUnitTest {
         ((FriendListAdapter) FriendsListActivity.friendAdapter).notifyDataSetChanged();
 
         assertEquals(0, list.getAdapter().getCount());
+
+
     }
 }

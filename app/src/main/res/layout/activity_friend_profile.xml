@@ -13,7 +13,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="10dp"
             android:text="@string/friend"
             android:textSize="25sp"
             android:id="@+id/friendName"/>
@@ -37,10 +37,10 @@
                 android:text="@string/send"/>
         </LinearLayout>
         <com.github.mikephil.charting.charts.CombinedChart
-            android:id="@+id/chart"
+            android:id="@+id/monthChart"
             android:layout_width="match_parent"
-            android:layout_height="400dp"
-            android:layout_margin="30dp"/>
+            android:layout_height="300dp"
+            android:layout_margin="10dp"/>
 
     </LinearLayout>
 

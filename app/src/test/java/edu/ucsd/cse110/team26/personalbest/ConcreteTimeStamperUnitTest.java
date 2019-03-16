@@ -4,40 +4,14 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 
 public class ConcreteTimeStamperUnitTest {
     private ConcreteTimeStamper timeStamper = new ConcreteTimeStamper();
-
-    @Test
-    public void isTodayTest(){
-        Calendar cal = Calendar.getInstance(TimeZone.getDefault());
-
-
-        assertTrue(timeStamper.isToday(cal.getTimeInMillis()));
-        assertFalse(timeStamper.isToday(5000));
-
-        Long time = new Date().getTime();
-        //previous day
-        Date date = new Date(time - time % (48 * 60 * 60 * 1000));
-        time = date.getTime();
-        assertFalse(timeStamper.isToday(time));
-
-        time = new Date().getTime();
-        //current day up to
-        date = new Date(time + time % (23 * 60 * 60 * 1000));
-        time = date.getTime();
-        assertTrue(timeStamper.isToday(time));
-
-
-    }
 
     @Test
     public void weekStartTest(){
