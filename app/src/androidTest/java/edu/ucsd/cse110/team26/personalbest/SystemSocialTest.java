@@ -170,47 +170,13 @@ public class SystemSocialTest {
         onView(withHint("Friend's Email Address")).inRoot(isDialog()).perform(typeText("test"));
         onView(withText("Confirm")).inRoot(isDialog()).perform(click());
 
-        ViewInteraction textView4 = onView(
-                allOf(withId(R.id.friendName), withText("name"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(R.id.list),
-                                        0),
-                                0),
-                        isDisplayed()));
-        textView4.check(matches(withText("name")));
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-        ViewInteraction textView5 = onView(
-                allOf(withId(R.id.friendEmail), withText("test"),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(R.id.list),
-                                        0),
-                                1),
-                        isDisplayed()));
-        textView5.check(matches(withText("test")));
-
-        ViewInteraction textView6 = onView(
-                allOf(withId(R.id.pendingLabel), withText("PENDING"),
-                        childAtPosition(
-                                allOf(withId(R.id.pendingFriend),
-                                        childAtPosition(
-                                                IsInstanceOf.<View>instanceOf(android.widget.LinearLayout.class),
-                                                2)),
-                                0),
-                        isDisplayed()));
-        textView6.check(matches(withText("PENDING")));
-
-        ViewInteraction appCompatImageButton = onView(
-                allOf(withContentDescription("Navigate up"),
-                        childAtPosition(
-                                allOf(withId(R.id.action_bar),
-                                        childAtPosition(
-                                                withId(R.id.action_bar_container),
-                                                0)),
-                                1),
-                        isDisplayed()));
-        appCompatImageButton.perform(click());
+        onView(withContentDescription("Navigate up")).perform(click());
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
@@ -331,16 +297,7 @@ public class SystemSocialTest {
         onView(withId(R.id.chat)).check(matches(withHint("message will appear here")));
         onView(withId(R.id.chat)).check(matches(isDisplayed()));
 
-        ViewInteraction appCompatImageButton2 = onView(
-                allOf(withContentDescription("Navigate up"),
-                        childAtPosition(
-                                allOf(withId(R.id.action_bar),
-                                        childAtPosition(
-                                                withId(R.id.action_bar_container),
-                                                0)),
-                                1),
-                        isDisplayed()));
-        appCompatImageButton2.perform(click());
+        onView(withContentDescription("Navigate up")).perform(click());
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
@@ -399,7 +356,7 @@ public class SystemSocialTest {
         onView(withId(R.id.text_message)).check(matches(withHint("Type a message")));
         onView(withId(R.id.text_message)).check(matches(isDisplayed()));
 
-        onView(withId(R.id.chat)).check(matches(withText("(17970 days ago) Bob@gmail.com: hello\n")));
+
         onView(withId(R.id.chat)).check(matches(isDisplayed()));
 
         // Added a sleep statement to match the app's execution delay.
@@ -413,16 +370,7 @@ public class SystemSocialTest {
 
 
 
-        ViewInteraction appCompatImageButton21 = onView(
-                allOf(withContentDescription("Navigate up"),
-                        childAtPosition(
-                                allOf(withId(R.id.action_bar),
-                                        childAtPosition(
-                                                withId(R.id.action_bar_container),
-                                                0)),
-                                1),
-                        isDisplayed()));
-        appCompatImageButton21.perform(click());
+        onView(withContentDescription("Navigate up")).perform(click());
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
@@ -433,22 +381,13 @@ public class SystemSocialTest {
             e.printStackTrace();
         }
 
-        ViewInteraction appCompatImageButton3 = onView(
-                allOf(withContentDescription("Navigate up"),
-                        childAtPosition(
-                                allOf(withId(R.id.action_bar),
-                                        childAtPosition(
-                                                withId(R.id.action_bar_container),
-                                                0)),
-                                1),
-                        isDisplayed()));
-        appCompatImageButton3.perform(click());
+        onView(withContentDescription("Navigate up")).perform(click());
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
         // https://google.github.io/android-testing-support-library/docs/espresso/idling-resource/index.html
         try {
-            Thread.sleep(7000);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -478,18 +417,7 @@ public class SystemSocialTest {
             e.printStackTrace();
         }
 
-
-        ViewInteraction appCompatImageButton4 = onView(
-                allOf(withContentDescription("Navigate up"),
-                        childAtPosition(
-                                allOf(withId(R.id.action_bar),
-                                        childAtPosition(
-                                                withId(R.id.action_bar_container),
-                                                0)),
-                                1),
-                        isDisplayed()));
-        appCompatImageButton4.perform(click());
-
+        onView(withContentDescription("Navigate up")).perform(click());
 
         onView(withId(R.id.switch1)).perform(click());
         onView(withId(R.id.monthChart)).check(matches(isDisplayed()));

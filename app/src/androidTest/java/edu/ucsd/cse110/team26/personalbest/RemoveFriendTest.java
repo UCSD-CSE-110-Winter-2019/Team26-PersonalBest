@@ -108,16 +108,7 @@ public class RemoveFriendTest {
         onView(withHint("Friend's Email Address")).inRoot(isDialog()).perform(replaceText("test"));
         onView(withText("Confirm")).inRoot(isDialog()).perform(click());
 
-        ViewInteraction appCompatImageButton = onView(
-                allOf(withContentDescription("Navigate up"),
-                        childAtPosition(
-                                allOf(withId(R.id.action_bar),
-                                        childAtPosition(
-                                                withId(R.id.action_bar_container),
-                                                0)),
-                                1),
-                        isDisplayed()));
-        appCompatImageButton.perform(click());
+        onView(withContentDescription("Navigate up")).perform(click());
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:

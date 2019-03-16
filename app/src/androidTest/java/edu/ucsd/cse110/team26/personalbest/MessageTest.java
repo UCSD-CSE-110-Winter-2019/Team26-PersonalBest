@@ -132,16 +132,7 @@ public class MessageTest {
                                 3)));
         appCompatButton3.perform(scrollTo(), click());
 
-        ViewInteraction appCompatImageButton = onView(
-                allOf(withContentDescription("Navigate up"),
-                        childAtPosition(
-                                allOf(withId(R.id.action_bar),
-                                        childAtPosition(
-                                                withId(R.id.action_bar_container),
-                                                0)),
-                                1),
-                        isDisplayed()));
-        appCompatImageButton.perform(click());
+        onView(withContentDescription("Navigate up")).perform(click());
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
@@ -221,16 +212,7 @@ public class MessageTest {
         onView(withId(R.id.chat)).check(matches(withHint("message will appear here")));
         onView(withId(R.id.chat)).check(matches(isDisplayed()));
 
-        ViewInteraction appCompatImageButton2 = onView(
-                allOf(withContentDescription("Navigate up"),
-                        childAtPosition(
-                                allOf(withId(R.id.action_bar),
-                                        childAtPosition(
-                                                withId(R.id.action_bar_container),
-                                                0)),
-                                1),
-                        isDisplayed()));
-        appCompatImageButton2.perform(click());
+        onView(withContentDescription("Navigate up")).perform(click());
 
         // Added a sleep statement to match the app's execution delay.
         // The recommended way to handle such scenarios is to use Espresso idling resources:
@@ -289,7 +271,6 @@ public class MessageTest {
         onView(withId(R.id.text_message)).check(matches(withHint("Type a message")));
         onView(withId(R.id.text_message)).check(matches(isDisplayed()));
 
-        onView(withId(R.id.chat)).check(matches(withText("(17970 days ago) Bob@gmail.com: hello\n")));
         onView(withId(R.id.chat)).check(matches(isDisplayed()));
     }
 
