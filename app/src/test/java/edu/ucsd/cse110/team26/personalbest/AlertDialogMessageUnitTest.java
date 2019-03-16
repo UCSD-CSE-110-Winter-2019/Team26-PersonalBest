@@ -88,6 +88,7 @@ public class AlertDialogMessageUnitTest {
     @Test
     public void testAlertDialogDeclineNewGoal() {
         activity.initializeNewDay();
+
         Settings settings = new Settings(InstrumentationRegistry.getInstrumentation().getContext(), new ConcreteTimeStamper());
         settings.saveGoal(2000);
 

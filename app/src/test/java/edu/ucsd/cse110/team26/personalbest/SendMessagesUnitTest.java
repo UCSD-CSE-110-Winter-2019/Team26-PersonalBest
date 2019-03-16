@@ -130,5 +130,4 @@ public class SendMessagesUnitTest {
         assert(chatHistory.getText().toString().contains(expectedMsg3));
         assert(chatHistory.getText().toString().contains(expectedMsg4));
     }
-
 }

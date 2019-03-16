@@ -68,6 +68,7 @@ public class StepCountActivity extends AppCompatActivity {
     private Day today = new Day();
     private User user = new User();
 
+    private boolean showDialogNotifications = true;
     IDataAdapter dataAdapter;
     TimeStamper timeStamper;
 
@@ -78,7 +79,6 @@ public class StepCountActivity extends AppCompatActivity {
 
     private CombinedChart monthChart;
     private CombinedChart weekChart;
-
 
     /* ================
     Description: keep the UI update with the current number of taken steps
@@ -97,6 +97,7 @@ public class StepCountActivity extends AppCompatActivity {
                 while(run) {
                     if( !timeStamper.isToday(currentDate) ) {
                         initializeNewDay();
+
                         currentDate = timeStamper.now();
                     }
                     fitnessService.updateStepCount(StepCountActivity.this::setStepCount);
@@ -321,17 +322,22 @@ public class StepCountActivity extends AppCompatActivity {
             else{
                 suggestedGoalNum = 15000;
             }
+            boolean hasOccured = getSharedPreferences("user", MODE_PRIVATE).contains("ShowDialog");
+            System.out.println(hasOccured);
+            if(!hasOccured ) {
+                //notification for when they cmolpete the goal;
+                notifier.showNotification();
 
-            //notification for when they cmolpete the goal;
-            notifier.showNotification();
+                createAlertDialog(suggestedGoalNum);
 
-            createAlertDialog(suggestedGoalNum);
+                Toast completeGoalToast = Toast.makeText(getApplicationContext(),
+                        String.format(Locale.getDefault(), "Congratulations, you've completed your goal of %d steps today!", today.goal),
+                        Toast.LENGTH_SHORT);
 
-            Toast completeGoalToast = Toast.makeText(getApplicationContext(),
-                    String.format(Locale.getDefault(),"Congratulations, you've completed your goal of %d steps today!", today.goal),
-                    Toast.LENGTH_SHORT);
+                completeGoalToast.show();
+            }
 
-            completeGoalToast.show();
+
             goalCompleted = true;
         } else {
             goalCompleted = false;
@@ -411,6 +417,8 @@ public class StepCountActivity extends AppCompatActivity {
                     dialog.dismiss();
                 });
         alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) ->{
+            SharedPreferences.Editor editor1 = getSharedPreferences("user",MODE_PRIVATE).edit();
+            editor1.putLong("ShowDialog", timeStamper.now()).apply();
             dialog.dismiss();
         });
         alertDialog.show();
@@ -429,6 +437,11 @@ public class StepCountActivity extends AppCompatActivity {
         settings.saveGoal((int) today.goal);
         lastEncouragingMessageSteps = 0;
         encouragementInc = 500;
+
+        if(getSharedPreferences("user", MODE_PRIVATE).contains("ShowDialog")){
+            SharedPreferences.Editor editNewDay = getSharedPreferences("user", MODE_PRIVATE).edit();
+            editNewDay.remove("ShowDialog");
+        }
     }
 
     public void updateDatabase() {
