@@ -1,6 +1,6 @@
 package edu.ucsd.cse110.team26.personalbest;
 
-import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -24,15 +24,15 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class GoogleFitAdapter implements FitnessService {
-    private final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = System.identityHashCode(this) & 0xFFFF;
     private final String TAG = "GoogleFitAdapter";
     private final String SESSION_NAME = "PersonalBestWalk";
 
-    private Activity activity;
+    private Context context;
     private GoogleSignInAccount lastSignedInAccount;
 
-    GoogleFitAdapter(Activity activity) {
-        this.activity = activity;
+    GoogleFitAdapter(Context context) {
+        this.context = context;
+        lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(context);
     }
 
     public void setup() {
@@ -42,22 +42,15 @@ public class GoogleFitAdapter implements FitnessService {
                 .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
                 .build();
 
-        if (!GoogleSignIn.hasPermissions(GoogleSignIn.getLastSignedInAccount(activity), fitnessOptions)) {
-            GoogleSignIn.requestPermissions(
-                    activity,
-                    getRequestCode(),
-                    GoogleSignIn.getLastSignedInAccount(activity),
-                    fitnessOptions);
-        } else {
+        if (GoogleSignIn.hasPermissions(lastSignedInAccount, fitnessOptions)) {
             startRecording();
         }
 
     }
 
     private void startRecording() {
-        lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);
         if (lastSignedInAccount != null) {
-            Fitness.getRecordingClient(activity, lastSignedInAccount)
+            Fitness.getRecordingClient(context, lastSignedInAccount)
                     .subscribe(DataType.TYPE_STEP_COUNT_CUMULATIVE)
                     .addOnSuccessListener(aVoid -> Log.i(TAG, "Successfully subscribed!"))
                     .addOnFailureListener(e -> Log.i(TAG, "There was a problem subscribing."));
@@ -70,9 +63,8 @@ public class GoogleFitAdapter implements FitnessService {
      * current timezone.
      */
     public void updateStepCount(Callback<Long> stepCountCallback) {
-        lastSignedInAccount = GoogleSignIn.getLastSignedInAccount(activity);
         if (lastSignedInAccount != null) {
-            Fitness.getHistoryClient(activity, lastSignedInAccount)
+            Fitness.getHistoryClient(context, lastSignedInAccount)
                     .readDailyTotal(DataType.TYPE_STEP_COUNT_DELTA)
                     .addOnSuccessListener(dataSet -> {
                         long totalSteps = dataSet.isEmpty()
@@ -85,6 +77,7 @@ public class GoogleFitAdapter implements FitnessService {
                     .addOnFailureListener(e -> Log.d(TAG, "There was a problem getting the step count.", e));
         } else {
             Log.e(TAG, "Error reading step count: no login found");
+            stepCountCallback.call((long) -1);
         }
     }
 
@@ -104,7 +97,7 @@ public class GoogleFitAdapter implements FitnessService {
 
         if(lastSignedInAccount != null) {
             Log.i(TAG, "Inserting new walk in the Sessions API");
-            Fitness.getSessionsClient(activity, lastSignedInAccount)
+            Fitness.getSessionsClient(context, lastSignedInAccount)
                     .insertSession(insertRequest)
                     .addOnSuccessListener(aVoid -> Log.i(TAG, "Session insert was successful!"))
                     .addOnFailureListener(e -> Log.i(TAG, "There was a problem inserting the session: " +
@@ -132,7 +125,7 @@ public class GoogleFitAdapter implements FitnessService {
                 .build();
 
         if(lastSignedInAccount != null) {
-            Task<SessionReadResponse> task = Fitness.getSessionsClient(activity, lastSignedInAccount)
+            Task<SessionReadResponse> task = Fitness.getSessionsClient(context, lastSignedInAccount)
                     .readSession(readRequest)
                     .addOnSuccessListener(sessionReadResponse -> {
                         List<Session> sessions = sessionReadResponse.getSessions();
@@ -172,7 +165,7 @@ public class GoogleFitAdapter implements FitnessService {
                     .enableServerQueries()
                     .build();
 
-            Fitness.getHistoryClient(activity, lastSignedInAccount).readData(readRequest)
+            Fitness.getHistoryClient(context, lastSignedInAccount).readData(readRequest)
                     .addOnSuccessListener(dataReadResponse -> {
                         List<Bucket> buckets = dataReadResponse.getBuckets();
                         Log.i(TAG, "Step counts retrieved: " + buckets.size());
@@ -195,11 +188,6 @@ public class GoogleFitAdapter implements FitnessService {
 
     public void getDays(long startTimestamp, long endTimestamp, Callback<List<Day>> dayCallback) {
 
-    }
-
-    @Override
-    public int getRequestCode() {
-        return GOOGLE_FIT_PERMISSIONS_REQUEST_CODE;
     }
 
 

@@ -11,22 +11,28 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
+import com.google.android.gms.fitness.FitnessOptions;
+import com.google.android.gms.fitness.data.DataType;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import java.util.concurrent.TimeUnit;
+
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
 public class MainActivity extends AppCompatActivity {
     private final int SIGN_IN_REQUEST_CODE = System.identityHashCode(this) & 0xFFFF;
+    private final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = System.identityHashCode(this) & 0xFFF0;
     private static final String TAG = "[MainActivity]";
     private boolean DEBUG = false;
     private boolean ESPRESSO = false;
     private FirebaseAuth mAuth;
     GoogleSignInClient gsoclient;
+    GoogleSignInAccount account;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,15 +80,40 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == SIGN_IN_REQUEST_CODE) {
             GoogleSignIn.getSignedInAccountFromIntent(data)
-                    .addOnSuccessListener(this::firebaseAuthWithGoogle)
+                    .addOnSuccessListener(this::checkGoogleFitPermissions)
                     .addOnFailureListener(e -> {
                         Log.e(TAG, "Failed to authenticate with error: " + e);
                     });
         }
+        else if(requestCode == GOOGLE_FIT_PERMISSIONS_REQUEST_CODE) {
+            firebaseAuthWithGoogle(account);
+        }
+    }
+
+    private void checkGoogleFitPermissions(GoogleSignInAccount acct) {
+
+        Log.d(TAG, "Getting fitness permissions: " + acct.getId());
+        account = acct;
+
+        FitnessOptions fitnessOptions = FitnessOptions.builder()
+                .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                .build();
+
+        if (!GoogleSignIn.hasPermissions(acct, fitnessOptions)) {
+            GoogleSignIn.requestPermissions(
+                    this,
+                    GOOGLE_FIT_PERMISSIONS_REQUEST_CODE,
+                    acct,
+                    fitnessOptions);
+        } else {
+            firebaseAuthWithGoogle(acct);
+        }
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+
+        Log.d(TAG, "firebaseAuthWithGoogle: " + acct.getId());
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
@@ -119,6 +150,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void launchStepCountActivity() {
+
+        PeriodicWorkRequest stepCheckRequest = new PeriodicWorkRequest.Builder(StepCheckWorker.class,
+                5, TimeUnit.MINUTES,
+                5, TimeUnit.MINUTES)
+                .addTag("StepCheckWorker")
+                .build();
+
+        if(!DEBUG) {
+            WorkManager.getInstance().cancelAllWork().getResult();
+            WorkManager.getInstance().enqueue(stepCheckRequest);
+            Log.d(TAG, "Started StepCheckWorker work");
+        }
+
         Intent intent = new Intent(this, StepCountActivity.class);
         intent.putExtra("DEBUG", DEBUG);
         intent.putExtra("ESPRESSO", ESPRESSO);

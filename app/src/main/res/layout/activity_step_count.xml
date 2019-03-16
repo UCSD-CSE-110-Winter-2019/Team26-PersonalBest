@@ -65,15 +65,15 @@
 
     <com.github.mikephil.charting.charts.CombinedChart
         android:id="@+id/monthChart"
-        android:layout_width="385dp"
-        android:layout_height="240dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_margin="10dp"
         android:visibility="gone"/>
 
     <com.github.mikephil.charting.charts.CombinedChart
         android:id="@+id/weekChart"
-        android:layout_width="385dp"
-        android:layout_height="240dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_margin="10dp" />
 
 
