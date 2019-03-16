@@ -26,7 +26,7 @@ public class ConcreteTimeStamperUnitTest {
 
         Long time = new Date().getTime();
         //previous day
-        Date date = new Date(time - time % (24 * 60 * 60 * 1000));
+        Date date = new Date(time - time % (48 * 60 * 60 * 1000));
         time = date.getTime();
         assertFalse(timeStamper.isToday(time));
 

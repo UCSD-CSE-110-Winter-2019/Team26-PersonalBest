@@ -67,6 +67,7 @@ public class StepCountActivity extends AppCompatActivity {
     IDataAdapter dataAdapter;
     TimeStamper timeStamper;
 
+
     // BarChart object
     private BarChart createBarChart;
     private GoalNotifications notifier;
@@ -89,7 +90,11 @@ public class StepCountActivity extends AppCompatActivity {
                 while(run) {
                     if( !timeStamper.isToday(currentDate) ) {
                         initializeNewDay();
-                        showDialogNotifications = true;
+                        if(getSharedPreferences("user", MODE_PRIVATE).contains("ShowDialog")){
+                            SharedPreferences.Editor editNewDay = getSharedPreferences("user", MODE_PRIVATE).edit();
+                            editNewDay.remove("ShowDialog");
+                        }
+
                         currentDate = timeStamper.now();
                     }
                     fitnessService.updateStepCount(StepCountActivity.this::setStepCount);
@@ -139,6 +144,8 @@ public class StepCountActivity extends AppCompatActivity {
         btnEndWalk = findViewById(R.id.btnEndWalk);
         textWalkData = findViewById(R.id.textWalkData);
         CombinedChart mChart = findViewById(R.id.chart1);
+
+        SharedPreferences.Editor editor1 = getSharedPreferences("user", MODE_PRIVATE).edit();
 
         fitnessService = FitnessServiceFactory.create(DEBUG, this);
         dataAdapter = IDatabaseAdapterFactory.create(DEBUG, this.getApplicationContext());
@@ -204,6 +211,7 @@ public class StepCountActivity extends AppCompatActivity {
         }
 
         Settings settings = new Settings(getApplicationContext(), timeStamper);
+
         today.goal = settings.getGoal();
         user.height = settings.getHeight();
         if(user.height == 0) {
@@ -222,7 +230,7 @@ public class StepCountActivity extends AppCompatActivity {
         SharedPreferences walkInfo = getSharedPreferences("walk", MODE_PRIVATE );
         startTimeStamp = walkInfo.getLong("startTimeStamp", -1);
         initialSteps = walkInfo.getLong("initialSteps", 0);
-        if(startTimeStamp != -1) {
+
             if (!timeStamper.isToday(startTimeStamp)) {
                 fitnessService.walk(startTimeStamp, timeStamper.endOfDay(startTimeStamp)); // terminate walk at end of day
                 SharedPreferences.Editor e = walkInfo.edit();
@@ -238,7 +246,7 @@ public class StepCountActivity extends AppCompatActivity {
         }
 
 
-    }
+
 
     @Override
     protected void onStop() {
@@ -280,10 +288,12 @@ public class StepCountActivity extends AppCompatActivity {
             else{
                 suggestedGoalNum = 15000;
             }
-            if(showDialogNotifications) {
+            boolean hasOccured = getSharedPreferences("user", MODE_PRIVATE).contains("ShowDialog");
+
+            if(hasOccured ) {
                 //notification for when they cmolpete the goal;
                 notifier.showNotification();
-
+                showDialogNotifications = false;
                 goalDialog = createAlertDialog(suggestedGoalNum);
 
                 Toast completeGoalToast = Toast.makeText(getApplicationContext(),
@@ -292,6 +302,9 @@ public class StepCountActivity extends AppCompatActivity {
 
                 completeGoalToast.show();
             }
+            SharedPreferences.Editor editor1 = getSharedPreferences("user",MODE_PRIVATE).edit();
+            editor1.putLong("ShowDialog", timeStamper.now()).apply();
+
             goalCompleted = true;
         } else {
             goalCompleted = false;
@@ -357,6 +370,7 @@ public class StepCountActivity extends AppCompatActivity {
 
     public AlertDialog createAlertDialog(final int suggestedGoal) {
         AlertDialog alertDialog = new AlertDialog.Builder(StepCountActivity.this).create();
+
         alertDialog.setTitle("Suggesting Goals");
 
         alertDialog.setMessage("Would you like to set next weeks steps to be " + suggestedGoal);
