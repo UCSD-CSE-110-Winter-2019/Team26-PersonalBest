@@ -1,6 +1,5 @@
 package edu.ucsd.cse110.team26.personalbest;
 
-import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
@@ -78,6 +77,7 @@ public class GoogleFitAdapter implements FitnessService {
                     .addOnFailureListener(e -> Log.d(TAG, "There was a problem getting the step count.", e));
         } else {
             Log.e(TAG, "Error reading step count: no login found");
+            stepCountCallback.call((long) -1);
         }
     }
 

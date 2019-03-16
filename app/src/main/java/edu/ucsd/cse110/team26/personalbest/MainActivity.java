@@ -22,6 +22,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
+import java.util.concurrent.TimeUnit;
+
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
 public class MainActivity extends AppCompatActivity {
     private final int SIGN_IN_REQUEST_CODE = System.identityHashCode(this) & 0xFFFF;
     private final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = System.identityHashCode(this) & 0xFFF0;
@@ -148,6 +153,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void launchStepCountActivity() {
+
+        PeriodicWorkRequest stepCheckRequest = new PeriodicWorkRequest.Builder(StepCheckWorker.class,
+                1,
+                TimeUnit.HOURS)
+                .addTag("StepCheckWorker")
+                .build();
+
+        if(!DEBUG) {
+            WorkManager.getInstance().cancelAllWorkByTag("StepCheckWorker");
+            WorkManager.getInstance().enqueue(stepCheckRequest);
+            Log.d(TAG, "Started StepCheckWorker work");
+        }
+
         Intent intent = new Intent(this, StepCountActivity.class);
         intent.putExtra("DEBUG", DEBUG);
         intent.putExtra("ESPRESSO", ESPRESSO);

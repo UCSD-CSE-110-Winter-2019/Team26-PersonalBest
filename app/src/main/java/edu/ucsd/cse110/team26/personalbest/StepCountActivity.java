@@ -1,6 +1,5 @@
 package edu.ucsd.cse110.team26.personalbest;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,7 +20,6 @@ import android.widget.Toast;
 import com.github.mikephil.charting.charts.CombinedChart;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -116,7 +114,6 @@ public class StepCountActivity extends AppCompatActivity {
                             month.add(new Day(5000, 0, 0, ts));
                             ts = timeStamper.previousDay(ts);
                         }
-                        Collections.reverse(month);
                         for(int i = 0; i < 7; i++ ) {
                             week.add(month.get(i));
                         }
@@ -183,7 +180,8 @@ public class StepCountActivity extends AppCompatActivity {
         });
 
         currentDate = timeStamper.now();
-        notifier=new GoalNotifications(this);
+        notifier = new GoalNotifications(this);
+
 
         btnStartWalk.setOnClickListener(view -> {
             if(startTimeStamp == -1) {
