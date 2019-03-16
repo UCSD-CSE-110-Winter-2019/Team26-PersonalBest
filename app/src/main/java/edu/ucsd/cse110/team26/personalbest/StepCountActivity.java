@@ -391,7 +391,6 @@ public class StepCountActivity extends AppCompatActivity {
         AlertDialog alertDialog = new AlertDialog.Builder(StepCountActivity.this).create();
         alertDialog.setTitle("Suggesting Goals");
         SharedPreferences.Editor editor1 = getSharedPreferences("user",MODE_PRIVATE).edit();
-        editor1.putLong("ShowDialog", timeStamper.now()).apply();
 
         alertDialog.setMessage("Would you like to increase your goal to " + suggestedGoal + "?");
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES", (dialog, which) -> {
@@ -400,7 +399,10 @@ public class StepCountActivity extends AppCompatActivity {
                     editor1.putLong("ShowDialog", 0).apply();
                     dialog.dismiss();
                 });
-        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) -> dialog.dismiss());
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NO", (dialog, which) -> {
+            editor1.putLong("ShowDialog", timeStamper.now()).apply();
+            dialog.dismiss();
+        });
         alertDialog.show();
     }
 
